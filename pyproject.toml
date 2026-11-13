@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "veriqc"
+version = "1.0.0"
+description = "Calibrated Triage and Verified On-Device Advisory for Edge Industrial Inspection"
+readme = "VeriQC.md"
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "torchvision",
+    "ultralytics",
+    "numpy",
+    "pyyaml",
+    "pillow",
+    "scipy",
+    "fastapi",
+    "uvicorn",
+    "websockets",
+    "pytest",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
+pythonpath = ["."]
+
