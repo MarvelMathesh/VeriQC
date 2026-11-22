@@ -1,120 +1,91 @@
-"""Reproducible detector training for the combined NEU-DET + KolektorSDD set.
-
-Every candidate in the E4 bake-off is trained by this script with the same
-recipe, so no candidate can win because it was trained more carefully.  The
-recipe is fixed up front:
-
-* identical data split (the combined 7-class dataset, part-wise for
-  KolektorSDD),
-* identical optimiser family, epoch budget and early-stopping patience,
-* identical seed,
-* the only differences are the architecture, the input resolution and whether
-  the initialisation is the COCO-pretrained weights or random.
-
-``--init scratch`` exists so the contribution of the pretrained initialisation
-is *measured* rather than assumed.  It is the same question the proposal asks
-of the anomaly gate: how much of the result is the recipe and how much is
-inherited knowledge.
-
-Usage::
-
-    python scripts/train_detector.py --arch yolo26n --imgsz 640 \
-        --data data/combined_yolo/dataset.yaml --out models/ultralytics/yolo26n_c640
-"""
+#!/usr/bin/env python3
+"""Train the supervised known-defect detector for one profile."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 import time
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-REPORTS = REPO / "reports" / "tables"
+sys.path.insert(0, str(REPO))
 
-
-def train_ultralytics(args) -> dict:
-    """YOLO26 / YOLO11 through the Ultralytics trainer."""
-    from ultralytics import YOLO
-
-    if args.init == "scratch":
-        # the yaml, not the .pt: no pretrained weights at all
-        model = YOLO(f"{args.arch}.yaml")
-        init_desc = "scratch (random init)"
-    else:
-        w = Path(args.init_weights or (REPO / "models" / "weights" / f"{args.arch}.pt"))
-        if not w.exists():
-            raise SystemExit(f"missing init weights: {w}")
-        model = YOLO(str(w))
-        init_desc = f"COCO-pretrained ({w.name})"
-
-    t0 = time.perf_counter()
-    res = model.train(
-        data=str(args.data),
-        imgsz=args.imgsz,
-        epochs=args.epochs,
-        patience=args.patience,
-        batch=args.batch,
-        device=args.device,
-        workers=args.workers,
-        seed=args.seed,
-        deterministic=True,
-        project=str(REPO / "models" / "ultralytics"),
-        name=args.out_name,
-        exist_ok=True,
-        verbose=False,
-        plots=False,
-        pretrained=False if args.init == "scratch" else True,
-    )
-    seconds = time.perf_counter() - t0
-
-    out_dir = REPO / "models" / "ultralytics" / args.out_name
-    best = out_dir / "weights" / "best.pt"
-    metrics = {}
-    try:
-        metrics = {k: float(v) for k, v in (res.results_dict or {}).items()}
-    except Exception:
-        pass
-    return {
-        "arch": args.arch,
-        "family": "ultralytics",
-        "imgsz": args.imgsz,
-        "init": init_desc,
-        "epochs": args.epochs,
-        "patience": args.patience,
-        "batch": args.batch,
-        "seed": args.seed,
-        "train_seconds": round(seconds, 1),
-        "weights": str(best),
-        "weights_bytes": best.stat().st_size if best.exists() else None,
-        "val_metrics": metrics,
-        "out_dir": str(out_dir),
-    }
+from veriqc import sha256_file  # noqa: E402
+from veriqc.datasets import NEU_CLASSES  # noqa: E402
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--arch", default="yolo26n")
-    ap.add_argument("--data", default="data/combined_yolo/dataset.yaml")
-    ap.add_argument("--imgsz", type=int, default=640)
-    ap.add_argument("--epochs", type=int, default=150)
-    ap.add_argument("--patience", type=int, default=40)
-    ap.add_argument("--batch", type=int, default=16)
-    ap.add_argument("--workers", type=int, default=8)
-    ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--device", default="0")
-    ap.add_argument("--init", choices=["pretrained", "scratch"], default="pretrained")
-    ap.add_argument("--init-weights", default=None)
-    ap.add_argument("--out-name", required=True)
-    args = ap.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data", default="data/prepared/neu/dataset.yaml")
+    parser.add_argument("--init-weights", default="yolo26n.pt")
+    parser.add_argument("--arch", default="yolo26n")
+    parser.add_argument("--epochs", type=int, default=80)
+    parser.add_argument("--imgsz", type=int, default=640)
+    parser.add_argument("--batch", type=int, default=16)
+    parser.add_argument("--device", default="0")
+    parser.add_argument("--seed", type=int, default=20261121)
+    parser.add_argument("--out", default="models/profiles/steel_surface/yolo26n_640.pt")
+    parser.add_argument("--report", default="reports/tables/detector_neu.json")
+    args = parser.parse_args()
 
-    if args.data.startswith("data/"):
-        args.data = str(REPO / args.data)
+    from ultralytics import YOLO
 
-    info = train_ultralytics(args)
-    REPORTS.mkdir(parents=True, exist_ok=True)
-    (REPORTS / f"train_{args.out_name}.json").write_text(json.dumps(info, indent=2, default=str))
-    print(json.dumps(info, indent=2, default=str))
+    data = str(REPO / args.data)
+    init = args.init_weights
+    if not Path(init).is_absolute() and (REPO / init).exists():
+        init = str(REPO / init)
+    started = time.time()
+    model = YOLO(init)
+    model.train(
+        data=data,
+        epochs=args.epochs,
+        imgsz=args.imgsz,
+        batch=args.batch,
+        device=args.device,
+        seed=args.seed,
+        deterministic=True,
+        patience=max(20, args.epochs // 4),
+        workers=4,
+        project=str(REPO / "runs" / "detect"),
+        name=f"{args.arch}_{args.imgsz}",
+        exist_ok=True,
+        cos_lr=True,
+        close_mosaic=10,
+        amp=True,
+        verbose=True,
+    )
+    metrics = model.val(data=data, split="test", imgsz=args.imgsz, device=args.device, verbose=False)
+    out = REPO / args.out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    best = Path(model.trainer.best)
+    import shutil
+
+    shutil.copy2(best, out)
+    payload = {
+        "profile_id": "steel_surface",
+        "architecture": args.arch,
+        "input_size": args.imgsz,
+        "epochs": args.epochs,
+        "seed": args.seed,
+        "classes": list(NEU_CLASSES),
+        "weights": str(out.relative_to(REPO)),
+        "weights_sha256": sha256_file(out),
+        "train_seconds": round(time.time() - started, 1),
+        "test": {
+            "split": "official NEU-DET validation",
+            "mAP50": round(float(metrics.box.map50), 4),
+            "mAP50_95": round(float(metrics.box.map), 4),
+            "precision": round(float(metrics.box.mp), 4),
+            "recall": round(float(metrics.box.mr), 4),
+        },
+        "command": " ".join([sys.executable, *sys.argv]),
+    }
+    report = REPO / args.report
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text(json.dumps(payload, indent=2) + "\n")
+    print(json.dumps(payload, indent=2))
 
 
 if __name__ == "__main__":
