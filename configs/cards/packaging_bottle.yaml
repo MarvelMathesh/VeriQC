@@ -1,0 +1,19 @@
+profile_id: packaging_bottle
+cards:
+- id: packaging_generic
+  defect_class: generic
+  summary: a surface or contamination anomaly on the container
+  probable_causes:
+  - handling damage
+  - contamination on the filling line
+  - a moulding defect
+  immediate_actions:
+  - quarantine the container
+  - photograph the marked region
+  - check the filling and handling line
+  - record the container position and compare with the previous batch
+  escalation: if the anomaly repeats across consecutive containers, stop the line and escalate
+  severity_scope:
+  - minor
+  - major
+  - critical

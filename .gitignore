@@ -4,6 +4,8 @@ venv/
 __pycache__/
 *.py[cod]
 *.egg-info/
+/build/
+/dist/
 .pytest_cache/
 .mypy_cache/
 
@@ -14,12 +16,15 @@ __pycache__/
 *.zip
 
 # --- model artefacts (weights, exports, onnx, hef, pte) ---
-models/
+# The model tree is local.  Export manifests without the binaries are
+# published under reports/models/ as evidence.
+/models/
 runs/
 *.pt
 *.onnx
 *.hef
 *.pte
+*.pte.tokenizer.json
 *.pth
 *.engine
 *.tflite
@@ -27,6 +32,8 @@ runs/
 # --- logs / scratch ---
 *.log
 *.db
+*.db-wal
+*.db-shm
 *.sqlite
 .cache/
 scratch/
@@ -37,3 +44,15 @@ third_party/
 # --- secrets ---
 .env
 *.token
+
+# --- personal media files ---
+*.mkv
+*.mp4
+*.avi
+
+# --- runtime state ---
+# The audit database and its external anchor are rewritten by the station
+# on every append; they are machine state, not repository content.
+veriqc_audit.head.json
+/artifacts/
+/reports/audit_export.csv

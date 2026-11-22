@@ -1,0 +1,19 @@
+id: electronics_transistor
+domain: electronics
+source: mvtec:transistor
+task: anomaly
+description: Electronic component surface inspection (MVTec AD transistor; analog source, not a PCB claim).
+known: null
+anomaly:
+  enabled: true
+  weights: models/profiles/electronics_transistor/patchcore.pt
+  input_size: 448
+  backbone: resnet18
+  layers: [layer2, layer3]
+  bank_size: 4000
+calibration: configs/calibration/electronics_transistor.json
+severity: configs/severity/electronics_transistor.yaml
+cards: configs/cards/electronics_transistor.yaml
+quality:
+  blur_ratio_min: 0.004
+  clipped_max: 0.30

@@ -1,0 +1,19 @@
+profile_id: electronics_transistor
+cards:
+- id: electronics_generic
+  defect_class: generic
+  summary: a surface anomaly on the electronic component
+  probable_causes:
+  - handling damage
+  - contamination
+  - a process excursion
+  immediate_actions:
+  - quarantine the component
+  - photograph the marked region
+  - inspect the handling and assembly line
+  - record the component position and compare with the previous batch
+  escalation: if the anomaly repeats in the batch, escalate to the quality engineer
+  severity_scope:
+  - minor
+  - major
+  - critical

@@ -1,0 +1,19 @@
+profile_id: textile_carpet
+cards:
+- id: textile_generic
+  defect_class: generic
+  summary: a surface anomaly on the carpet that does not match a trained defect class
+  probable_causes:
+  - yarn or needle damage
+  - contamination on the line
+  - a process excursion
+  immediate_actions:
+  - quarantine the roll section
+  - photograph the marked region
+  - inspect the needle and rollers
+  - record the roll position and compare with the previous roll
+  escalation: if the anomaly repeats along the roll, stop the line and escalate to the process engineer
+  severity_scope:
+  - minor
+  - major
+  - critical

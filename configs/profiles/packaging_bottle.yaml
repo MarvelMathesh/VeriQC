@@ -1,0 +1,19 @@
+id: packaging_bottle
+domain: packaging
+source: mvtec:bottle
+task: anomaly
+description: Container surface and contamination inspection (MVTec AD bottle).
+known: null
+anomaly:
+  enabled: true
+  weights: models/profiles/packaging_bottle/patchcore.pt
+  input_size: 448
+  backbone: resnet18
+  layers: [layer2, layer3]
+  bank_size: 4000
+calibration: configs/calibration/packaging_bottle.json
+severity: configs/severity/packaging_bottle.yaml
+cards: configs/cards/packaging_bottle.yaml
+quality:
+  blur_ratio_min: 0.0015
+  clipped_max: 0.6

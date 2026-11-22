@@ -1,0 +1,19 @@
+profile_id: pharma_capsule
+cards:
+- id: pharma_generic
+  defect_class: generic
+  summary: a surface anomaly on the capsule
+  probable_causes:
+  - capsule machine wear
+  - handling damage
+  - contamination
+  immediate_actions:
+  - quarantine the batch segment
+  - photograph the marked region
+  - inspect the capsule machine
+  - record the batch segment and compare with the previous batch
+  escalation: if the anomaly repeats in the batch, stop the machine and escalate to quality assurance
+  severity_scope:
+  - minor
+  - major
+  - critical

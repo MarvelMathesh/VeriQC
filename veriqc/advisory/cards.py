@@ -1,9 +1,4 @@
-"""Standard Operating Procedure (SOP) cards for edge advisory reasoning.
-
-Provides structured domain knowledge: defect class, hedged probable causes,
-immediate operator actions, escalation rules, and stable alphanumeric IDs.
-Retrieved cards form the bounded grounding set for the language advisor.
-"""
+"""Advisory cards and bounded SOP retrieval."""
 
 from __future__ import annotations
 
@@ -12,75 +7,75 @@ from pathlib import Path
 
 import yaml
 
-__all__ = ["SopCard", "CardLibrary", "load_cards"]
+__all__ = ["Card", "CardLibrary", "load_cards"]
 
 
-@dataclass
-class SopCard:
+@dataclass(frozen=True)
+class Card:
     id: str
     defect_class: str
     summary: str
-    probable_causes: list[str] = field(default_factory=list)
-    immediate_actions: list[str] = field(default_factory=list)
+    probable_causes: tuple[str, ...] = ()
+    immediate_actions: tuple[str, ...] = ()
     escalation: str = ""
-    severity_scope: list[str] = field(default_factory=list)
-    requires_zone: bool = False
-
-    def to_prompt(self) -> str:
-        lines = [f"{self.id} [{self.defect_class}] {self.summary}"]
-        for a in self.immediate_actions:
-            lines.append(f"  - action: {a}")
-        for c in self.probable_causes:
-            lines.append(f"  - probable cause: {c}")
-        if self.escalation:
-            lines.append(f"  - escalation: {self.escalation}")
-        return "\n".join(lines)
-
+    severity_scope: tuple[str, ...] = ()
+    profile_id: str = ""
 
 @dataclass
 class CardLibrary:
-    cards: list[SopCard]
+    profile_id: str
+    cards: list[Card] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        self._by_id = {c.id: c for c in self.cards}
+        seen = set()
+        for card in self.cards:
+            if card.id in seen:
+                raise ValueError(f"duplicate card id {card.id!r}")
+            seen.add(card.id)
+            if card.profile_id and card.profile_id != self.profile_id:
+                raise ValueError(f"card {card.id!r} belongs to {card.profile_id!r}")
 
-    def by_id(self, card_id: str) -> SopCard | None:
-        return self._by_id.get(card_id)
-
-    def retrieve(self, defect_class: str | None, severity: str | None, limit: int = 3) -> list[SopCard]:
-        """Cards for a class (and optionally a severity), capped at ``limit``.
-
-        If the class is unknown or has no cards, the generic cards are used so
-        that the advisor can still say something useful.
-        """
-        out = [c for c in self.cards if c.defect_class == defect_class]
+    def retrieve(self, defect_class: str | None, severity: str | None = None) -> list[Card]:
+        direct = [card for card in self.cards if card.defect_class == defect_class]
         if severity:
-            scoped = [c for c in out if not c.severity_scope or severity in c.severity_scope]
+            scoped = [card for card in direct if not card.severity_scope or severity in card.severity_scope]
             if scoped:
-                out = scoped
-        if not out:
-            out = [c for c in self.cards if c.defect_class == "generic"]
-        return out[:limit]
+                direct = scoped
+        if direct:
+            return direct
+        return [card for card in self.cards if card.defect_class == "generic"]
 
-    def all_ids(self) -> set[str]:
-        return set(self._by_id)
+    def primary(self, defect_class: str | None, severity: str | None = None) -> Card | None:
+        cards = self.retrieve(defect_class, severity)
+        return cards[0] if cards else None
+
+    def template(self, card: Card, defect_class: str) -> str:
+        causes = "; ".join(card.probable_causes[:2])
+        actions = "; ".join(card.immediate_actions[:2])
+        escalation = f" Escalate if: {card.escalation}." if card.escalation else ""
+        return (
+            f"{defect_class.replace('_', ' ').capitalize()}: {card.summary}. "
+            f"Probable cause: {causes}. Do now: {actions}.{escalation}"
+        )
 
 
 def load_cards(path: str | Path) -> CardLibrary:
     data = yaml.safe_load(Path(path).read_text()) or {}
-    raw = data.get("cards", data if isinstance(data, list) else [])
+    profile_id = str(data.get("profile_id", ""))
+    if not profile_id:
+        raise ValueError("card file has no profile_id")
     cards = []
-    for c in raw:
+    for raw in data.get("cards", []):
         cards.append(
-            SopCard(
-                id=str(c["id"]),
-                defect_class=str(c.get("defect_class", "generic")),
-                summary=str(c.get("summary", "")),
-                probable_causes=[str(x) for x in c.get("probable_causes", [])],
-                immediate_actions=[str(x) for x in c.get("immediate_actions", [])],
-                escalation=str(c.get("escalation", "")),
-                severity_scope=[str(x) for x in c.get("severity_scope", [])],
-                requires_zone=bool(c.get("requires_zone", False)),
+            Card(
+                id=str(raw["id"]),
+                defect_class=str(raw["defect_class"]),
+                summary=str(raw.get("summary", "")),
+                probable_causes=tuple(str(v) for v in raw.get("probable_causes", ())),
+                immediate_actions=tuple(str(v) for v in raw.get("immediate_actions", ())),
+                escalation=str(raw.get("escalation", "")),
+                severity_scope=tuple(str(v) for v in raw.get("severity_scope", ())),
+                profile_id=profile_id,
             )
         )
-    return CardLibrary(cards)
+    return CardLibrary(profile_id=profile_id, cards=cards)

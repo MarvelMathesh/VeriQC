@@ -1,44 +1,57 @@
-"""Unit tests for the tamper-evident SQLite storage."""
-
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
-import pytest
+import json
+import sqlite3
 
-from veriqc.contract.record import DefectRecord
-from veriqc.storage.db import InspectionDatabase
+from veriqc.inspection import InspectionResult
+from veriqc.audit import AuditStore
 
 
-def test_storage_cryptographic_chain():
-    with tempfile.TemporaryDirectory() as tmpdir:
-        db_path = Path(tmpdir) / "test_audit.db"
-        db = InspectionDatabase(db_path)
+def result(identifier: str = "a") -> InspectionResult:
+    return InspectionResult(
+        inspection_id=identifier,
+        timestamp=1.0,
+        part_id="P1",
+        profile_id="p",
+        verdict="FAIL",
+    )
 
-        # Integrity on empty DB
-        ok, n, err = db.verify_integrity()
-        assert ok is True
-        assert n == 0
 
-        # Log entry 1
-        r1 = DefectRecord(part_id="P-101", verdict="PASS", timestamp=1.0)
-        e1 = db.log_inspection(r1, None)
-        assert e1.prev_hash == "0" * 64
-        assert len(e1.curr_hash) == 64
+def test_chain_verifies_and_detects_tampering(tmp_path) -> None:
+    store = AuditStore(tmp_path / "audit.db")
+    store.append(result("a"))
+    store.append(result("b"), event="review", extra={"label": "PASS"})
+    assert store.verify()["ok"] is True
+    assert len(store.history()) == 2
+    assert store.get("a") is not None
 
-        # Log entry 2
-        r2 = DefectRecord(part_id="P-102", verdict="FAIL", timestamp=2.0)
-        e2 = db.log_inspection(r2, None)
-        assert e2.prev_hash == e1.curr_hash
+    connection = sqlite3.connect(tmp_path / "audit.db")
+    connection.execute("UPDATE events SET payload_json='{}' WHERE id=1")
+    connection.commit()
+    connection.close()
+    assert store.verify()["ok"] is False
 
-        # Verify integrity
-        ok, count, err = db.verify_integrity()
-        assert ok is True
-        assert count == 2
 
-        # Export JSONL
-        jsonl_path = Path(tmpdir) / "audit.jsonl"
-        exported = db.export_jsonl(jsonl_path)
-        assert exported == 2
-        assert jsonl_path.exists()
+def test_missing_anchor_is_reported(tmp_path) -> None:
+    store = AuditStore(tmp_path / "audit.db")
+    store.append(result())
+    store.anchor.unlink()
+    report = store.verify()
+    assert report["ok"] is False
+    assert report["anchor_ok"] is False
 
+
+def test_export(tmp_path) -> None:
+    store = AuditStore(tmp_path / "audit.db")
+    store.append(result())
+    target = store.export_csv(tmp_path / "out.csv")
+    assert target.exists()
+    assert "inspection_id" in target.read_text()
+
+
+def test_anchor_records_head(tmp_path) -> None:
+    store = AuditStore(tmp_path / "audit.db")
+    store.append(result())
+    anchor = json.loads((tmp_path / "audit.head.json").read_text())
+    assert anchor["count"] == 1
+    assert len(anchor["head"]) == 64

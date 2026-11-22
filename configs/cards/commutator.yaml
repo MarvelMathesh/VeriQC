@@ -1,0 +1,33 @@
+profile_id: commutator
+cards:
+- id: commutator_crack
+  defect_class: crack
+  summary: a break in the commutator body, running with or across the turning marks
+  probable_causes:
+  - handling or assembly damage
+  - stress concentration at a machined step
+  - an internal defect that reached the surface
+  immediate_actions:
+  - quarantine the part and photograph the marked region
+  - record the crack position and compare with the batch
+  - record the part position and compare with the previous batch
+  escalation: if the break appears on another part from the same batch, escalate to the quality engineer and hold the batch
+  severity_scope:
+  - minor
+  - major
+  - critical
+- id: commutator_generic
+  defect_class: generic
+  summary: an anomaly that does not match the trained commutator crack class
+  probable_causes:
+  - unseen defect mode
+  - process excursion
+  immediate_actions:
+  - quarantine the part for engineering review
+  - photograph the marked region
+  - record the part position and compare with the previous batch
+  escalation: if repeated anomalies occur in one shift, escalate to the quality engineer
+  severity_scope:
+  - minor
+  - major
+  - critical

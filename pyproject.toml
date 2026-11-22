@@ -1,30 +1,51 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "veriqc"
-version = "1.0.0"
-description = "Calibrated Triage and Verified On-Device Advisory for Edge Industrial Inspection"
-readme = "VeriQC.md"
+version = "2.0.0"
+description = "Risk-calibrated edge inspection with a verified on-device Llama advisory"
+readme = "README.md"
 requires-python = ">=3.10"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "VeriQC contributors" }]
 dependencies = [
-    "torch",
-    "torchvision",
-    "ultralytics",
-    "numpy",
-    "pyyaml",
-    "pillow",
-    "scipy",
-    "fastapi",
-    "uvicorn",
-    "websockets",
-    "pytest",
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "scikit-learn>=1.5",
+    "Pillow>=10.0",
+    "PyYAML>=6.0",
+    "opencv-python>=4.10",
+    "torch>=2.4",
+    "torchvision>=0.19",
+    "ultralytics>=8.4",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "python-multipart>=0.0.9",
+    "websockets>=13.0",
 ]
 
+[project.optional-dependencies]
+advisory = ["executorch>=1.6.0", "transformers>=4.45"]
+research = [
+    "pytest>=8.0",
+    "httpx>=0.27",
+    "matplotlib>=3.9",
+    "onnx>=1.17",
+    "onnxscript>=0.3",
+    "onnxruntime>=1.20",
+]
+
+[tool.setuptools.packages.find]
+include = ["veriqc*"]
+exclude = ["tests*", "scripts*", "experiments*"]
+
 [tool.pytest.ini_options]
-minversion = "7.0"
-addopts = "-ra -q"
+addopts = "-ra"
 testpaths = ["tests"]
 pythonpath = ["."]
-
+markers = [
+    "slow: needs a model artefact or a long measurement",
+]

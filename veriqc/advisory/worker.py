@@ -1,181 +1,208 @@
-"""The advisory worker: generate, verify, retry once, fall back to a template.
-
-Failure recovery lifecycle:
-1. Slot-constrained LLM generation attempt.
-2. Deterministic verification against SOP cards and DefectRecord numbers.
-3. On verification failure: retry once at temperature 0 with a stricter correction prompt.
-4. On secondary failure: fall back to a deterministic template card summary.
-Every advisory outcome is recorded with its audit path label and verification reasons.
-"""
+"""Generate, verify and publish one advisory.  The template is the floor."""
 
 from __future__ import annotations
 
+import threading
 import time
 from dataclasses import dataclass, field
-from pathlib import Path
+from typing import Any
 
-from veriqc.advisory.cards import CardLibrary, SopCard
-from veriqc.advisory.prompts import build_prompt, build_template
-from veriqc.advisory.verifier import VerificationResult, verify_advisory
-from veriqc.contract.record import DefectRecord
+from veriqc.advisory.cards import CardLibrary
+from veriqc.advisory.guidance import (
+    build_prompt,
+    compose,
+    parse_selection,
+    verify_selection,
+)
+from veriqc.inspection import InspectionResult
 
 __all__ = ["AdvisoryOutcome", "AdvisoryWorker"]
 
 
 @dataclass
 class AdvisoryOutcome:
-    """The advisory plus its provenance and verification evidence."""
-
-    record: DefectRecord
     text: str
-    path: str  # llm | retry | template
-    verified: bool
-    violations: list[str] = field(default_factory=list)
-    checks_run: list[str] = field(default_factory=list)
-    action_ids: list[str] = field(default_factory=list)
-    ttft_ms: float = 0.0
-    decode_ms: float = 0.0
-    tokens_per_second: float = 0.0
-    prompt_tokens: int = 0
-    generated_tokens: int = 0
-    wall_ms: float = 0.0
+    template: str
+    path: str
+    accepted: bool
+    latency_ms: float = 0.0
+    cause: str | None = None
+    action: str | None = None
+    note: str | None = None
+    verification: dict[str, Any] = field(default_factory=dict)
+    model: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
+            "status": "accepted" if self.accepted else "template",
+            "text": self.text,
+            "template": self.template,
             "path": self.path,
-            "verified": self.verified,
-            "violations": list(self.violations),
-            "checks_run": list(self.checks_run),
-            "action_ids": list(self.action_ids),
-            "ttft_ms": round(self.ttft_ms, 1),
-            "decode_ms": round(self.decode_ms, 1),
-            "tokens_per_second": round(self.tokens_per_second, 2),
-            "prompt_tokens": self.prompt_tokens,
-            "generated_tokens": self.generated_tokens,
-            "wall_ms": round(self.wall_ms, 1),
+            "accepted": self.accepted,
+            "latency_ms": round(self.latency_ms, 1),
+            "cause": self.cause,
+            "action": self.action,
+            "note": self.note,
+            "verification": dict(self.verification),
+            "model": dict(self.model),
         }
 
 
 class AdvisoryWorker:
-    """Owns the generate -> verify -> retry -> template policy."""
-
     def __init__(
         self,
-        card_library: CardLibrary,
+        cards: CardLibrary,
         runner=None,
-        max_cards: int = 3,
-        max_new_tokens: int = 96,
-        temperature: float = 0.0,
-    ):
-        self.cards = card_library
+        *,
+        max_new_tokens: int = 48,
+        deadline_s: float = 60.0,
+    ) -> None:
+        self.cards = cards
         self.runner = runner
-        self.max_cards = max_cards
-        self.max_new_tokens = max_new_tokens
-        self.temperature = temperature
+        self.max_new_tokens = int(max_new_tokens)
+        self.deadline_s = float(deadline_s)
+        self._lock = threading.Lock()
 
-    # -- helpers -----------------------------------------------------------
-    def retrieve(self, record: DefectRecord) -> list[SopCard]:
-        return self.cards.retrieve(record.defect_class, record.severity, limit=self.max_cards)
+    @property
+    def available(self) -> bool:
+        return self.runner is not None
 
-    def _tokenizer(self):
-        return getattr(self.runner, "tokenizer", None) if self.runner is not None else None
-
-    def _strict_prompt(self, record: DefectRecord, cards: list[SopCard], violations: list[str]) -> str:
-        base = build_prompt(record, cards, tokenizer=self._tokenizer())
-        extra = (
-            "\n\nYour previous answer was rejected because: "
-            + "; ".join(violations[:4])
-            + ". Answer again, obeying every rule exactly. "
-            "Use only the numbers and the class from the record, and hedge any cause."
+    def template_for(self, result: InspectionResult) -> tuple[str, str | None, str | None, str | None]:
+        finding = result.findings[0] if result.findings else None
+        defect_class = finding.defect_class if finding else "generic"
+        severity = finding.severity if finding else None
+        card = self.cards.primary(defect_class, severity)
+        if card is None:
+            return "Inspection requires review; see the structured findings.", None, None, None
+        return (
+            self.cards.template(card, defect_class),
+            card.id,
+            card.probable_causes[0] if card.probable_causes else None,
+            card.immediate_actions[0] if card.immediate_actions else None,
         )
-        return base + extra
 
-    # -- main entry point ---------------------------------------------------
-    def advise(self, record: DefectRecord) -> AdvisoryOutcome:
-        t0 = time.perf_counter()
-        cards = self.retrieve(record)
-
-        if self.runner is None:
-            text = build_template(record, cards)
-            vr = verify_advisory(text, record, cards)
+    def advise_result(self, result: InspectionResult) -> AdvisoryOutcome:
+        started = time.perf_counter()
+        template, card_id, default_cause, default_action = self.template_for(result)
+        if result.verdict == "PASS":
             return AdvisoryOutcome(
-                record=record,
-                text=text,
+                text="Part accepted. Continue the line.",
+                template="Part accepted. Continue the line.",
+                path="pass",
+                accepted=True,
+            )
+        if self.runner is None:
+            return AdvisoryOutcome(
+                text=template,
+                template=template,
                 path="template",
-                verified=vr.ok,
-                violations=vr.violations,
-                checks_run=vr.checks_run,
-                action_ids=vr.action_ids,
-                wall_ms=(time.perf_counter() - t0) * 1000,
+                accepted=False,
+                cause=default_cause,
+                action=default_action,
+                latency_ms=(time.perf_counter() - started) * 1000.0,
+                verification={"ok": False, "violations": ["advisory runtime unavailable"]},
             )
-
-        # ---- first pass ----------------------------------------------------
-        prompt = build_prompt(record, cards, tokenizer=self._tokenizer())
-        res = self.runner.generate(prompt, max_new_tokens=self.max_new_tokens)
-        vr = verify_advisory(res.text, record, cards)
-        if vr.ok:
+        finding = result.findings[0] if result.findings else None
+        card = self.cards.primary(finding.defect_class if finding else "generic", finding.severity if finding else None)
+        if card is None or not card.probable_causes or not card.immediate_actions:
             return AdvisoryOutcome(
-                record=record,
-                text=res.text,
-                path="llm",
-                verified=True,
-                violations=[],
-                checks_run=vr.checks_run,
-                action_ids=vr.action_ids,
-                ttft_ms=res.ttft_ms,
-                decode_ms=res.decode_ms,
-                tokens_per_second=res.tokens_per_second,
-                prompt_tokens=res.prompt_tokens,
-                generated_tokens=res.generated_tokens,
-                wall_ms=(time.perf_counter() - t0) * 1000,
+                text=template,
+                template=template,
+                path="template",
+                accepted=False,
+                cause=default_cause,
+                action=default_action,
+                latency_ms=(time.perf_counter() - started) * 1000.0,
+                verification={"ok": False, "violations": ["no card options"]},
             )
-
-        # ---- retry once, stricter prompt, temperature 0 ---------------------
-        retry_prompt = self._strict_prompt(record, cards, vr.violations)
-        res2 = self.runner.generate(retry_prompt, max_new_tokens=self.max_new_tokens)
-        vr2 = verify_advisory(res2.text, record, cards)
-        if vr2.ok:
+        try:
+            prompt = build_prompt(result, card, tokenizer=getattr(self.runner, "tokenizer", None))
+        except Exception as exc:
             return AdvisoryOutcome(
-                record=record,
-                text=res2.text,
-                path="retry",
-                verified=True,
-                violations=[],
-                checks_run=vr2.checks_run,
-                action_ids=vr2.action_ids,
-                ttft_ms=res2.ttft_ms,
-                decode_ms=res2.decode_ms,
-                tokens_per_second=res2.tokens_per_second,
-                prompt_tokens=res2.prompt_tokens,
-                generated_tokens=res2.generated_tokens,
-                wall_ms=(time.perf_counter() - t0) * 1000,
+                text=template,
+                template=template,
+                path="template",
+                accepted=False,
+                cause=default_cause,
+                action=default_action,
+                latency_ms=(time.perf_counter() - started) * 1000.0,
+                verification={"ok": False, "violations": [f"prompt error: {exc!r}"]},
             )
 
-        # ---- template fallback ----------------------------------------------
-        text = build_template(record, cards)
-        vr3 = verify_advisory(text, record, cards)
+        generated = self._generate(prompt)
+        if generated is None:
+            return AdvisoryOutcome(
+                text=template,
+                template=template,
+                path="template",
+                accepted=False,
+                cause=default_cause,
+                action=default_action,
+                latency_ms=(time.perf_counter() - started) * 1000.0,
+                verification={"ok": False, "violations": ["generation timeout or busy"]},
+            )
+        selection = parse_selection(generated.text, card)
+        if selection is None:
+            return AdvisoryOutcome(
+                text=template,
+                template=template,
+                path="template",
+                accepted=False,
+                cause=default_cause,
+                action=default_action,
+                latency_ms=(time.perf_counter() - started) * 1000.0,
+                verification={
+                    "ok": False,
+                    "violations": ["the model did not return a valid three-line selection"],
+                    "raw": generated.text[:500],
+                },
+                model=generated.to_dict(),
+            )
+        verification = verify_selection(selection, result)
+        if not verification.ok:
+            return AdvisoryOutcome(
+                text=template,
+                template=template,
+                path="template",
+                accepted=False,
+                cause=default_cause,
+                action=default_action,
+                latency_ms=(time.perf_counter() - started) * 1000.0,
+                verification={"ok": False, "violations": verification.violations},
+                model=generated.to_dict(),
+            )
+        text = compose(selection, result, card)
         return AdvisoryOutcome(
-            record=record,
             text=text,
-            path="template",
-            verified=vr3.ok,
-            violations=vr2.violations,
-            checks_run=vr3.checks_run,
-            action_ids=vr3.action_ids,
-            ttft_ms=res.ttft_ms,
-            decode_ms=res.decode_ms,
-            tokens_per_second=res.tokens_per_second,
-            prompt_tokens=res.prompt_tokens,
-            generated_tokens=res.generated_tokens,
-            wall_ms=(time.perf_counter() - t0) * 1000,
+            template=template,
+            path="llm",
+            accepted=True,
+            latency_ms=(time.perf_counter() - started) * 1000.0,
+            cause=card.probable_causes[selection.cause_index - 1],
+            action=card.immediate_actions[selection.action_index - 1],
+            note=selection.note,
+            verification={"ok": True, "violations": [], "card_id": card_id},
+            model=generated.to_dict(),
         )
 
-    # -- ablation helper ----------------------------------------------------
-    def raw_generate(self, record: DefectRecord) -> tuple[str, VerificationResult, list[SopCard]]:
-        """Generate without verifying -- used for the A4 ablation."""
-        cards = self.retrieve(record)
-        if self.runner is None:
-            return "", VerificationResult(ok=False, violations=["no runner"]), cards
-        prompt = build_prompt(record, cards, tokenizer=self._tokenizer())
-        res = self.runner.generate(prompt, max_new_tokens=self.max_new_tokens)
-        return res.text, verify_advisory(res.text, record, cards), cards
+    def _generate(self, prompt: str):
+        holder: dict[str, Any] = {}
+
+        def run() -> None:
+            try:
+                holder["result"] = self.runner.generate(prompt, max_new_tokens=self.max_new_tokens)
+            except Exception as exc:
+                holder["error"] = exc
+            finally:
+                self._lock.release()
+
+        if not self._lock.acquire(blocking=False):
+            return None
+        thread = threading.Thread(target=run, daemon=True, name="VeriQC-Advisory")
+        thread.start()
+        thread.join(self.deadline_s)
+        if thread.is_alive():
+            return None
+        if "error" in holder:
+            return None
+        return holder.get("result")

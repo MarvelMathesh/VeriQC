@@ -1,0 +1,16 @@
+{
+  "schema": "veriqc.calibration/1",
+  "profile_id": "steel_surface",
+  "rule": "known_only",
+  "alpha_fail": 0.1,
+  "alpha_review": 0.3,
+  "anomaly": null,
+  "known": null,
+  "fused": null,
+  "screening_fail": 0.36058669388294223,
+  "screening_review": 0.5780285060405731,
+  "sample_sizes": {
+    "known_cal": 144
+  },
+  "note": "Known-class screening on NEU-DET. The 10% development split is also used for early stopping, so this threshold is a development estimate; the shared split is a disclosed limitation. The source has no normal steel population, so no false-alarm claim is made."
+}

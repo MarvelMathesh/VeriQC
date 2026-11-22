@@ -1,0 +1,19 @@
+area_thresholds:
+  minor: 0.005
+  major: 0.02
+  critical: 0.08
+class_risk:
+  crazing: 1.2
+  inclusion: 1.5
+  patches: 1.0
+  pitted_surface: 1.3
+  rolled-in_scale: 1.1
+  scratches: 1.4
+zone_criticality:
+  center: 1.0
+  edge: 1.3
+  corner: 1.4
+grade_thresholds:
+  major: 1.5
+  critical: 3.0
+default_risk: 1.2

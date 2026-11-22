@@ -1,0 +1,22 @@
+id: steel_surface
+domain: steel
+source: neu-det
+task: detect
+description: Six-class hot-rolled steel surface inspection (NEU-DET).
+known:
+  type: detector
+  weights: models/profiles/steel_surface/yolo26n_640.pt
+  input_size: 640
+  classes: [crazing, inclusion, patches, pitted_surface, rolled-in_scale, scratches]
+  conf_threshold: 0.01
+  iou_threshold: 0.5
+  min_area_px: 8
+  report_threshold: 0.25
+anomaly:
+  enabled: false
+calibration: configs/calibration/steel_surface.json
+severity: configs/severity/steel_surface.yaml
+cards: configs/cards/steel_surface.yaml
+quality:
+  blur_ratio_min: 0.004
+  clipped_max: 0.30

@@ -1,0 +1,14 @@
+area_thresholds:
+  minor: 0.0005
+  major: 0.002
+  critical: 0.01
+class_risk:
+  unknown_anomaly: 1.3
+zone_criticality:
+  center: 1.0
+  edge: 1.3
+  corner: 1.4
+grade_thresholds:
+  major: 1.5
+  critical: 3.0
+default_risk: 1.2

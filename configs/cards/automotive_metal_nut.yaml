@@ -1,0 +1,19 @@
+profile_id: automotive_metal_nut
+cards:
+- id: automotive_generic
+  defect_class: generic
+  summary: a surface anomaly on the machined nut
+  probable_causes:
+  - tool wear
+  - handling damage
+  - a process excursion
+  immediate_actions:
+  - quarantine the part
+  - photograph the marked region
+  - inspect the tooling
+  - record the part position and compare with the previous batch
+  escalation: if the anomaly repeats across the batch, escalate to the process engineer
+  severity_scope:
+  - minor
+  - major
+  - critical

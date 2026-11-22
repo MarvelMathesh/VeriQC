@@ -1,0 +1,106 @@
+profile_id: steel_surface
+cards:
+- id: steel_crazing
+  defect_class: crazing
+  summary: fine irregular cracking across the steel surface
+  probable_causes:
+  - excessive rolling reduction
+  - thermal stress during cooling
+  immediate_actions:
+  - check the rolling reduction schedule for this batch
+  - flag the batch for metallurgy review
+  - record the finding position and compare with the previous batch
+  escalation: if crazing appears on more than one part in the batch, escalate to the process engineer
+  severity_scope:
+  - minor
+  - major
+  - critical
+- id: steel_inclusion
+  defect_class: inclusion
+  summary: embedded foreign material in the steel
+  probable_causes:
+  - carry-over from the caster
+  - incomplete deoxidation
+  immediate_actions:
+  - record the inclusion position
+  - divert the batch to metallurgy
+  - record the finding position and compare with the previous batch
+  escalation: if inclusions cluster in one area of the coil, stop the line
+  severity_scope:
+  - major
+  - critical
+- id: steel_patches
+  defect_class: patches
+  summary: irregular surface patches with a sharp boundary
+  probable_causes:
+  - localized scale adherence during rolling
+  - roll surface damage
+  immediate_actions:
+  - inspect the roll surface for a matching imprint
+  - clean the roll and re-check the next part
+  - record the finding position and compare with the previous batch
+  escalation: if the same patch shape repeats, escalate to the rolling mill
+  severity_scope:
+  - minor
+  - major
+- id: steel_pitted_surface
+  defect_class: pitted_surface
+  summary: dense small pits across the surface
+  probable_causes:
+  - pickling attack
+  - water droplet etching during cooling
+  immediate_actions:
+  - check the pickling bath
+  - dry the strip before the next pass
+  - record the finding position and compare with the previous batch
+  escalation: if pitting appears on every part, stop and check the pickling line
+  severity_scope:
+  - minor
+  - major
+  - critical
+- id: steel_rolled_in_scale
+  defect_class: rolled-in_scale
+  summary: scale pressed into the surface during rolling
+  probable_causes:
+  - insufficient descaling
+  - high mill temperature
+  immediate_actions:
+  - check descaling pressure and delay
+  - reduce rolling temperature
+  - record the finding position and compare with the previous batch
+  escalation: if severity increases across the coil, escalate to the mill supervisor
+  severity_scope:
+  - minor
+  - major
+  - critical
+- id: steel_scratches
+  defect_class: scratches
+  summary: linear marks in the rolling direction
+  probable_causes:
+  - handling contact
+  - guide rail misalignment
+  - trapped scale
+  immediate_actions:
+  - inspect the guide rail and adjust alignment
+  - check the roller surface
+  - record the finding position and compare with the previous batch
+  escalation: if scratches reappear after adjustment, escalate to the line supervisor
+  severity_scope:
+  - minor
+  - major
+  - critical
+- id: steel_generic
+  defect_class: generic
+  summary: an anomaly that does not match a trained steel defect class
+  probable_causes:
+  - unseen defect mode
+  - process excursion
+  immediate_actions:
+  - quarantine the part for engineering review
+  - photograph the marked region
+  - record the finding position and compare with the previous batch
+  escalation: if repeated anomalies occur in one shift, escalate to the quality engineer
+  severity_scope:
+  - minor
+  - major
+  - critical

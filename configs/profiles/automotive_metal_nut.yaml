@@ -1,0 +1,19 @@
+id: automotive_metal_nut
+domain: automotive
+source: mvtec:metal_nut
+task: anomaly
+description: Machined nut surface inspection (MVTec AD metal_nut).
+known: null
+anomaly:
+  enabled: true
+  weights: models/profiles/automotive_metal_nut/patchcore.pt
+  input_size: 448
+  backbone: resnet18
+  layers: [layer2, layer3]
+  bank_size: 4000
+calibration: configs/calibration/automotive_metal_nut.json
+severity: configs/severity/automotive_metal_nut.yaml
+cards: configs/cards/automotive_metal_nut.yaml
+quality:
+  blur_ratio_min: 0.004
+  clipped_max: 0.30
