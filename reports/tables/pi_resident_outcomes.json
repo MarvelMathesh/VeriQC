@@ -1,0 +1,14 @@
+{
+  "events": 72,
+  "paths": {
+    "llm": 10,
+    "template": 62
+  },
+  "accepted": {
+    "true": 10,
+    "false": 62
+  },
+  "violations": {
+    "generation timeout or busy": 62
+  }
+}

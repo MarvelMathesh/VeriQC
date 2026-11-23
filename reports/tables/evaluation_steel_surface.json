@@ -1,0 +1,38 @@
+{
+  "images": 360,
+  "defect_images": 360,
+  "normal_images": 0,
+  "verdict_counts": {
+    "PASS": 31,
+    "REVIEW": 5,
+    "FAIL": 324
+  },
+  "confusion": {
+    "non_pass": {
+      "detected": 329,
+      "missed": 31,
+      "false_alarms": 0,
+      "true_negatives": 0
+    },
+    "fail": {
+      "detected": 324,
+      "missed": 36,
+      "false_alarms": 0,
+      "true_negatives": 0
+    }
+  },
+  "known_score_auroc": null,
+  "anomaly_score_auroc": null,
+  "detection_rate_non_pass": 0.9139,
+  "detection_rate_fail": 0.9,
+  "false_alarm_rate_non_pass": null,
+  "false_alarm_rate_fail": null,
+  "review_rate": 0.0139,
+  "qc_review_count": 5,
+  "qc_review_rate": 0.0139,
+  "latency_ms_median": 4.86,
+  "latency_ms_p95": 5.82,
+  "profile_id": "steel_surface",
+  "device": "cuda",
+  "calibration": "configs/calibration/steel_surface.json"
+}

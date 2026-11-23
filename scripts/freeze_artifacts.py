@@ -55,6 +55,8 @@ def main() -> None:
             "max_seq_length": source.get("max_seq_length"),
             "tokenizer": str(ADVISORY_TOKENIZER.relative_to(REPO)),
             "tokenizer_sha256": sha256_file(ADVISORY_TOKENIZER),
+            "tokenizer_files": source.get("tokenizer_files"),
+            "tokenizer_bundle_sha256": source.get("tokenizer_bundle_sha256"),
             "source_checkpoint": source.get("source_checkpoint"),
             "runtime": source.get("runtime"),
             "note": "The advisory runs in an isolated child process and cannot change the verdict.",

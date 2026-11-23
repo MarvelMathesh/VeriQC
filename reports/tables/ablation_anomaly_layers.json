@@ -1,0 +1,32 @@
+{
+  "source": "mvtec:carpet",
+  "arms": [
+    {
+      "arm": "layer2-only",
+      "image_layer": "layer2",
+      "pixel_layer": "layer2",
+      "bank_size": 4000,
+      "image_auroc": 0.9827,
+      "pixel_auroc": 0.9661,
+      "au_pro": 0.8865
+    },
+    {
+      "arm": "layer3-only",
+      "image_layer": "layer3",
+      "pixel_layer": "layer3",
+      "bank_size": 4000,
+      "image_auroc": 0.9402,
+      "pixel_auroc": 0.9874,
+      "au_pro": 0.9098
+    },
+    {
+      "arm": "dual-layer",
+      "image_layer": "layer2",
+      "pixel_layer": "layer3",
+      "bank_size": 4000,
+      "image_auroc": 0.9827,
+      "pixel_auroc": 0.9864,
+      "au_pro": 0.907
+    }
+  ]
+}

@@ -30,6 +30,41 @@ def test_results_evidence_paths_exist() -> None:
             assert (REPO / evidence).exists(), evidence
 
 
+def test_pi_benchmarks_are_labeled_as_pi() -> None:
+    for mode in ("vision", "advisory", "resident"):
+        path = REPO / "reports" / "tables" / f"pi_{mode}.json"
+        if not path.exists():
+            continue
+        payload = json.loads(path.read_text())
+        assert payload["mode"] == mode
+        assert payload["environment"]["machine"] == "aarch64"
+        assert "Raspberry Pi 5" in (payload["environment"]["model"] or "")
+        assert payload["environment"]["memory_total_mb"] > 7000
+
+
+def test_pi_operating_point_matches_host() -> None:
+    host = REPO / "reports" / "tables" / "evaluation_commutator.json"
+    pi = REPO / "reports" / "tables" / "pi_evaluation_commutator.json"
+    if not host.exists() or not pi.exists():
+        return
+    host_payload = json.loads(host.read_text())
+    pi_payload = json.loads(pi.read_text())
+    assert host_payload["verdict_counts"] == pi_payload["verdict_counts"]
+    assert host_payload["confusion"] == pi_payload["confusion"]
+
+
+def test_usefulness_instrument_has_no_fabricated_scores() -> None:
+    sheet = REPO / "reports" / "tables" / "advisory_usefulness_sheet.csv"
+    if not sheet.exists():
+        return
+    import csv
+
+    rows = list(csv.DictReader(sheet.open(newline="")))
+    assert len(rows) == 37
+    assert all(row["rater_id"] == "" for row in rows)
+    assert all(row["usefulness_a_1_5"] == "" for row in rows)
+
+
 def test_runtime_artifact_manifest_is_complete() -> None:
     manifest = REPO / "configs" / "artifacts.json"
     if not manifest.exists():

@@ -1,6 +1,6 @@
 {
   "schema": "veriqc.artifacts/1",
-  "generated_at": "2026-11-22T03:23:20+05:30",
+  "generated_at": "2026-11-22T23:39:32+05:30",
   "note": "Runtime artifact hashes. Re-run scripts/freeze_artifacts.py after a deliberate update.",
   "profiles": {
     "automotive_metal_nut": {

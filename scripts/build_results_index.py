@@ -237,6 +237,110 @@ def advisory_summary() -> dict:
     return summary
 
 
+def usefulness_summary() -> dict:
+    path = TABLES / "advisory_usefulness.json"
+    if not path.exists():
+        return {
+            "status": "not_measured",
+            "instrument": "reports/tables/advisory_usefulness_sheet.csv",
+            "note": "Blind paired rating sheet prepared; requires an independent human rater.",
+        }
+    payload = json.loads(path.read_text())
+    return {
+        "status": payload.get("status", "unknown"),
+        "raters": payload.get("raters"),
+        "cases": payload.get("cases"),
+        "usefulness": payload.get("usefulness"),
+        "actionability": payload.get("actionability"),
+        "preference": payload.get("preference"),
+        "grounding_error": payload.get("grounding_error"),
+        "evidence": str(path.relative_to(REPO)),
+    }
+
+
+def pi_environment() -> dict | None:
+    path = TABLES / "pi_vision.json"
+    if not path.exists():
+        return None
+    environment = json.loads(path.read_text()).get("environment", {})
+    return {
+        "model": environment.get("model"),
+        "platform": environment.get("platform"),
+        "python": environment.get("python"),
+        "memory_total_mb": environment.get("memory_total_mb"),
+        "cpu_governor": environment.get("cpu_governor"),
+        "packages": environment.get("packages"),
+        "evidence": str(path.relative_to(REPO)),
+    }
+
+
+def pi_summary() -> dict | None:
+    summary = {}
+    for mode in ("vision", "advisory", "resident", "resident_steady"):
+        path = TABLES / f"pi_{mode}.json"
+        if path.exists():
+            payload = json.loads(path.read_text())
+            summary[mode] = {
+                key: value
+                for key, value in payload.items()
+                if key not in ("rows", "environment")
+            }
+            summary[mode]["environment"] = payload.get("environment")
+            summary[mode]["evidence"] = str(path.relative_to(REPO))
+            if mode == "resident":
+                outcomes_path = TABLES / "pi_resident_outcomes.json"
+                if outcomes_path.exists():
+                    summary[mode]["advisory_outcomes"] = json.loads(
+                        outcomes_path.read_text()
+                    )
+                    summary[mode]["advisory_outcomes_evidence"] = str(
+                        outcomes_path.relative_to(REPO)
+                    )
+    parity_path = TABLES / "pi_evaluation_commutator.json"
+    host_path = TABLES / "evaluation_commutator.json"
+    if parity_path.exists() and host_path.exists():
+        host = json.loads(host_path.read_text())
+        pi = json.loads(parity_path.read_text())
+        summary["evaluation_commutator_parity"] = {
+            "verdict_counts_equal": host["verdict_counts"] == pi["verdict_counts"],
+            "confusion_equal": host["confusion"] == pi["confusion"],
+            "host_verdict_counts": host["verdict_counts"],
+            "pi_verdict_counts": pi["verdict_counts"],
+            "host_known_pixel_ap": host.get("known_pixel_ap"),
+            "pi_known_pixel_ap": pi.get("known_pixel_ap"),
+            "host_known_pixel_auroc": host.get("known_pixel_auroc"),
+            "pi_known_pixel_auroc": pi.get("known_pixel_auroc"),
+            "host_known_au_pro": host.get("known_au_pro"),
+            "pi_known_au_pro": pi.get("known_au_pro"),
+            "host_latency_ms_median": host.get("latency_ms_median"),
+            "pi_latency_ms_median": pi.get("latency_ms_median"),
+            "evidence": str(parity_path.relative_to(REPO)),
+        }
+    return summary or None
+
+
+def pi_smoke_summary() -> dict | None:
+    path = TABLES / "pi_station_smoke.json"
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text())
+    keys = (
+        "startup_seconds",
+        "verdict",
+        "vision_latency_ms",
+        "advisory_status",
+        "advisory_accepted",
+        "advisory_latency_ms",
+        "overlay_http",
+        "csv_http",
+        "chain_ok",
+        "artifact_hashes",
+    )
+    summary = {key: payload.get(key) for key in keys}
+    summary["evidence"] = str(path.relative_to(REPO))
+    return summary
+
+
 def export_parity_summary() -> dict:
     table = load("export_parity.json")
     segmenter = [
@@ -265,6 +369,26 @@ def export_parity_summary() -> dict:
     }
 
 
+def not_measured() -> list[str]:
+    pi = pi_summary()
+    pi_complete = bool(pi) and {"vision", "advisory", "resident"} <= set(pi)
+    usefulness = usefulness_summary()
+    items = []
+    if not pi_complete:
+        items.append(
+            "Raspberry Pi 5 latency, memory, thermal and co-resident advisory scheduling"
+        )
+    if usefulness.get("status") != "measured":
+        items.append("Human advisory usefulness rating")
+    items.extend(
+        [
+            "Hailo NPU execution",
+            "Normal-steel false-alarm rate (no normal NEU-DET population)",
+        ]
+    )
+    return items
+
+
 def main() -> None:
     payload = {
         "schema": "veriqc.results/2",
@@ -281,7 +405,7 @@ def main() -> None:
                 "executorch": _package("executorch"),
                 "onnxruntime": _package("onnxruntime"),
             },
-            "raspberry_pi": None,
+            "raspberry_pi": pi_environment(),
         },
         "evaluation_protocol": {
             "split_discipline": (
@@ -313,6 +437,9 @@ def main() -> None:
             "anomaly_kolektor": load("ablation_anomaly_kolektor.json"),
         },
         "advisory": advisory_summary(),
+        "advisory_usefulness": usefulness_summary(),
+        "pi_benchmark": pi_summary(),
+        "pi_station_smoke": pi_smoke_summary(),
         "artifact_manifests": sorted(
             str(path.relative_to(REPO)) for path in (REPO / "reports" / "models").glob("*.json")
         ),
@@ -320,12 +447,7 @@ def main() -> None:
             "configs/artifacts.json" if (REPO / "configs" / "artifacts.json").exists() else None
         ),
         "export_parity": export_parity_summary(),
-        "not_measured": [
-            "Raspberry Pi 5 latency, memory, thermal and co-resident advisory scheduling",
-            "Human advisory usefulness rating",
-            "Hailo NPU execution",
-            "Normal-steel false-alarm rate (no normal NEU-DET population)",
-        ],
+        "not_measured": not_measured(),
     }
     output = REPO / "reports" / "results.json"
     output.write_text(json.dumps(payload, indent=2) + "\n")

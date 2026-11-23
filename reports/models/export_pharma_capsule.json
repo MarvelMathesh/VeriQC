@@ -1,0 +1,17 @@
+{
+  "profile_id": "pharma_capsule",
+  "artifacts": {
+    "anomaly": {
+      "backbone": "models/profiles/pharma_capsule/export/anomaly_backbone.onnx",
+      "backbone_sha256": "93596c2fec46a1fe8df9acbe74215e79f523004e905fbb814115dd5288060f73",
+      "banks": "models/profiles/pharma_capsule/export/anomaly_banks.npz",
+      "banks_sha256": "3c96546046c4baa8df47b69d5fd05a8157f47b7859a45db079d2ed04df53ab1e",
+      "bank_size": 4000,
+      "external_data": {
+        "path": "models/profiles/pharma_capsule/export/anomaly_backbone.onnx.data",
+        "sha256": "4bfc5475f59408c2883a138f1c54f735dcb5c2e0d7531003863b51bf66ff1385",
+        "bytes": 11120896
+      }
+    }
+  }
+}

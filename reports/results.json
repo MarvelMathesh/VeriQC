@@ -1,0 +1,1938 @@
+{
+  "schema": "veriqc.results/2",
+  "generated_at": "2026-11-23T00:45:32+05:30",
+  "environment": {
+    "cpu": "13th Gen Intel(R) Core(TM) i7-13700HX",
+    "gpu": "NVIDIA GeForce RTX 4050 Laptop GPU",
+    "system": "Linux 7.2.11-arch1-1, Python 3.12.16",
+    "software": {
+      "torch": "2.15.0+cu134",
+      "torchvision": "0.29.2+cu134",
+      "ultralytics": "8.4.211",
+      "numpy": "2.5.4",
+      "executorch": "1.6.0",
+      "onnxruntime": "1.31.1"
+    },
+    "raspberry_pi": {
+      "model": "Raspberry Pi 5 Model B Rev 1.1",
+      "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+      "python": "3.13.5",
+      "memory_total_mb": 8058.3,
+      "cpu_governor": "ondemand",
+      "packages": {
+        "torch": "2.15.0+cpu",
+        "torchvision": "0.29.2+cpu",
+        "ultralytics": "8.4.216",
+        "numpy": "2.5.4",
+        "executorch": "1.6.0",
+        "transformers": "5.24.0",
+        "opencv": "5.1.0.95"
+      },
+      "evidence": "reports/tables/pi_vision.json"
+    }
+  },
+  "evaluation_protocol": {
+    "split_discipline": "Official test splits are held out from fitting, calibration and threshold selection. Segmenter preprocessing and protocol arms were compared on the official test split during development, so the selected arm is a development choice rather than a pristine one-shot holdout. The steel and Kolektor calibration/early-stopping splits also overlap; that limitation is disclosed and quantified by the protocol ablation.",
+    "quality_gate": "Evaluation applies the same acquisition gate as the station before the decision. A failed gate returns REVIEW and never executes the models.",
+    "decision": "Anomaly and dual profiles use split-conformal tail p-values; FAIL at alpha 0.05, REVIEW at alpha 0.10, with a missing or non-finite channel failing closed. The steel profile uses a recall-targeted screening threshold and makes no false-alarm claim."
+  },
+  "profiles": {
+    "steel_surface": {
+      "domain": "steel",
+      "source": "neu-det",
+      "task": "detect",
+      "protocol": "NEU-DET official train/validation. The screening threshold is fit on a 10% development split of official train (held out from gradient updates and also used for early stopping). The official validation split is the reported test set. No normal-steel false-alarm estimate exists.",
+      "calibration": {
+        "path": "configs/calibration/steel_surface.json",
+        "rule": "known_only",
+        "alpha_fail": 0.1,
+        "alpha_review": 0.3,
+        "sample_sizes": {
+          "known_cal": 144
+        }
+      },
+      "model_metrics": {
+        "architecture": "yolo26n",
+        "input_size": 640,
+        "epochs": 80,
+        "seed": 20261121,
+        "test": {
+          "split": "official NEU-DET validation",
+          "mAP50": 0.76,
+          "mAP50_95": 0.409,
+          "precision": 0.7029,
+          "recall": 0.7049
+        },
+        "weights_sha256": "6a79318213b38aef0cd65c65ef5f22f200afc60d9203f3b10bed801bc85c230c"
+      },
+      "operating_point": {
+        "images": 360,
+        "defect_images": 360,
+        "normal_images": 0,
+        "verdict_counts": {
+          "PASS": 31,
+          "REVIEW": 5,
+          "FAIL": 324
+        },
+        "qc_review_count": 5,
+        "review_rate": 0.0139,
+        "confusion": {
+          "non_pass": {
+            "detected": 329,
+            "missed": 31,
+            "false_alarms": 0,
+            "true_negatives": 0
+          },
+          "fail": {
+            "detected": 324,
+            "missed": 36,
+            "false_alarms": 0,
+            "true_negatives": 0
+          }
+        },
+        "defect_recall_non_pass": {
+          "count": 329,
+          "n": 360,
+          "rate": 0.9139,
+          "ci95": [
+            0.88,
+            0.9407
+          ]
+        },
+        "defect_recall_fail": {
+          "count": 324,
+          "n": 360,
+          "rate": 0.9,
+          "ci95": [
+            0.8643,
+            0.929
+          ]
+        },
+        "normal_false_alarm_non_pass": null,
+        "normal_false_alarm_fail": null
+      },
+      "latency": {
+        "cuda_evaluation_ms": {
+          "median": 4.86,
+          "p95": 5.82
+        },
+        "cpu_station_ms": {
+          "median": 23.49,
+          "p95": 24.52,
+          "p99": 24.76,
+          "peak_rss_mb": 956.6,
+          "device": "cpu",
+          "threads": 4
+        }
+      },
+      "evidence": [
+        "reports/tables/evaluation_steel_surface.json",
+        "reports/tables/detector_neu.json",
+        "reports/tables/latency_steel_surface.json"
+      ]
+    },
+    "commutator": {
+      "domain": "automotive",
+      "source": "kolektor-sdd",
+      "task": "segment",
+      "protocol": "KolektorSDD official JIM-2019 three-fold split by physical part; fold 0 is the operating point. A 15% physical-part holdout supplies both early-stopping and calibration scores; this shared split is a disclosed selection limitation. Portrait 384x1024 preprocessing is used.",
+      "calibration": {
+        "path": "configs/calibration/commutator.json",
+        "rule": "known_only",
+        "alpha_fail": 0.05,
+        "alpha_review": 0.1,
+        "sample_sizes": {
+          "known_cal": 35
+        }
+      },
+      "model_metrics": {
+        "architecture": "ResNet-18 U-Net",
+        "input_size": [
+          384,
+          1024
+        ],
+        "metric_size": [
+          512,
+          1408
+        ],
+        "three_fold_mean": {
+          "image_auroc": 0.9817,
+          "pixel_auroc": 0.9526,
+          "pixel_ap": 0.7813,
+          "au_pro": 0.8572,
+          "best_f1": 0.9702
+        },
+        "folds": [
+          {
+            "fold": 0,
+            "image_auroc": 1.0,
+            "pixel_auroc": 0.95,
+            "pixel_ap": 0.8048,
+            "au_pro": 0.8879,
+            "best_f1": 1.0
+          },
+          {
+            "fold": 1,
+            "image_auroc": 0.9991,
+            "pixel_auroc": 0.9907,
+            "pixel_ap": 0.7968,
+            "au_pro": 0.9293,
+            "best_f1": 0.973
+          },
+          {
+            "fold": 2,
+            "image_auroc": 0.9459,
+            "pixel_auroc": 0.917,
+            "pixel_ap": 0.7423,
+            "au_pro": 0.7545,
+            "best_f1": 0.9375
+          }
+        ],
+        "fold_0_pixel": {
+          "auroc": 0.95,
+          "ap": 0.8048,
+          "au_pro": 0.8879
+        }
+      },
+      "operating_point": {
+        "images": 135,
+        "defect_images": 18,
+        "normal_images": 117,
+        "verdict_counts": {
+          "PASS": 114,
+          "REVIEW": 1,
+          "FAIL": 20
+        },
+        "qc_review_count": 0,
+        "review_rate": 0.0074,
+        "confusion": {
+          "non_pass": {
+            "detected": 18,
+            "missed": 0,
+            "false_alarms": 3,
+            "true_negatives": 114
+          },
+          "fail": {
+            "detected": 18,
+            "missed": 0,
+            "false_alarms": 2,
+            "true_negatives": 115
+          }
+        },
+        "defect_recall_non_pass": {
+          "count": 18,
+          "n": 18,
+          "rate": 1.0,
+          "ci95": [
+            0.8147,
+            1.0
+          ]
+        },
+        "defect_recall_fail": {
+          "count": 18,
+          "n": 18,
+          "rate": 1.0,
+          "ci95": [
+            0.8147,
+            1.0
+          ]
+        },
+        "normal_false_alarm_non_pass": {
+          "count": 3,
+          "n": 117,
+          "rate": 0.0256,
+          "ci95": [
+            0.0053,
+            0.0731
+          ]
+        },
+        "normal_false_alarm_fail": {
+          "count": 2,
+          "n": 117,
+          "rate": 0.0171,
+          "ci95": [
+            0.0021,
+            0.0604
+          ]
+        }
+      },
+      "latency": {
+        "cuda_evaluation_ms": {
+          "median": 21.72,
+          "p95": 22.48
+        },
+        "cpu_station_ms": {
+          "median": 223.64,
+          "p95": 235.42,
+          "p99": 241.77,
+          "peak_rss_mb": 1075.1,
+          "device": "cpu",
+          "threads": 4
+        }
+      },
+      "evidence": [
+        "reports/tables/evaluation_commutator.json",
+        "reports/tables/segmenter_kolektor.json",
+        "reports/tables/segmenter_kolektor_training.json",
+        "reports/tables/ablation_segmenter_protocol.json",
+        "reports/tables/latency_commutator.json"
+      ]
+    },
+    "textile_carpet": {
+      "domain": "textile",
+      "source": "mvtec:carpet",
+      "task": "anomaly",
+      "protocol": "MVTec AD official train/test; fit on 80% of train/good, calibrate on a disjoint 20%, report on the official test split.",
+      "calibration": {
+        "path": "configs/calibration/textile_carpet.json",
+        "rule": "anomaly_only",
+        "alpha_fail": 0.05,
+        "alpha_review": 0.1,
+        "sample_sizes": {
+          "anomaly_cal": 56
+        }
+      },
+      "model_metrics": {
+        "architecture": "PatchCore, ResNet-18 layer2 image bank + layer3 localization bank",
+        "input_size": 448,
+        "bank_size": 4000,
+        "image_auroc": 0.9827,
+        "pixel_auroc": 0.9864,
+        "pixel_ap": 0.6064,
+        "au_pro": 0.907,
+        "weights_sha256": "290613663ae76b76a1207baed872b1df80a7fbcc9bec1681725d2af843bd2e88"
+      },
+      "operating_point": {
+        "images": 117,
+        "defect_images": 89,
+        "normal_images": 28,
+        "verdict_counts": {
+          "PASS": 27,
+          "REVIEW": 14,
+          "FAIL": 76
+        },
+        "qc_review_count": 0,
+        "review_rate": 0.1197,
+        "confusion": {
+          "non_pass": {
+            "detected": 86,
+            "missed": 3,
+            "false_alarms": 4,
+            "true_negatives": 24
+          },
+          "fail": {
+            "detected": 75,
+            "missed": 14,
+            "false_alarms": 1,
+            "true_negatives": 27
+          }
+        },
+        "defect_recall_non_pass": {
+          "count": 86,
+          "n": 89,
+          "rate": 0.9663,
+          "ci95": [
+            0.9046,
+            0.993
+          ]
+        },
+        "defect_recall_fail": {
+          "count": 75,
+          "n": 89,
+          "rate": 0.8427,
+          "ci95": [
+            0.7502,
+            0.9112
+          ]
+        },
+        "normal_false_alarm_non_pass": {
+          "count": 4,
+          "n": 28,
+          "rate": 0.1429,
+          "ci95": [
+            0.0403,
+            0.3267
+          ]
+        },
+        "normal_false_alarm_fail": {
+          "count": 1,
+          "n": 28,
+          "rate": 0.0357,
+          "ci95": [
+            0.0009,
+            0.1835
+          ]
+        }
+      },
+      "latency": {
+        "cuda_evaluation_ms": {
+          "median": 13.4,
+          "p95": 14.08
+        },
+        "cpu_station_ms": {
+          "median": 119.51,
+          "p95": 123.66,
+          "p99": 125.73,
+          "peak_rss_mb": 886.3,
+          "device": "cpu",
+          "threads": 4
+        }
+      },
+      "evidence": [
+        "reports/tables/evaluation_textile_carpet.json",
+        "reports/tables/anomaly_mvtec.json",
+        "reports/tables/latency_textile_carpet.json"
+      ]
+    },
+    "packaging_bottle": {
+      "domain": "packaging",
+      "source": "mvtec:bottle",
+      "task": "anomaly",
+      "protocol": "MVTec AD official train/test; fit on 80% of train/good, calibrate on a disjoint 20%, report on the official test split.",
+      "calibration": {
+        "path": "configs/calibration/packaging_bottle.json",
+        "rule": "anomaly_only",
+        "alpha_fail": 0.05,
+        "alpha_review": 0.1,
+        "sample_sizes": {
+          "anomaly_cal": 42
+        }
+      },
+      "model_metrics": {
+        "architecture": "PatchCore, ResNet-18 layer2 image bank + layer3 localization bank",
+        "input_size": 448,
+        "bank_size": 4000,
+        "image_auroc": 0.9984,
+        "pixel_auroc": 0.9838,
+        "pixel_ap": 0.7373,
+        "au_pro": 0.9102,
+        "weights_sha256": "51e5cb9319285c7ec1fb68d62efc68dc04955dddbeba376aee59e3cd3e1a933f"
+      },
+      "operating_point": {
+        "images": 83,
+        "defect_images": 63,
+        "normal_images": 20,
+        "verdict_counts": {
+          "PASS": 19,
+          "REVIEW": 0,
+          "FAIL": 64
+        },
+        "qc_review_count": 0,
+        "review_rate": 0.0,
+        "confusion": {
+          "non_pass": {
+            "detected": 63,
+            "missed": 0,
+            "false_alarms": 1,
+            "true_negatives": 19
+          },
+          "fail": {
+            "detected": 63,
+            "missed": 0,
+            "false_alarms": 1,
+            "true_negatives": 19
+          }
+        },
+        "defect_recall_non_pass": {
+          "count": 63,
+          "n": 63,
+          "rate": 1.0,
+          "ci95": [
+            0.9431,
+            1.0
+          ]
+        },
+        "defect_recall_fail": {
+          "count": 63,
+          "n": 63,
+          "rate": 1.0,
+          "ci95": [
+            0.9431,
+            1.0
+          ]
+        },
+        "normal_false_alarm_non_pass": {
+          "count": 1,
+          "n": 20,
+          "rate": 0.05,
+          "ci95": [
+            0.0013,
+            0.2487
+          ]
+        },
+        "normal_false_alarm_fail": {
+          "count": 1,
+          "n": 20,
+          "rate": 0.05,
+          "ci95": [
+            0.0013,
+            0.2487
+          ]
+        }
+      },
+      "latency": {
+        "cuda_evaluation_ms": {
+          "median": 12.77,
+          "p95": 13.25
+        },
+        "cpu_station_ms": {
+          "median": 102.25,
+          "p95": 104.46,
+          "p99": 108.69,
+          "peak_rss_mb": 883.5,
+          "device": "cpu",
+          "threads": 4
+        }
+      },
+      "evidence": [
+        "reports/tables/evaluation_packaging_bottle.json",
+        "reports/tables/anomaly_mvtec.json",
+        "reports/tables/latency_packaging_bottle.json"
+      ]
+    },
+    "pharma_capsule": {
+      "domain": "pharmaceutical",
+      "source": "mvtec:capsule",
+      "task": "anomaly",
+      "protocol": "MVTec AD official train/test; fit on 80% of train/good, calibrate on a disjoint 20%, report on the official test split.",
+      "calibration": {
+        "path": "configs/calibration/pharma_capsule.json",
+        "rule": "anomaly_only",
+        "alpha_fail": 0.05,
+        "alpha_review": 0.1,
+        "sample_sizes": {
+          "anomaly_cal": 44
+        }
+      },
+      "model_metrics": {
+        "architecture": "PatchCore, ResNet-18 layer2 image bank + layer3 localization bank",
+        "input_size": 448,
+        "bank_size": 4000,
+        "image_auroc": 0.9705,
+        "pixel_auroc": 0.9844,
+        "pixel_ap": 0.3999,
+        "au_pro": 0.879,
+        "weights_sha256": "959f61c09939c7fe0e8569a6b7e28063e69c79320f3d1994e1bb40f44bc33ca3"
+      },
+      "operating_point": {
+        "images": 132,
+        "defect_images": 109,
+        "normal_images": 23,
+        "verdict_counts": {
+          "PASS": 41,
+          "REVIEW": 17,
+          "FAIL": 74
+        },
+        "qc_review_count": 0,
+        "review_rate": 0.1288,
+        "confusion": {
+          "non_pass": {
+            "detected": 90,
+            "missed": 19,
+            "false_alarms": 1,
+            "true_negatives": 22
+          },
+          "fail": {
+            "detected": 73,
+            "missed": 36,
+            "false_alarms": 1,
+            "true_negatives": 22
+          }
+        },
+        "defect_recall_non_pass": {
+          "count": 90,
+          "n": 109,
+          "rate": 0.8257,
+          "ci95": [
+            0.7413,
+            0.8917
+          ]
+        },
+        "defect_recall_fail": {
+          "count": 73,
+          "n": 109,
+          "rate": 0.6697,
+          "ci95": [
+            0.5731,
+            0.7568
+          ]
+        },
+        "normal_false_alarm_non_pass": {
+          "count": 1,
+          "n": 23,
+          "rate": 0.0435,
+          "ci95": [
+            0.0011,
+            0.2195
+          ]
+        },
+        "normal_false_alarm_fail": {
+          "count": 1,
+          "n": 23,
+          "rate": 0.0435,
+          "ci95": [
+            0.0011,
+            0.2195
+          ]
+        }
+      },
+      "latency": {
+        "cuda_evaluation_ms": {
+          "median": 13.25,
+          "p95": 13.5
+        },
+        "cpu_station_ms": {
+          "median": 112.25,
+          "p95": 117.16,
+          "p99": 123.99,
+          "peak_rss_mb": 886.5,
+          "device": "cpu",
+          "threads": 4
+        }
+      },
+      "evidence": [
+        "reports/tables/evaluation_pharma_capsule.json",
+        "reports/tables/anomaly_mvtec.json",
+        "reports/tables/latency_pharma_capsule.json"
+      ]
+    },
+    "automotive_metal_nut": {
+      "domain": "automotive",
+      "source": "mvtec:metal_nut",
+      "task": "anomaly",
+      "protocol": "MVTec AD official train/test; fit on 80% of train/good, calibrate on a disjoint 20%, report on the official test split.",
+      "calibration": {
+        "path": "configs/calibration/automotive_metal_nut.json",
+        "rule": "anomaly_only",
+        "alpha_fail": 0.05,
+        "alpha_review": 0.1,
+        "sample_sizes": {
+          "anomaly_cal": 44
+        }
+      },
+      "model_metrics": {
+        "architecture": "PatchCore, ResNet-18 layer2 image bank + layer3 localization bank",
+        "input_size": 448,
+        "bank_size": 4000,
+        "image_auroc": 0.9858,
+        "pixel_auroc": 0.963,
+        "pixel_ap": 0.7475,
+        "au_pro": 0.8863,
+        "weights_sha256": "13e2a73b34208a8ab73dc4925c86ee381f6a97ac8594f473e2d56928950ab121"
+      },
+      "operating_point": {
+        "images": 115,
+        "defect_images": 93,
+        "normal_images": 22,
+        "verdict_counts": {
+          "PASS": 25,
+          "REVIEW": 0,
+          "FAIL": 90
+        },
+        "qc_review_count": 0,
+        "review_rate": 0.0,
+        "confusion": {
+          "non_pass": {
+            "detected": 89,
+            "missed": 4,
+            "false_alarms": 1,
+            "true_negatives": 21
+          },
+          "fail": {
+            "detected": 89,
+            "missed": 4,
+            "false_alarms": 1,
+            "true_negatives": 21
+          }
+        },
+        "defect_recall_non_pass": {
+          "count": 89,
+          "n": 93,
+          "rate": 0.957,
+          "ci95": [
+            0.8935,
+            0.9882
+          ]
+        },
+        "defect_recall_fail": {
+          "count": 89,
+          "n": 93,
+          "rate": 0.957,
+          "ci95": [
+            0.8935,
+            0.9882
+          ]
+        },
+        "normal_false_alarm_non_pass": {
+          "count": 1,
+          "n": 22,
+          "rate": 0.0455,
+          "ci95": [
+            0.0012,
+            0.2284
+          ]
+        },
+        "normal_false_alarm_fail": {
+          "count": 1,
+          "n": 22,
+          "rate": 0.0455,
+          "ci95": [
+            0.0012,
+            0.2284
+          ]
+        }
+      },
+      "latency": {
+        "cuda_evaluation_ms": {
+          "median": 11.93,
+          "p95": 12.43
+        },
+        "cpu_station_ms": {
+          "median": 102.81,
+          "p95": 106.78,
+          "p99": 112.96,
+          "peak_rss_mb": 877.3,
+          "device": "cpu",
+          "threads": 4
+        }
+      },
+      "evidence": [
+        "reports/tables/evaluation_automotive_metal_nut.json",
+        "reports/tables/anomaly_mvtec.json",
+        "reports/tables/latency_automotive_metal_nut.json"
+      ]
+    },
+    "electronics_transistor": {
+      "domain": "electronics",
+      "source": "mvtec:transistor",
+      "task": "anomaly",
+      "protocol": "MVTec AD official train/test; fit on 80% of train/good, calibrate on a disjoint 20%, report on the official test split.",
+      "calibration": {
+        "path": "configs/calibration/electronics_transistor.json",
+        "rule": "anomaly_only",
+        "alpha_fail": 0.05,
+        "alpha_review": 0.1,
+        "sample_sizes": {
+          "anomaly_cal": 43
+        }
+      },
+      "model_metrics": {
+        "architecture": "PatchCore, ResNet-18 layer2 image bank + layer3 localization bank",
+        "input_size": 448,
+        "bank_size": 4000,
+        "image_auroc": 0.925,
+        "pixel_auroc": 0.8487,
+        "pixel_ap": 0.5026,
+        "au_pro": 0.7157,
+        "weights_sha256": "8b3add658582937e64a1fe842e4dd2cde26ae938be6e74c757495d776d2ff517"
+      },
+      "operating_point": {
+        "images": 100,
+        "defect_images": 40,
+        "normal_images": 60,
+        "verdict_counts": {
+          "PASS": 61,
+          "REVIEW": 1,
+          "FAIL": 38
+        },
+        "qc_review_count": 0,
+        "review_rate": 0.01,
+        "confusion": {
+          "non_pass": {
+            "detected": 30,
+            "missed": 10,
+            "false_alarms": 9,
+            "true_negatives": 51
+          },
+          "fail": {
+            "detected": 30,
+            "missed": 10,
+            "false_alarms": 8,
+            "true_negatives": 52
+          }
+        },
+        "defect_recall_non_pass": {
+          "count": 30,
+          "n": 40,
+          "rate": 0.75,
+          "ci95": [
+            0.588,
+            0.8731
+          ]
+        },
+        "defect_recall_fail": {
+          "count": 30,
+          "n": 40,
+          "rate": 0.75,
+          "ci95": [
+            0.588,
+            0.8731
+          ]
+        },
+        "normal_false_alarm_non_pass": {
+          "count": 9,
+          "n": 60,
+          "rate": 0.15,
+          "ci95": [
+            0.071,
+            0.2657
+          ]
+        },
+        "normal_false_alarm_fail": {
+          "count": 8,
+          "n": 60,
+          "rate": 0.1333,
+          "ci95": [
+            0.0594,
+            0.2459
+          ]
+        }
+      },
+      "latency": {
+        "cuda_evaluation_ms": {
+          "median": 13.41,
+          "p95": 13.76
+        },
+        "cpu_station_ms": {
+          "median": 112.81,
+          "p95": 118.84,
+          "p99": 123.41,
+          "peak_rss_mb": 885.8,
+          "device": "cpu",
+          "threads": 4
+        }
+      },
+      "evidence": [
+        "reports/tables/evaluation_electronics_transistor.json",
+        "reports/tables/anomaly_mvtec.json",
+        "reports/tables/latency_electronics_transistor.json"
+      ]
+    }
+  },
+  "ablations": {
+    "anomaly_layer_budget": {
+      "source": "mvtec:carpet",
+      "arms": [
+        {
+          "arm": "layer2-only",
+          "image_layer": "layer2",
+          "pixel_layer": "layer2",
+          "bank_size": 4000,
+          "image_auroc": 0.9827,
+          "pixel_auroc": 0.9661,
+          "au_pro": 0.8865
+        },
+        {
+          "arm": "layer3-only",
+          "image_layer": "layer3",
+          "pixel_layer": "layer3",
+          "bank_size": 4000,
+          "image_auroc": 0.9402,
+          "pixel_auroc": 0.9874,
+          "au_pro": 0.9098
+        },
+        {
+          "arm": "dual-layer",
+          "image_layer": "layer2",
+          "pixel_layer": "layer3",
+          "bank_size": 4000,
+          "image_auroc": 0.9827,
+          "pixel_auroc": 0.9864,
+          "au_pro": 0.907
+        }
+      ]
+    },
+    "commutator_channel": {
+      "profile_id": "commutator",
+      "fold": 0,
+      "alpha_fail": 0.05,
+      "arms": [
+        {
+          "arm": "segmentation-only",
+          "threshold": 0.9776520729064941,
+          "recall": 1.0,
+          "false_alarm_rate": 0.0171
+        },
+        {
+          "arm": "anomaly-only",
+          "threshold": 0.7276566624641418,
+          "recall": 0.0556,
+          "false_alarm_rate": 0.0085
+        },
+        {
+          "arm": "dual",
+          "recall": 1.0,
+          "false_alarm_rate": 0.0256
+        }
+      ]
+    },
+    "calibration_vs_fixed_threshold": {
+      "arms": [
+        {
+          "profile_id": "textile_carpet",
+          "channel": "anomaly",
+          "fixed_0.5": {
+            "threshold": 0.5,
+            "recall": 0.9326,
+            "false_alarm_rate": 0.0714
+          },
+          "calibrated": {
+            "threshold": 0.529939,
+            "recall": 0.8427,
+            "false_alarm_rate": 0.0357
+          }
+        },
+        {
+          "profile_id": "commutator",
+          "channel": "known",
+          "fixed_0.5": {
+            "threshold": 0.5,
+            "recall": 1.0,
+            "false_alarm_rate": 0.1026
+          },
+          "calibrated": {
+            "threshold": 0.977652,
+            "recall": 1.0,
+            "false_alarm_rate": 0.0171
+          }
+        }
+      ]
+    },
+    "segmenter_protocol": {
+      "source": "kolektor-sdd",
+      "protocol": "Controlled fold-0 and three-fold segmenter preprocessing/split experiments. All metrics use the official test split at 512x1408. The portrait-current arm is selected because its deployed fold-0 operating point is better; the nested and fixed-budget arms are retained as negative protocol results. The shared validation/calibration split remains a disclosed limitation.",
+      "arms": [
+        {
+          "arm": "landscape-current",
+          "split": "28 train / 5 validation",
+          "input_size": [
+            1024,
+            384
+          ],
+          "metric_size": [
+            512,
+            1408
+          ],
+          "folds": [
+            {
+              "images": 135,
+              "defect_images": 18,
+              "image_auroc": 0.9957,
+              "pixel_auroc": 0.9444,
+              "pixel_ap": 0.712,
+              "au_pro": 0.875,
+              "best_f1": 0.973,
+              "best_precision": 0.9474,
+              "best_recall": 1.0,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 0,
+              "input_size": [
+                1024,
+                384
+              ],
+              "weights": "/tmp/veriqc_experiments/landscape_current/fold0_unet.pt",
+              "weights_sha256": "ce47b3e03511425c810c4ad12c42d3ba51fe42270714f450f4d3052e34678c81"
+            },
+            {
+              "images": 136,
+              "defect_images": 18,
+              "image_auroc": 0.9981,
+              "pixel_auroc": 0.9511,
+              "pixel_ap": 0.6992,
+              "au_pro": 0.8171,
+              "best_f1": 0.9474,
+              "best_precision": 0.9,
+              "best_recall": 1.0,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 1,
+              "input_size": [
+                1024,
+                384
+              ],
+              "weights": "/tmp/veriqc_experiments/landscape_current/fold1_unet.pt",
+              "weights_sha256": "208a03802ec55224940e2c6da6f6d7b8069435039f40b92fd55fa824b36dda10"
+            },
+            {
+              "images": 128,
+              "defect_images": 16,
+              "image_auroc": 0.9994,
+              "pixel_auroc": 0.9644,
+              "pixel_ap": 0.767,
+              "au_pro": 0.8608,
+              "best_f1": 0.9697,
+              "best_precision": 0.9412,
+              "best_recall": 1.0,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 2,
+              "input_size": [
+                1024,
+                384
+              ],
+              "weights": "/tmp/veriqc_experiments/landscape_current/fold2_unet.pt",
+              "weights_sha256": "58661d8b3b86de081e11d2e1a9b21591de6fb3b98bc8d00b14b9e20cc9212746"
+            }
+          ],
+          "mean": {
+            "image_auroc": 0.9977,
+            "pixel_auroc": 0.9533,
+            "pixel_ap": 0.7261,
+            "au_pro": 0.851,
+            "best_f1": 0.9634
+          },
+          "note": "Resampled to 1024x384 landscape; validation also supplies calibration."
+        },
+        {
+          "arm": "portrait-current",
+          "split": "28 train / 5 validation",
+          "input_size": [
+            384,
+            1024
+          ],
+          "metric_size": [
+            512,
+            1408
+          ],
+          "folds": [
+            {
+              "images": 135,
+              "defect_images": 18,
+              "image_auroc": 1.0,
+              "pixel_auroc": 0.95,
+              "pixel_ap": 0.8048,
+              "au_pro": 0.8879,
+              "best_f1": 1.0,
+              "best_precision": 1.0,
+              "best_recall": 1.0,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 0,
+              "input_size": [
+                384,
+                1024
+              ],
+              "weights": "/tmp/veriqc_experiments/portrait_current/fold0_unet.pt",
+              "weights_sha256": "9b4fcd97020fc8c271ebecff86a4a07a73da92eb807a81d26be9541cf26193fc"
+            },
+            {
+              "images": 136,
+              "defect_images": 18,
+              "image_auroc": 0.9991,
+              "pixel_auroc": 0.9907,
+              "pixel_ap": 0.7968,
+              "au_pro": 0.9293,
+              "best_f1": 0.973,
+              "best_precision": 0.9474,
+              "best_recall": 1.0,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 1,
+              "input_size": [
+                384,
+                1024
+              ],
+              "weights": "/tmp/veriqc_experiments/portrait_current/fold1_unet.pt",
+              "weights_sha256": "87ff30d9a7cf1f5ca36c20b39989fe214b35f52b8e0c2c18f4ea83666db58c70"
+            },
+            {
+              "images": 128,
+              "defect_images": 16,
+              "image_auroc": 0.9459,
+              "pixel_auroc": 0.917,
+              "pixel_ap": 0.7423,
+              "au_pro": 0.7545,
+              "best_f1": 0.9375,
+              "best_precision": 0.9375,
+              "best_recall": 0.9375,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 2,
+              "input_size": [
+                384,
+                1024
+              ],
+              "weights": "/tmp/veriqc_experiments/portrait_current/fold2_unet.pt",
+              "weights_sha256": "bc46a35512f35599c6ae440dbdb60a8623f79eafc7e11c29e1570175bff6f1ea"
+            }
+          ],
+          "mean": {
+            "image_auroc": 0.9817,
+            "pixel_auroc": 0.9526,
+            "pixel_ap": 0.7813,
+            "au_pro": 0.8572,
+            "best_f1": 0.9702
+          },
+          "note": "Resampled to 384x1024 portrait; validation also supplies calibration. Selected."
+        },
+        {
+          "arm": "landscape-nested",
+          "split": "23 train / 5 validation / 5 calibration",
+          "input_size": [
+            1024,
+            384
+          ],
+          "metric_size": [
+            512,
+            1408
+          ],
+          "folds": [
+            {
+              "images": 135,
+              "defect_images": 18,
+              "image_auroc": 0.9981,
+              "pixel_auroc": 0.9591,
+              "pixel_ap": 0.6897,
+              "au_pro": 0.8902,
+              "best_f1": 0.973,
+              "best_precision": 0.9474,
+              "best_recall": 1.0,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 0,
+              "input_size": [
+                1024,
+                384
+              ],
+              "weights": "/tmp/veriqc_experiments/landscape_nested/fold0_unet.pt",
+              "weights_sha256": "10d6ea1e37ed368187d19bef962e25f194d4912f4451d792511d5cefb9786638"
+            },
+            {
+              "images": 136,
+              "defect_images": 18,
+              "image_auroc": 0.9934,
+              "pixel_auroc": 0.8991,
+              "pixel_ap": 0.6182,
+              "au_pro": 0.7599,
+              "best_f1": 0.9143,
+              "best_precision": 0.9412,
+              "best_recall": 0.8889,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 1,
+              "input_size": [
+                1024,
+                384
+              ],
+              "weights": "/tmp/veriqc_experiments/landscape_nested/fold1_unet.pt",
+              "weights_sha256": "7d80feaea1e7d0afd8dcd3218a4837bda8ddcc53cbae23520a711ac3238ae4f4"
+            },
+            {
+              "images": 128,
+              "defect_images": 16,
+              "image_auroc": 0.9989,
+              "pixel_auroc": 0.942,
+              "pixel_ap": 0.6543,
+              "au_pro": 0.7711,
+              "best_f1": 0.9677,
+              "best_precision": 1.0,
+              "best_recall": 0.9375,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 2,
+              "input_size": [
+                1024,
+                384
+              ],
+              "weights": "/tmp/veriqc_experiments/landscape_nested/fold2_unet.pt",
+              "weights_sha256": "ec763e3938df762789287d4683b785fc159453a1db653e1bf652d5449df4d7a8"
+            }
+          ],
+          "mean": {
+            "image_auroc": 0.9968,
+            "pixel_auroc": 0.9334,
+            "pixel_ap": 0.6541,
+            "au_pro": 0.8071,
+            "best_f1": 0.9517
+          },
+          "note": "Nested physical-part split; calibration is disjoint from early stopping."
+        },
+        {
+          "arm": "portrait-fixed",
+          "split": "28 train / 0 validation / 5 calibration",
+          "input_size": [
+            384,
+            1024
+          ],
+          "metric_size": [
+            512,
+            1408
+          ],
+          "folds": [
+            {
+              "images": 136,
+              "defect_images": 18,
+              "image_auroc": 1.0,
+              "pixel_auroc": 0.9283,
+              "pixel_ap": 0.5722,
+              "au_pro": 0.7759,
+              "best_f1": 1.0,
+              "best_precision": 1.0,
+              "best_recall": 1.0,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 1,
+              "input_size": [
+                384,
+                1024
+              ],
+              "weights": "/tmp/veriqc_experiments/portrait_fixed/fold1_unet.pt",
+              "weights_sha256": "843cfa7d775ccec75702a5fd358752066bba5d8944b2bf9337253b74916c0b3f"
+            },
+            {
+              "images": 128,
+              "defect_images": 16,
+              "image_auroc": 0.9989,
+              "pixel_auroc": 0.9183,
+              "pixel_ap": 0.7615,
+              "au_pro": 0.8633,
+              "best_f1": 0.9697,
+              "best_precision": 0.9412,
+              "best_recall": 1.0,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 2,
+              "input_size": [
+                384,
+                1024
+              ],
+              "weights": "/tmp/veriqc_experiments/portrait_fixed/fold2_unet.pt",
+              "weights_sha256": "855d3574b654e317d9bcecdf83774797b5aa9dbf184729411073ef0ad8575f55"
+            }
+          ],
+          "mean": {
+            "image_auroc": 0.9994,
+            "pixel_auroc": 0.9233,
+            "pixel_ap": 0.6668,
+            "au_pro": 0.8196,
+            "best_f1": 0.9849
+          },
+          "note": "Fixed 30-epoch budget; calibration is disjoint from selection. Folds 1-2 only."
+        },
+        {
+          "arm": "portrait-nested",
+          "split": "23 train / 5 validation / 5 calibration",
+          "input_size": [
+            384,
+            1024
+          ],
+          "metric_size": [
+            512,
+            1408
+          ],
+          "folds": [
+            {
+              "images": 135,
+              "defect_images": 18,
+              "image_auroc": 1.0,
+              "pixel_auroc": 0.9698,
+              "pixel_ap": 0.8089,
+              "au_pro": 0.9068,
+              "best_f1": 1.0,
+              "best_precision": 1.0,
+              "best_recall": 1.0,
+              "metric_size": [
+                512,
+                1408
+              ],
+              "fold": 0,
+              "input_size": [
+                384,
+                1024
+              ],
+              "weights": "/tmp/veriqc_experiments/portrait_nested/fold0_unet.pt",
+              "weights_sha256": "ffc6050fc86e47fb8b713cf9b1833d686e1ca73cbc6d1ec3c5762286fc8776ee"
+            }
+          ],
+          "mean": {
+            "image_auroc": 1.0,
+            "pixel_auroc": 0.9698,
+            "pixel_ap": 0.8089,
+            "au_pro": 0.9068,
+            "best_f1": 1.0
+          },
+          "note": "Fold 0 only; the nested split reduced cross-fold robustness and was not carried forward."
+        }
+      ],
+      "fold0_operating_point": [
+        {
+          "arm": "landscape-current",
+          "recall_non_pass": 1.0,
+          "recall_fail": 1.0,
+          "false_alarm_non_pass": 0.094,
+          "false_alarm_fail": 0.0342,
+          "review_rate": 0.0519,
+          "fail_threshold": 0.9217,
+          "review_threshold": 0.8502
+        },
+        {
+          "arm": "portrait-current",
+          "recall_non_pass": 1.0,
+          "recall_fail": 1.0,
+          "false_alarm_non_pass": 0.0256,
+          "false_alarm_fail": 0.0171,
+          "review_rate": 0.0074,
+          "fail_threshold": 0.977652,
+          "review_threshold": 0.794684
+        }
+      ]
+    },
+    "anomaly_kolektor": {
+      "reports": [
+        {
+          "profile_id": "commutator",
+          "source": "kolektor-sdd",
+          "fold": 0,
+          "fit_images": 195,
+          "cal_images": 35,
+          "weights": "models/profiles/commutator/patchcore.pt",
+          "weights_sha256": "0a4fb40b88ae3041055ac4abdf992720fb46ef5b3512000049386b867e93dee3",
+          "bank_size": 4000,
+          "test": {
+            "images": 135,
+            "defect_images": 18,
+            "image_auroc": 0.9492,
+            "pixel_auroc": 0.902,
+            "pixel_ap": 0.0765,
+            "au_pro": 0.7134,
+            "score_ms_median": 12.68
+          },
+          "cal_scores": [
+            0.5072341561317444,
+            0.47517454624176025,
+            0.4771633446216583,
+            0.6166180968284607,
+            0.47650864720344543,
+            0.49299803376197815,
+            0.6637627482414246,
+            0.49675917625427246,
+            0.48952722549438477,
+            0.4725138545036316,
+            0.48207414150238037,
+            0.4958662688732147,
+            0.5255818367004395,
+            0.46075281500816345,
+            0.551134467124939,
+            0.7276566624641418,
+            0.4959324896335602,
+            0.5635319352149963,
+            0.5222846269607544,
+            0.5191159844398499,
+            0.5176610946655273,
+            0.45641636848449707,
+            0.4534037709236145,
+            0.472908079624176,
+            0.4862247407436371,
+            0.4687589108943939,
+            0.5720489621162415,
+            0.5057258605957031,
+            0.5556175112724304,
+            0.4623429775238037,
+            0.46553027629852295,
+            0.47260600328445435,
+            0.47793394327163696,
+            0.4601307809352875,
+            0.47502562403678894
+          ],
+          "fit_seconds": 68.3
+        },
+        {
+          "profile_id": "commutator",
+          "source": "kolektor-sdd",
+          "fold": 1,
+          "fit_images": 195,
+          "cal_images": 34,
+          "weights": "models/profiles/commutator/patchcore_fold1.pt",
+          "weights_sha256": "e0511a73022e04d0c7d4e999e3fbaf62819d00b03d2f3999ab345b1d7ece8426",
+          "bank_size": 4000,
+          "test": {
+            "images": 136,
+            "defect_images": 18,
+            "image_auroc": 0.8743,
+            "pixel_auroc": 0.8833,
+            "pixel_ap": 0.088,
+            "au_pro": 0.6307,
+            "score_ms_median": 12.1
+          },
+          "cal_scores": [
+            0.5088566541671753,
+            0.47989439964294434,
+            0.4797701835632324,
+            0.4878018796443939,
+            0.4806349575519562,
+            0.49271172285079956,
+            0.47873562574386597,
+            0.49845296144485474,
+            0.49329131841659546,
+            0.4847545921802521,
+            0.5054678916931152,
+            0.47535666823387146,
+            0.47470682859420776,
+            0.4706824719905853,
+            0.4869343042373657,
+            0.49266380071640015,
+            0.4339931905269623,
+            0.522621750831604,
+            0.49865177273750305,
+            0.46182817220687866,
+            0.47013232111930847,
+            0.524876058101654,
+            0.522235631942749,
+            0.48295333981513977,
+            0.46266433596611023,
+            0.4614126682281494,
+            0.5228753685951233,
+            0.47013232111930847,
+            0.524876058101654,
+            0.522235631942749,
+            0.48295333981513977,
+            0.46266433596611023,
+            0.4614126682281494,
+            0.5228753685951233
+          ],
+          "fit_seconds": 59.5
+        },
+        {
+          "profile_id": "commutator",
+          "source": "kolektor-sdd",
+          "fold": 2,
+          "fit_images": 201,
+          "cal_images": 34,
+          "weights": "models/profiles/commutator/patchcore_fold2.pt",
+          "weights_sha256": "194035d7e72996a61d0f45e40dd9a355175150db59499e19ffdcf4a0938de883",
+          "bank_size": 4000,
+          "test": {
+            "images": 128,
+            "defect_images": 16,
+            "image_auroc": 0.8878,
+            "pixel_auroc": 0.8801,
+            "pixel_ap": 0.1,
+            "au_pro": 0.6613,
+            "score_ms_median": 12.97
+          },
+          "cal_scores": [
+            0.47468772530555725,
+            0.48645496368408203,
+            0.5209015011787415,
+            0.4969346821308136,
+            0.5806320309638977,
+            0.5146521329879761,
+            0.5109302997589111,
+            0.4710126221179962,
+            0.4697270691394806,
+            0.4846844971179962,
+            0.48622921109199524,
+            0.48560455441474915,
+            0.4791775941848755,
+            0.4908362030982971,
+            0.5414470434188843,
+            0.49183279275894165,
+            0.4878535866737366,
+            0.513045608997345,
+            0.5556648373603821,
+            0.4983598589897156,
+            0.4999818801879883,
+            0.464396208524704,
+            0.5056783556938171,
+            0.4904303252696991,
+            0.4828619062900543,
+            0.47270819544792175,
+            0.4727938175201416,
+            0.5013775825500488,
+            0.49861645698547363,
+            0.4963745176792145,
+            0.5126910209655762,
+            0.5267235636711121,
+            0.49513277411460876,
+            0.5012717843055725
+          ],
+          "fit_seconds": 61.5
+        }
+      ]
+    }
+  },
+  "advisory": {
+    "cases": 37,
+    "accepted": 37,
+    "acceptance_rate": 1.0,
+    "rejected": 0,
+    "rejected_format": 0,
+    "accepted_grounding_violations": 0,
+    "rejection_reasons": {},
+    "latency_ms_median": 6309.5,
+    "latency_ms_median_accepted": 6309.5,
+    "latency_ms_min": 5404.7,
+    "latency_ms_max": 10948.2,
+    "ttft_ms_median": 1902.0,
+    "ttft_ms_median_accepted": 1902.0,
+    "ttft_ms_min": 1639.0,
+    "ttft_ms_max": 2620.0,
+    "tokens_per_second_median": 5.63,
+    "generated_tokens_min": 20,
+    "generated_tokens_max": 47,
+    "resident_mb_median": 2765.8,
+    "resident_mb_max": 2765.8,
+    "human_usefulness": "not measured; blind sheet prepared, awaiting independent rater",
+    "model_sha256": "3fdc3db98e7b0f33c480c9ea92cdc48f68c09e0eb809ba31ae846c50bab513b4",
+    "tokenizer_sha256": "6b9e4e7fb171f92fd137b777cc2714bf87d11576700a1dcd7a399e7bbe39537b",
+    "wall_seconds": 263.1,
+    "tokenizer_files": {
+      "config.json": "dfb67fd8afe73a1c75245824ef9d64a6ba8983025447e3bf76aa1ea57ee46152",
+      "special_tokens_map.json": "94e708c3f5e64acf85bbe5ad01467a1248faadb73e83b41793087ecced586e8f",
+      "tokenizer.json": "6b9e4e7fb171f92fd137b777cc2714bf87d11576700a1dcd7a399e7bbe39537b",
+      "tokenizer_config.json": "9ddd255c19fe319c8d4e891163540382e9fbda99f394674f2a929efc47d57458"
+    },
+    "tokenizer_bundle_sha256": "eda224f03d112cb7fd5f24cd880af908c8da140d2a2c4895d3264700e54cffa2",
+    "evidence": "reports/tables/advisory_audit.json"
+  },
+  "advisory_usefulness": {
+    "status": "not_measured",
+    "instrument": "reports/tables/advisory_usefulness_sheet.csv",
+    "note": "Blind paired rating sheet prepared; requires an independent human rater."
+  },
+  "pi_benchmark": {
+    "vision": {
+      "schema": "veriqc.pi-benchmark/1",
+      "mode": "vision",
+      "profile": "commutator",
+      "device": "cpu",
+      "threads": 4,
+      "images": 60,
+      "warmup_images": 3,
+      "total_ms": {
+        "median": 1333.54,
+        "p95": 1349.79,
+        "p99": 1384.22,
+        "min": 1320.39,
+        "max": 1411.22
+      },
+      "wall_ms": {
+        "median": 1333.59,
+        "p95": 1349.84,
+        "p99": 1384.27,
+        "min": 1320.44,
+        "max": 1411.27
+      },
+      "throughput_images_per_second": 0.748,
+      "elapsed_s": 80.2,
+      "monitor": {
+        "temperature_c": {
+          "start": 47.4,
+          "median": 55.6,
+          "max": 59.0,
+          "end": 57.9,
+          "samples": 79
+        },
+        "throttle": {
+          "before": {
+            "raw": "0x0",
+            "flags": []
+          },
+          "after": {
+            "raw": "0x0",
+            "flags": []
+          },
+          "occurred_flags": []
+        },
+        "rss_mb": {
+          "parent_max": 822.6,
+          "tree_max": 822.6,
+          "samples": 79
+        }
+      },
+      "environment": {
+        "hostname": "Rpi5",
+        "model": "Raspberry Pi 5 Model B Rev 1.1",
+        "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+        "machine": "aarch64",
+        "python": "3.13.5",
+        "cpu_governor": "ondemand",
+        "packages": {
+          "torch": "2.15.0+cpu",
+          "torchvision": "0.29.2+cpu",
+          "ultralytics": "8.4.216",
+          "numpy": "2.5.4",
+          "executorch": "1.6.0",
+          "transformers": "5.24.0",
+          "opencv": "5.1.0.95"
+        },
+        "memory_total_mb": 8058.3,
+        "measured_at": "2026-11-22T23:47:56"
+      },
+      "evidence": "reports/tables/pi_vision.json"
+    },
+    "advisory": {
+      "schema": "veriqc.pi-benchmark/1",
+      "mode": "advisory",
+      "device": "cpu",
+      "cases": 37,
+      "accepted": 37,
+      "acceptance_rate": 1.0,
+      "case_build_seconds": 31.2,
+      "model_load_seconds": 0.9,
+      "latency_ms": {
+        "median": 25478.6,
+        "p95": 44654.78,
+        "p99": 44763.26,
+        "min": 21770.1,
+        "max": 44791.7
+      },
+      "ttft_ms": {
+        "median": 7053.0,
+        "p95": 9854.2,
+        "p99": 9879.64,
+        "min": 6885.0,
+        "max": 9880.0
+      },
+      "tokens_per_second_median": 1.35,
+      "resident_mb_max": 2367.3,
+      "monitor": {
+        "temperature_c": {
+          "start": 51.8,
+          "median": 50.1,
+          "max": 56.8,
+          "end": 46.9,
+          "samples": 1063
+        },
+        "throttle": {
+          "before": {
+            "raw": "0x0",
+            "flags": []
+          },
+          "after": {
+            "raw": "0x0",
+            "flags": []
+          },
+          "occurred_flags": []
+        },
+        "rss_mb": {
+          "parent_max": 638.0,
+          "tree_max": 2826.9,
+          "samples": 1063
+        }
+      },
+      "startup_note": "model_load_seconds is the in-process runner constructor; full station startup is recorded in pi_resident_steady.json (10.8 s) and pi_station_smoke.json (17.0 s to HTTP health).",
+      "environment": {
+        "hostname": "Rpi5",
+        "model": "Raspberry Pi 5 Model B Rev 1.1",
+        "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+        "machine": "aarch64",
+        "python": "3.13.5",
+        "cpu_governor": "ondemand",
+        "packages": {
+          "torch": "2.15.0+cpu",
+          "torchvision": "0.29.2+cpu",
+          "ultralytics": "8.4.216",
+          "numpy": "2.5.4",
+          "executorch": "1.6.0",
+          "transformers": "5.24.0",
+          "opencv": "5.1.0.95"
+        },
+        "memory_total_mb": 8058.3,
+        "measured_at": "2026-11-22T23:49:40"
+      },
+      "evidence": "reports/tables/pi_advisory.json"
+    },
+    "resident": {
+      "schema": "veriqc.pi-benchmark/1",
+      "mode": "resident",
+      "profile": "commutator",
+      "device": "cpu",
+      "startup_seconds": 11.6,
+      "inspections": 96,
+      "arrival_interval_s": 2.0,
+      "submit_seconds": 298.1,
+      "drain_seconds": 120.1,
+      "drained": false,
+      "vision_ms": {
+        "median": 3110.25,
+        "p95": 3207.97,
+        "p99": 3250.4,
+        "min": 1376.95,
+        "max": 3268.16
+      },
+      "wall_ms": {
+        "median": 3162.43,
+        "p95": 3257.62,
+        "p99": 3302.49,
+        "min": 1411.7,
+        "max": 3321.38
+      },
+      "qsize_max_observed": 57,
+      "queue_drops_reported": 0,
+      "stats": {
+        "inspections": 96,
+        "advisories_completed": 71,
+        "advisories_failed": 0,
+        "advisories_dropped": 0,
+        "advisories_timed_out": 61,
+        "advisory_queue_high_water": 57
+      },
+      "queue_remaining_at_end": 24,
+      "audit_chain": {
+        "ok": true,
+        "rows": 167,
+        "first_bad": null,
+        "anchor_ok": true
+      },
+      "monitor": {
+        "temperature_c": {
+          "start": 40.8,
+          "median": 53.5,
+          "max": 59.0,
+          "end": 51.8,
+          "samples": 414
+        },
+        "throttle": {
+          "before": {
+            "raw": "0x0",
+            "flags": []
+          },
+          "after": {
+            "raw": "0x0",
+            "flags": []
+          },
+          "occurred_flags": []
+        },
+        "rss_mb": {
+          "parent_max": 791.3,
+          "tree_max": 3028.8,
+          "samples": 414
+        }
+      },
+      "verdict_counts": {
+        "FAIL": 96
+      },
+      "environment": {
+        "hostname": "Rpi5",
+        "model": "Raspberry Pi 5 Model B Rev 1.1",
+        "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+        "machine": "aarch64",
+        "python": "3.13.5",
+        "cpu_governor": "ondemand",
+        "packages": {
+          "torch": "2.15.0+cpu",
+          "torchvision": "0.29.2+cpu",
+          "ultralytics": "8.4.216",
+          "numpy": "2.5.4",
+          "executorch": "1.6.0",
+          "transformers": "5.24.0",
+          "opencv": "5.1.0.95"
+        },
+        "memory_total_mb": 8058.3,
+        "measured_at": "2026-11-23T00:09:52"
+      },
+      "evidence": "reports/tables/pi_resident.json",
+      "advisory_outcomes": {
+        "events": 72,
+        "paths": {
+          "llm": 10,
+          "template": 62
+        },
+        "accepted": {
+          "true": 10,
+          "false": 62
+        },
+        "violations": {
+          "generation timeout or busy": 62
+        }
+      },
+      "advisory_outcomes_evidence": "reports/tables/pi_resident_outcomes.json"
+    },
+    "resident_steady": {
+      "schema": "veriqc.pi-benchmark/1",
+      "mode": "resident",
+      "profile": "commutator",
+      "device": "cpu",
+      "startup_seconds": 10.8,
+      "inspections": 10,
+      "arrival_interval_s": 45.0,
+      "submit_seconds": 450.0,
+      "drain_seconds": 0.0,
+      "drained": true,
+      "vision_ms": {
+        "median": 1358.03,
+        "p95": 1370.88,
+        "p99": 1375.16,
+        "min": 1329.31,
+        "max": 1376.23
+      },
+      "wall_ms": {
+        "median": 1389.62,
+        "p95": 1404.9,
+        "p99": 1408.4,
+        "min": 1360.44,
+        "max": 1409.27
+      },
+      "qsize_max_observed": 1,
+      "queue_drops_reported": 0,
+      "stats": {
+        "inspections": 10,
+        "advisories_completed": 10,
+        "advisories_failed": 0,
+        "advisories_dropped": 0,
+        "advisories_timed_out": 0,
+        "advisory_queue_high_water": 1
+      },
+      "advisory_outcomes": {
+        "events": 10,
+        "paths": {
+          "llm": 10
+        },
+        "accepted": {
+          "true": 10,
+          "false": 0
+        },
+        "violations": {}
+      },
+      "queue_remaining_at_end": 0,
+      "audit_chain": {
+        "ok": true,
+        "rows": 20,
+        "first_bad": null,
+        "anchor_ok": true
+      },
+      "monitor": {
+        "temperature_c": {
+          "start": 38.6,
+          "median": 46.3,
+          "max": 53.5,
+          "end": 38.0,
+          "samples": 444
+        },
+        "throttle": {
+          "before": {
+            "raw": "0x0",
+            "flags": []
+          },
+          "after": {
+            "raw": "0x0",
+            "flags": []
+          },
+          "occurred_flags": []
+        },
+        "rss_mb": {
+          "parent_max": 823.5,
+          "tree_max": 2999.2,
+          "samples": 444
+        }
+      },
+      "verdict_counts": {
+        "FAIL": 10
+      },
+      "environment": {
+        "hostname": "Rpi5",
+        "model": "Raspberry Pi 5 Model B Rev 1.1",
+        "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+        "machine": "aarch64",
+        "python": "3.13.5",
+        "cpu_governor": "ondemand",
+        "packages": {
+          "torch": "2.15.0+cpu",
+          "torchvision": "0.29.2+cpu",
+          "ultralytics": "8.4.216",
+          "numpy": "2.5.4",
+          "executorch": "1.6.0",
+          "transformers": "5.24.0",
+          "opencv": "5.1.0.95"
+        },
+        "memory_total_mb": 8058.3,
+        "measured_at": "2026-11-23T00:18:16"
+      },
+      "evidence": "reports/tables/pi_resident_steady.json"
+    },
+    "evaluation_commutator_parity": {
+      "verdict_counts_equal": true,
+      "confusion_equal": true,
+      "host_verdict_counts": {
+        "PASS": 114,
+        "REVIEW": 1,
+        "FAIL": 20
+      },
+      "pi_verdict_counts": {
+        "PASS": 114,
+        "REVIEW": 1,
+        "FAIL": 20
+      },
+      "host_known_pixel_ap": 0.8048,
+      "pi_known_pixel_ap": 0.8047,
+      "host_known_pixel_auroc": 0.95,
+      "pi_known_pixel_auroc": 0.95,
+      "host_known_au_pro": 0.8879,
+      "pi_known_au_pro": 0.8879,
+      "host_latency_ms_median": 21.72,
+      "pi_latency_ms_median": 1312.73,
+      "evidence": "reports/tables/pi_evaluation_commutator.json"
+    }
+  },
+  "pi_station_smoke": {
+    "startup_seconds": 17.0,
+    "verdict": "FAIL",
+    "vision_latency_ms": 1337.32,
+    "advisory_status": "accepted",
+    "advisory_accepted": true,
+    "advisory_latency_ms": 27913.6,
+    "overlay_http": 200,
+    "csv_http": 200,
+    "chain_ok": true,
+    "artifact_hashes": [
+      "advisory_model",
+      "advisory_tokenizer",
+      "advisory_tokenizer_bundle",
+      "calibration",
+      "cards",
+      "known_weights",
+      "profile",
+      "severity"
+    ],
+    "evidence": "reports/tables/pi_station_smoke.json"
+  },
+  "artifact_manifests": [
+    "reports/models/advisory.json",
+    "reports/models/export_automotive_metal_nut.json",
+    "reports/models/export_commutator.json",
+    "reports/models/export_electronics_transistor.json",
+    "reports/models/export_packaging_bottle.json",
+    "reports/models/export_pharma_capsule.json",
+    "reports/models/export_steel_surface.json",
+    "reports/models/export_textile_carpet.json"
+  ],
+  "runtime_artifact_manifest": "configs/artifacts.json",
+  "export_parity": {
+    "segmenter_max_abs_logit_difference": 7.927417755126953e-06,
+    "anomaly_max_abs_feature_difference": 4.06801700592041e-06,
+    "detector_max_box_difference_px": 0.0009918212890625,
+    "detector_max_confidence_difference": 1.5497207641601562e-06,
+    "detector_images": 8,
+    "evidence": "reports/tables/export_parity.json",
+    "note": "ONNX Runtime CPUExecutionProvider compared with PyTorch CPU on local inputs; the reference station executes PyTorch."
+  },
+  "not_measured": [
+    "Human advisory usefulness rating",
+    "Hailo NPU execution",
+    "Normal-steel false-alarm rate (no normal NEU-DET population)"
+  ]
+}

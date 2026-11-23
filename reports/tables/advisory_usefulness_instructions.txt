@@ -1,0 +1,13 @@
+VeriQC advisory usefulness rating (independent rater)
+
+1. Open only advisory_usefulness_sheet.csv. Do not open
+   advisory_usefulness_key.csv; it reveals which option is the model.
+2. Each row contains two anonymised advice options (A and B) for the same
+   inspection finding.
+3. Score each option from 1 (not useful / not actionable) to 5 (very useful /
+   directly actionable) in the four score columns.
+4. Set preference to A, B or equal. Set grounding_error to none, minor or
+   major. Comments are optional.
+5. Use one rater_id for all 37 rows and do not skip rows.
+6. Return the completed CSV. The analysis command is:
+   python scripts/analyze_usefulness.py

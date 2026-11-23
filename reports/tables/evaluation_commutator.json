@@ -1,0 +1,41 @@
+{
+  "images": 135,
+  "defect_images": 18,
+  "normal_images": 117,
+  "verdict_counts": {
+    "PASS": 114,
+    "REVIEW": 1,
+    "FAIL": 20
+  },
+  "confusion": {
+    "non_pass": {
+      "detected": 18,
+      "missed": 0,
+      "false_alarms": 3,
+      "true_negatives": 114
+    },
+    "fail": {
+      "detected": 18,
+      "missed": 0,
+      "false_alarms": 2,
+      "true_negatives": 115
+    }
+  },
+  "known_score_auroc": 1.0,
+  "anomaly_score_auroc": null,
+  "detection_rate_non_pass": 1.0,
+  "detection_rate_fail": 1.0,
+  "false_alarm_rate_non_pass": 0.0256,
+  "false_alarm_rate_fail": 0.0171,
+  "review_rate": 0.0074,
+  "qc_review_count": 0,
+  "qc_review_rate": 0.0,
+  "latency_ms_median": 21.72,
+  "latency_ms_p95": 22.48,
+  "known_pixel_auroc": 0.95,
+  "known_pixel_ap": 0.8048,
+  "known_au_pro": 0.8879,
+  "profile_id": "commutator",
+  "device": "cuda",
+  "calibration": "configs/calibration/commutator.json"
+}

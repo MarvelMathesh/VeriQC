@@ -1,0 +1,23 @@
+{
+  "profile_id": "pharma_capsule",
+  "device": "cpu",
+  "threads": 4,
+  "warmup_images": 5,
+  "images": 50,
+  "total_ms": {
+    "median": 112.25,
+    "p95": 117.16,
+    "p99": 123.99,
+    "min": 106.69,
+    "max": 126.85
+  },
+  "peak_rss_mb": 886.5,
+  "artifact_sizes_bytes": {
+    "profile": 508,
+    "calibration": 1206,
+    "severity": 223,
+    "cards": 542,
+    "anomaly_weights": 17324371
+  },
+  "measured_at": "2026-11-22T03:21:41"
+}

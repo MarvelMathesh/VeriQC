@@ -49,6 +49,30 @@ def test_export(tmp_path) -> None:
     assert "inspection_id" in target.read_text()
 
 
+def test_advisory_outcomes_are_counted(tmp_path) -> None:
+    store = AuditStore(tmp_path / "audit.db")
+    store.append(
+        result(),
+        event="advisory",
+        extra={"path": "llm", "accepted": True, "verification": {"violations": []}},
+    )
+    store.append(
+        result("b"),
+        event="advisory",
+        extra={
+            "path": "template",
+            "accepted": False,
+            "verification": {"violations": ["generation timeout or busy"]},
+        },
+    )
+    assert store.verdict_counts() == {}
+    outcomes = store.advisory_outcomes()
+    assert outcomes["events"] == 2
+    assert outcomes["paths"] == {"llm": 1, "template": 1}
+    assert outcomes["accepted"] == {"true": 1, "false": 1}
+    assert outcomes["violations"] == {"generation timeout or busy": 1}
+
+
 def test_anchor_records_head(tmp_path) -> None:
     store = AuditStore(tmp_path / "audit.db")
     store.append(result())

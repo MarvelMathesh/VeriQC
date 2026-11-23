@@ -1,0 +1,23 @@
+{
+  "profile_id": "textile_carpet",
+  "device": "cpu",
+  "threads": 4,
+  "warmup_images": 5,
+  "images": 50,
+  "total_ms": {
+    "median": 119.51,
+    "p95": 123.66,
+    "p99": 125.73,
+    "min": 111.88,
+    "max": 125.9
+  },
+  "peak_rss_mb": 886.3,
+  "artifact_sizes_bytes": {
+    "profile": 508,
+    "calibration": 1419,
+    "severity": 223,
+    "cards": 605,
+    "anomaly_weights": 17324371
+  },
+  "measured_at": "2026-11-22T03:12:10"
+}

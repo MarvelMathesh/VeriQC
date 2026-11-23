@@ -1,0 +1,23 @@
+{
+  "profile_id": "steel_surface",
+  "device": "cpu",
+  "threads": 4,
+  "warmup_images": 5,
+  "images": 50,
+  "total_ms": {
+    "median": 23.49,
+    "p95": 24.52,
+    "p99": 24.76,
+    "min": 21.54,
+    "max": 24.77
+  },
+  "peak_rss_mb": 956.6,
+  "artifact_sizes_bytes": {
+    "profile": 617,
+    "calibration": 506,
+    "severity": 307,
+    "cards": 3433,
+    "known_weights": 5467269
+  },
+  "measured_at": "2026-11-22T03:12:16"
+}

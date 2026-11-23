@@ -1,0 +1,41 @@
+{
+  "images": 83,
+  "defect_images": 63,
+  "normal_images": 20,
+  "verdict_counts": {
+    "PASS": 19,
+    "REVIEW": 0,
+    "FAIL": 64
+  },
+  "confusion": {
+    "non_pass": {
+      "detected": 63,
+      "missed": 0,
+      "false_alarms": 1,
+      "true_negatives": 19
+    },
+    "fail": {
+      "detected": 63,
+      "missed": 0,
+      "false_alarms": 1,
+      "true_negatives": 19
+    }
+  },
+  "known_score_auroc": null,
+  "anomaly_score_auroc": 0.9984,
+  "detection_rate_non_pass": 1.0,
+  "detection_rate_fail": 1.0,
+  "false_alarm_rate_non_pass": 0.05,
+  "false_alarm_rate_fail": 0.05,
+  "review_rate": 0.0,
+  "qc_review_count": 0,
+  "qc_review_rate": 0.0,
+  "latency_ms_median": 12.77,
+  "latency_ms_p95": 13.25,
+  "anomaly_pixel_auroc": 0.9838,
+  "anomaly_pixel_ap": 0.7373,
+  "anomaly_au_pro": 0.9102,
+  "profile_id": "packaging_bottle",
+  "device": "cuda",
+  "calibration": "configs/calibration/packaging_bottle.json"
+}

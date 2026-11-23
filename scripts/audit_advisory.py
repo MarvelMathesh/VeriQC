@@ -163,7 +163,7 @@ def main() -> None:
         "generated_tokens_max": max(generated_tokens) if generated_tokens else None,
         "resident_mb_median": round(statistics.median(resident), 1) if resident else None,
         "resident_mb_max": round(max(resident), 1) if resident else None,
-        "human_usefulness": "not measured; requires independent rating sheet",
+        "human_usefulness": "not measured; blind sheet prepared, awaiting independent rater",
         "model_sha256": sha256_file(pte),
         "tokenizer_sha256": sha256_file(tokenizer / "tokenizer.json"),
         "wall_seconds": round(time.time() - started, 1),

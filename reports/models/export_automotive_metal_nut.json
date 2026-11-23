@@ -1,0 +1,17 @@
+{
+  "profile_id": "automotive_metal_nut",
+  "artifacts": {
+    "anomaly": {
+      "backbone": "models/profiles/automotive_metal_nut/export/anomaly_backbone.onnx",
+      "backbone_sha256": "93596c2fec46a1fe8df9acbe74215e79f523004e905fbb814115dd5288060f73",
+      "banks": "models/profiles/automotive_metal_nut/export/anomaly_banks.npz",
+      "banks_sha256": "d74e658b20800a0b40ccaf910328a8a13852ed798648e0ac0c46effa7e0c47ac",
+      "bank_size": 4000,
+      "external_data": {
+        "path": "models/profiles/automotive_metal_nut/export/anomaly_backbone.onnx.data",
+        "sha256": "4bfc5475f59408c2883a138f1c54f735dcb5c2e0d7531003863b51bf66ff1385",
+        "bytes": 11120896
+      }
+    }
+  }
+}

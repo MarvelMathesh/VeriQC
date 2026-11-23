@@ -1,0 +1,101 @@
+{
+  "schema": "veriqc.pi-benchmark/1",
+  "environment": {
+    "hostname": "Rpi5",
+    "model": "Raspberry Pi 5 Model B Rev 1.1",
+    "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+    "machine": "aarch64",
+    "python": "3.13.5",
+    "cpu_governor": "ondemand",
+    "packages": {
+      "torch": "2.15.0+cpu",
+      "torchvision": "0.29.2+cpu",
+      "ultralytics": "8.4.216",
+      "numpy": "2.5.4",
+      "executorch": "1.6.0",
+      "transformers": "5.24.0",
+      "opencv": "5.1.0.95"
+    },
+    "memory_total_mb": 8058.3,
+    "measured_at": "2026-11-23T00:18:16"
+  },
+  "mode": "resident",
+  "profile": "commutator",
+  "device": "cpu",
+  "startup_seconds": 10.8,
+  "inspections": 10,
+  "arrival_interval_s": 45.0,
+  "submit_seconds": 450.0,
+  "drain_seconds": 0.0,
+  "drained": true,
+  "vision_ms": {
+    "median": 1358.03,
+    "p95": 1370.88,
+    "p99": 1375.16,
+    "min": 1329.31,
+    "max": 1376.23
+  },
+  "wall_ms": {
+    "median": 1389.62,
+    "p95": 1404.9,
+    "p99": 1408.4,
+    "min": 1360.44,
+    "max": 1409.27
+  },
+  "qsize_max_observed": 1,
+  "queue_drops_reported": 0,
+  "stats": {
+    "inspections": 10,
+    "advisories_completed": 10,
+    "advisories_failed": 0,
+    "advisories_dropped": 0,
+    "advisories_timed_out": 0,
+    "advisory_queue_high_water": 1
+  },
+  "advisory_outcomes": {
+    "events": 10,
+    "paths": {
+      "llm": 10
+    },
+    "accepted": {
+      "true": 10,
+      "false": 0
+    },
+    "violations": {}
+  },
+  "queue_remaining_at_end": 0,
+  "audit_chain": {
+    "ok": true,
+    "rows": 20,
+    "first_bad": null,
+    "anchor_ok": true
+  },
+  "monitor": {
+    "temperature_c": {
+      "start": 38.6,
+      "median": 46.3,
+      "max": 53.5,
+      "end": 38.0,
+      "samples": 444
+    },
+    "throttle": {
+      "before": {
+        "raw": "0x0",
+        "flags": []
+      },
+      "after": {
+        "raw": "0x0",
+        "flags": []
+      },
+      "occurred_flags": []
+    },
+    "rss_mb": {
+      "parent_max": 823.5,
+      "tree_max": 2999.2,
+      "samples": 444
+    }
+  },
+  "verdict_counts": {
+    "FAIL": 10
+  }
+}

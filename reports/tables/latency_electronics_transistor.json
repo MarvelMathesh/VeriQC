@@ -1,0 +1,23 @@
+{
+  "profile_id": "electronics_transistor",
+  "device": "cpu",
+  "threads": 4,
+  "warmup_images": 5,
+  "images": 50,
+  "total_ms": {
+    "median": 112.81,
+    "p95": 118.84,
+    "p99": 123.41,
+    "min": 107.68,
+    "max": 126.02
+  },
+  "peak_rss_mb": 885.8,
+  "artifact_sizes_bytes": {
+    "profile": 596,
+    "calibration": 1201,
+    "severity": 223,
+    "cards": 561,
+    "anomaly_weights": 17324371
+  },
+  "measured_at": "2026-11-22T03:21:59"
+}

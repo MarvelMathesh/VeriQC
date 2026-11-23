@@ -1,0 +1,100 @@
+{
+  "runtime": "ONNX Runtime CPUExecutionProvider vs PyTorch CPU",
+  "note": "These exports are deployment artifacts; the reference station executes PyTorch.",
+  "profiles": [
+    {
+      "artifact": "models/profiles/automotive_metal_nut/export/anomaly_backbone.onnx",
+      "input_shape": [
+        1,
+        3,
+        448,
+        448
+      ],
+      "max_abs_feature_difference": 3.427267074584961e-06,
+      "per_layer": {
+        "layer2": 3.427267074584961e-06,
+        "layer3": 2.3692846298217773e-06
+      },
+      "profile_id": "automotive_metal_nut"
+    },
+    {
+      "artifact": "models/profiles/commutator/export/segmenter.onnx",
+      "input_shape": [
+        1,
+        3,
+        1024,
+        384
+      ],
+      "max_abs_logit_difference": 7.927417755126953e-06,
+      "profile_id": "commutator"
+    },
+    {
+      "artifact": "models/profiles/electronics_transistor/export/anomaly_backbone.onnx",
+      "input_shape": [
+        1,
+        3,
+        448,
+        448
+      ],
+      "max_abs_feature_difference": 3.0994415283203125e-06,
+      "per_layer": {
+        "layer2": 3.0994415283203125e-06,
+        "layer3": 2.2202730178833008e-06
+      },
+      "profile_id": "electronics_transistor"
+    },
+    {
+      "artifact": "models/profiles/packaging_bottle/export/anomaly_backbone.onnx",
+      "input_shape": [
+        1,
+        3,
+        448,
+        448
+      ],
+      "max_abs_feature_difference": 4.06801700592041e-06,
+      "per_layer": {
+        "layer2": 4.06801700592041e-06,
+        "layer3": 1.9669532775878906e-06
+      },
+      "profile_id": "packaging_bottle"
+    },
+    {
+      "artifact": "models/profiles/pharma_capsule/export/anomaly_backbone.onnx",
+      "input_shape": [
+        1,
+        3,
+        448,
+        448
+      ],
+      "max_abs_feature_difference": 3.606081008911133e-06,
+      "per_layer": {
+        "layer2": 3.606081008911133e-06,
+        "layer3": 2.384185791015625e-06
+      },
+      "profile_id": "pharma_capsule"
+    },
+    {
+      "artifact": "models/profiles/steel_surface/export/detector.onnx",
+      "images": 8,
+      "max_box_difference_px": 0.0009918212890625,
+      "max_confidence_difference": 1.5497207641601562e-06,
+      "count_mismatches": [],
+      "profile_id": "steel_surface"
+    },
+    {
+      "artifact": "models/profiles/textile_carpet/export/anomaly_backbone.onnx",
+      "input_shape": [
+        1,
+        3,
+        448,
+        448
+      ],
+      "max_abs_feature_difference": 3.337860107421875e-06,
+      "per_layer": {
+        "layer2": 3.337860107421875e-06,
+        "layer3": 1.8477439880371094e-06
+      },
+      "profile_id": "textile_carpet"
+    }
+  ]
+}

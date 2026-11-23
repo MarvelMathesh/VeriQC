@@ -1,0 +1,81 @@
+{
+  "folds": [
+    {
+      "images": 135,
+      "defect_images": 18,
+      "image_auroc": 1.0,
+      "pixel_auroc": 0.95,
+      "pixel_ap": 0.8048,
+      "au_pro": 0.8879,
+      "best_f1": 1.0,
+      "best_precision": 1.0,
+      "best_recall": 1.0,
+      "metric_size": [
+        512,
+        1408
+      ],
+      "fold": 0,
+      "input_size": [
+        384,
+        1024
+      ],
+      "weights": "models/profiles/commutator/fold0_unet.pt",
+      "weights_sha256": "9b4fcd97020fc8c271ebecff86a4a07a73da92eb807a81d26be9541cf26193fc"
+    },
+    {
+      "images": 136,
+      "defect_images": 18,
+      "image_auroc": 0.9991,
+      "pixel_auroc": 0.9907,
+      "pixel_ap": 0.7968,
+      "au_pro": 0.9293,
+      "best_f1": 0.973,
+      "best_precision": 0.9474,
+      "best_recall": 1.0,
+      "metric_size": [
+        512,
+        1408
+      ],
+      "fold": 1,
+      "input_size": [
+        384,
+        1024
+      ],
+      "weights": "models/profiles/commutator/fold1_unet.pt",
+      "weights_sha256": "87ff30d9a7cf1f5ca36c20b39989fe214b35f52b8e0c2c18f4ea83666db58c70"
+    },
+    {
+      "images": 128,
+      "defect_images": 16,
+      "image_auroc": 0.9459,
+      "pixel_auroc": 0.917,
+      "pixel_ap": 0.7423,
+      "au_pro": 0.7545,
+      "best_f1": 0.9375,
+      "best_precision": 0.9375,
+      "best_recall": 0.9375,
+      "metric_size": [
+        512,
+        1408
+      ],
+      "fold": 2,
+      "input_size": [
+        384,
+        1024
+      ],
+      "weights": "models/profiles/commutator/fold2_unet.pt",
+      "weights_sha256": "bc46a35512f35599c6ae440dbdb60a8623f79eafc7e11c29e1570175bff6f1ea"
+    }
+  ],
+  "mean": {
+    "image_auroc": 0.9817,
+    "pixel_auroc": 0.9526,
+    "pixel_ap": 0.7813,
+    "au_pro": 0.8572,
+    "best_f1": 0.9702
+  },
+  "metric_size": [
+    512,
+    1408
+  ]
+}

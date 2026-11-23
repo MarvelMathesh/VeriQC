@@ -135,6 +135,44 @@ class AuditStore:
             return None
         return json.loads(row["payload_json"])
 
+    def verdict_counts(self) -> dict[str, int]:
+        """Count stored verdict events by label."""
+
+        with closing(self._connect()) as connection:
+            rows = connection.execute(
+                "SELECT verdict, COUNT(*) FROM events WHERE event = 'verdict' "
+                "GROUP BY verdict ORDER BY verdict"
+            ).fetchall()
+        return {str(row[0]): int(row[1]) for row in rows}
+
+    def advisory_outcomes(self) -> dict[str, Any]:
+        """Count advisory event outcomes without exposing prompt text."""
+
+        with closing(self._connect()) as connection:
+            rows = connection.execute(
+                "SELECT payload_json FROM events WHERE event = 'advisory' ORDER BY id ASC"
+            ).fetchall()
+        paths: dict[str, int] = {}
+        accepted = {True: 0, False: 0}
+        violations: dict[str, int] = {}
+        for row in rows:
+            payload = json.loads(row["payload_json"])
+            extra = payload.get("extra") or {}
+            path = str(extra.get("path") or "unknown")
+            paths[path] = paths.get(path, 0) + 1
+            accepted[bool(extra.get("accepted"))] = accepted.get(bool(extra.get("accepted")), 0) + 1
+            for violation in (extra.get("verification") or {}).get("violations", []):
+                violations[str(violation)] = violations.get(str(violation), 0) + 1
+        return {
+            "events": len(rows),
+            "paths": dict(sorted(paths.items())),
+            "accepted": {
+                "true": accepted.get(True, 0),
+                "false": accepted.get(False, 0),
+            },
+            "violations": dict(sorted(violations.items())),
+        }
+
     def verify(self) -> dict[str, Any]:
         with closing(self._connect()) as connection:
             rows = connection.execute("SELECT * FROM events ORDER BY id ASC").fetchall()

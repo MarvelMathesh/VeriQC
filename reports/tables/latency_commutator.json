@@ -1,0 +1,23 @@
+{
+  "profile_id": "commutator",
+  "device": "cpu",
+  "threads": 4,
+  "warmup_images": 5,
+  "images": 50,
+  "total_ms": {
+    "median": 223.64,
+    "p95": 235.42,
+    "p99": 241.77,
+    "min": 213.41,
+    "max": 246.44
+  },
+  "peak_rss_mb": 1075.1,
+  "artifact_sizes_bytes": {
+    "profile": 576,
+    "calibration": 1167,
+    "severity": 214,
+    "cards": 1173,
+    "known_weights": 57076177
+  },
+  "measured_at": "2026-11-22T03:12:00"
+}

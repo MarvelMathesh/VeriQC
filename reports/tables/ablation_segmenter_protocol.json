@@ -1,0 +1,402 @@
+{
+  "source": "kolektor-sdd",
+  "protocol": "Controlled fold-0 and three-fold segmenter preprocessing/split experiments. All metrics use the official test split at 512x1408. The portrait-current arm is selected because its deployed fold-0 operating point is better; the nested and fixed-budget arms are retained as negative protocol results. The shared validation/calibration split remains a disclosed limitation.",
+  "arms": [
+    {
+      "arm": "landscape-current",
+      "split": "28 train / 5 validation",
+      "input_size": [
+        1024,
+        384
+      ],
+      "metric_size": [
+        512,
+        1408
+      ],
+      "folds": [
+        {
+          "images": 135,
+          "defect_images": 18,
+          "image_auroc": 0.9957,
+          "pixel_auroc": 0.9444,
+          "pixel_ap": 0.712,
+          "au_pro": 0.875,
+          "best_f1": 0.973,
+          "best_precision": 0.9474,
+          "best_recall": 1.0,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 0,
+          "input_size": [
+            1024,
+            384
+          ],
+          "weights": "/tmp/veriqc_experiments/landscape_current/fold0_unet.pt",
+          "weights_sha256": "ce47b3e03511425c810c4ad12c42d3ba51fe42270714f450f4d3052e34678c81"
+        },
+        {
+          "images": 136,
+          "defect_images": 18,
+          "image_auroc": 0.9981,
+          "pixel_auroc": 0.9511,
+          "pixel_ap": 0.6992,
+          "au_pro": 0.8171,
+          "best_f1": 0.9474,
+          "best_precision": 0.9,
+          "best_recall": 1.0,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 1,
+          "input_size": [
+            1024,
+            384
+          ],
+          "weights": "/tmp/veriqc_experiments/landscape_current/fold1_unet.pt",
+          "weights_sha256": "208a03802ec55224940e2c6da6f6d7b8069435039f40b92fd55fa824b36dda10"
+        },
+        {
+          "images": 128,
+          "defect_images": 16,
+          "image_auroc": 0.9994,
+          "pixel_auroc": 0.9644,
+          "pixel_ap": 0.767,
+          "au_pro": 0.8608,
+          "best_f1": 0.9697,
+          "best_precision": 0.9412,
+          "best_recall": 1.0,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 2,
+          "input_size": [
+            1024,
+            384
+          ],
+          "weights": "/tmp/veriqc_experiments/landscape_current/fold2_unet.pt",
+          "weights_sha256": "58661d8b3b86de081e11d2e1a9b21591de6fb3b98bc8d00b14b9e20cc9212746"
+        }
+      ],
+      "mean": {
+        "image_auroc": 0.9977,
+        "pixel_auroc": 0.9533,
+        "pixel_ap": 0.7261,
+        "au_pro": 0.851,
+        "best_f1": 0.9634
+      },
+      "note": "Resampled to 1024x384 landscape; validation also supplies calibration."
+    },
+    {
+      "arm": "portrait-current",
+      "split": "28 train / 5 validation",
+      "input_size": [
+        384,
+        1024
+      ],
+      "metric_size": [
+        512,
+        1408
+      ],
+      "folds": [
+        {
+          "images": 135,
+          "defect_images": 18,
+          "image_auroc": 1.0,
+          "pixel_auroc": 0.95,
+          "pixel_ap": 0.8048,
+          "au_pro": 0.8879,
+          "best_f1": 1.0,
+          "best_precision": 1.0,
+          "best_recall": 1.0,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 0,
+          "input_size": [
+            384,
+            1024
+          ],
+          "weights": "/tmp/veriqc_experiments/portrait_current/fold0_unet.pt",
+          "weights_sha256": "9b4fcd97020fc8c271ebecff86a4a07a73da92eb807a81d26be9541cf26193fc"
+        },
+        {
+          "images": 136,
+          "defect_images": 18,
+          "image_auroc": 0.9991,
+          "pixel_auroc": 0.9907,
+          "pixel_ap": 0.7968,
+          "au_pro": 0.9293,
+          "best_f1": 0.973,
+          "best_precision": 0.9474,
+          "best_recall": 1.0,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 1,
+          "input_size": [
+            384,
+            1024
+          ],
+          "weights": "/tmp/veriqc_experiments/portrait_current/fold1_unet.pt",
+          "weights_sha256": "87ff30d9a7cf1f5ca36c20b39989fe214b35f52b8e0c2c18f4ea83666db58c70"
+        },
+        {
+          "images": 128,
+          "defect_images": 16,
+          "image_auroc": 0.9459,
+          "pixel_auroc": 0.917,
+          "pixel_ap": 0.7423,
+          "au_pro": 0.7545,
+          "best_f1": 0.9375,
+          "best_precision": 0.9375,
+          "best_recall": 0.9375,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 2,
+          "input_size": [
+            384,
+            1024
+          ],
+          "weights": "/tmp/veriqc_experiments/portrait_current/fold2_unet.pt",
+          "weights_sha256": "bc46a35512f35599c6ae440dbdb60a8623f79eafc7e11c29e1570175bff6f1ea"
+        }
+      ],
+      "mean": {
+        "image_auroc": 0.9817,
+        "pixel_auroc": 0.9526,
+        "pixel_ap": 0.7813,
+        "au_pro": 0.8572,
+        "best_f1": 0.9702
+      },
+      "note": "Resampled to 384x1024 portrait; validation also supplies calibration. Selected."
+    },
+    {
+      "arm": "landscape-nested",
+      "split": "23 train / 5 validation / 5 calibration",
+      "input_size": [
+        1024,
+        384
+      ],
+      "metric_size": [
+        512,
+        1408
+      ],
+      "folds": [
+        {
+          "images": 135,
+          "defect_images": 18,
+          "image_auroc": 0.9981,
+          "pixel_auroc": 0.9591,
+          "pixel_ap": 0.6897,
+          "au_pro": 0.8902,
+          "best_f1": 0.973,
+          "best_precision": 0.9474,
+          "best_recall": 1.0,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 0,
+          "input_size": [
+            1024,
+            384
+          ],
+          "weights": "/tmp/veriqc_experiments/landscape_nested/fold0_unet.pt",
+          "weights_sha256": "10d6ea1e37ed368187d19bef962e25f194d4912f4451d792511d5cefb9786638"
+        },
+        {
+          "images": 136,
+          "defect_images": 18,
+          "image_auroc": 0.9934,
+          "pixel_auroc": 0.8991,
+          "pixel_ap": 0.6182,
+          "au_pro": 0.7599,
+          "best_f1": 0.9143,
+          "best_precision": 0.9412,
+          "best_recall": 0.8889,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 1,
+          "input_size": [
+            1024,
+            384
+          ],
+          "weights": "/tmp/veriqc_experiments/landscape_nested/fold1_unet.pt",
+          "weights_sha256": "7d80feaea1e7d0afd8dcd3218a4837bda8ddcc53cbae23520a711ac3238ae4f4"
+        },
+        {
+          "images": 128,
+          "defect_images": 16,
+          "image_auroc": 0.9989,
+          "pixel_auroc": 0.942,
+          "pixel_ap": 0.6543,
+          "au_pro": 0.7711,
+          "best_f1": 0.9677,
+          "best_precision": 1.0,
+          "best_recall": 0.9375,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 2,
+          "input_size": [
+            1024,
+            384
+          ],
+          "weights": "/tmp/veriqc_experiments/landscape_nested/fold2_unet.pt",
+          "weights_sha256": "ec763e3938df762789287d4683b785fc159453a1db653e1bf652d5449df4d7a8"
+        }
+      ],
+      "mean": {
+        "image_auroc": 0.9968,
+        "pixel_auroc": 0.9334,
+        "pixel_ap": 0.6541,
+        "au_pro": 0.8071,
+        "best_f1": 0.9517
+      },
+      "note": "Nested physical-part split; calibration is disjoint from early stopping."
+    },
+    {
+      "arm": "portrait-fixed",
+      "split": "28 train / 0 validation / 5 calibration",
+      "input_size": [
+        384,
+        1024
+      ],
+      "metric_size": [
+        512,
+        1408
+      ],
+      "folds": [
+        {
+          "images": 136,
+          "defect_images": 18,
+          "image_auroc": 1.0,
+          "pixel_auroc": 0.9283,
+          "pixel_ap": 0.5722,
+          "au_pro": 0.7759,
+          "best_f1": 1.0,
+          "best_precision": 1.0,
+          "best_recall": 1.0,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 1,
+          "input_size": [
+            384,
+            1024
+          ],
+          "weights": "/tmp/veriqc_experiments/portrait_fixed/fold1_unet.pt",
+          "weights_sha256": "843cfa7d775ccec75702a5fd358752066bba5d8944b2bf9337253b74916c0b3f"
+        },
+        {
+          "images": 128,
+          "defect_images": 16,
+          "image_auroc": 0.9989,
+          "pixel_auroc": 0.9183,
+          "pixel_ap": 0.7615,
+          "au_pro": 0.8633,
+          "best_f1": 0.9697,
+          "best_precision": 0.9412,
+          "best_recall": 1.0,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 2,
+          "input_size": [
+            384,
+            1024
+          ],
+          "weights": "/tmp/veriqc_experiments/portrait_fixed/fold2_unet.pt",
+          "weights_sha256": "855d3574b654e317d9bcecdf83774797b5aa9dbf184729411073ef0ad8575f55"
+        }
+      ],
+      "mean": {
+        "image_auroc": 0.9994,
+        "pixel_auroc": 0.9233,
+        "pixel_ap": 0.6668,
+        "au_pro": 0.8196,
+        "best_f1": 0.9849
+      },
+      "note": "Fixed 30-epoch budget; calibration is disjoint from selection. Folds 1-2 only."
+    },
+    {
+      "arm": "portrait-nested",
+      "split": "23 train / 5 validation / 5 calibration",
+      "input_size": [
+        384,
+        1024
+      ],
+      "metric_size": [
+        512,
+        1408
+      ],
+      "folds": [
+        {
+          "images": 135,
+          "defect_images": 18,
+          "image_auroc": 1.0,
+          "pixel_auroc": 0.9698,
+          "pixel_ap": 0.8089,
+          "au_pro": 0.9068,
+          "best_f1": 1.0,
+          "best_precision": 1.0,
+          "best_recall": 1.0,
+          "metric_size": [
+            512,
+            1408
+          ],
+          "fold": 0,
+          "input_size": [
+            384,
+            1024
+          ],
+          "weights": "/tmp/veriqc_experiments/portrait_nested/fold0_unet.pt",
+          "weights_sha256": "ffc6050fc86e47fb8b713cf9b1833d686e1ca73cbc6d1ec3c5762286fc8776ee"
+        }
+      ],
+      "mean": {
+        "image_auroc": 1.0,
+        "pixel_auroc": 0.9698,
+        "pixel_ap": 0.8089,
+        "au_pro": 0.9068,
+        "best_f1": 1.0
+      },
+      "note": "Fold 0 only; the nested split reduced cross-fold robustness and was not carried forward."
+    }
+  ],
+  "fold0_operating_point": [
+    {
+      "arm": "landscape-current",
+      "recall_non_pass": 1.0,
+      "recall_fail": 1.0,
+      "false_alarm_non_pass": 0.094,
+      "false_alarm_fail": 0.0342,
+      "review_rate": 0.0519,
+      "fail_threshold": 0.9217,
+      "review_threshold": 0.8502
+    },
+    {
+      "arm": "portrait-current",
+      "recall_non_pass": 1.0,
+      "recall_fail": 1.0,
+      "false_alarm_non_pass": 0.0256,
+      "false_alarm_fail": 0.0171,
+      "review_rate": 0.0074,
+      "fail_threshold": 0.977652,
+      "review_threshold": 0.794684
+    }
+  ]
+}

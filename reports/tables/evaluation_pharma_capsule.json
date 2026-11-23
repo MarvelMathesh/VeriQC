@@ -1,0 +1,41 @@
+{
+  "images": 132,
+  "defect_images": 109,
+  "normal_images": 23,
+  "verdict_counts": {
+    "PASS": 41,
+    "REVIEW": 17,
+    "FAIL": 74
+  },
+  "confusion": {
+    "non_pass": {
+      "detected": 90,
+      "missed": 19,
+      "false_alarms": 1,
+      "true_negatives": 22
+    },
+    "fail": {
+      "detected": 73,
+      "missed": 36,
+      "false_alarms": 1,
+      "true_negatives": 22
+    }
+  },
+  "known_score_auroc": null,
+  "anomaly_score_auroc": 0.9705,
+  "detection_rate_non_pass": 0.8257,
+  "detection_rate_fail": 0.6697,
+  "false_alarm_rate_non_pass": 0.0435,
+  "false_alarm_rate_fail": 0.0435,
+  "review_rate": 0.1288,
+  "qc_review_count": 0,
+  "qc_review_rate": 0.0,
+  "latency_ms_median": 13.25,
+  "latency_ms_p95": 13.5,
+  "anomaly_pixel_auroc": 0.9844,
+  "anomaly_pixel_ap": 0.3999,
+  "anomaly_au_pro": 0.879,
+  "profile_id": "pharma_capsule",
+  "device": "cuda",
+  "calibration": "configs/calibration/pharma_capsule.json"
+}

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import queue
 import threading
@@ -31,7 +32,22 @@ def _verify_advisory_artifacts(pte: Path, tokenizer: Path, manifest: Path) -> di
         raise ValueError("advisory PTE hash mismatch")
     if expected.get("tokenizer_sha256") and tokenizer_hash != expected["tokenizer_sha256"]:
         raise ValueError("advisory tokenizer hash mismatch")
-    return {"advisory_model": model_hash, "advisory_tokenizer": tokenizer_hash}
+    hashes = {"advisory_model": model_hash, "advisory_tokenizer": tokenizer_hash}
+    tokenizer_files = expected.get("tokenizer_files") or {}
+    if tokenizer_files:
+        for name, digest in sorted(tokenizer_files.items()):
+            path = tokenizer / name
+            if not path.is_file():
+                raise ValueError(f"advisory tokenizer file is missing: {name}")
+            if sha256_file(path) != digest:
+                raise ValueError(f"advisory tokenizer file hash mismatch: {name}")
+        bundle = hashlib.sha256(
+            json.dumps(tokenizer_files, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        if expected.get("tokenizer_bundle_sha256") and bundle != expected["tokenizer_bundle_sha256"]:
+            raise ValueError("advisory tokenizer bundle hash mismatch")
+        hashes["advisory_tokenizer_bundle"] = bundle
+    return hashes
 
 
 class Station:
@@ -85,6 +101,9 @@ class Station:
             "inspections": 0,
             "advisories_completed": 0,
             "advisories_failed": 0,
+            "advisories_dropped": 0,
+            "advisories_timed_out": 0,
+            "advisory_queue_high_water": 0,
         }
         self._stats_lock = threading.Lock()
 
@@ -112,9 +131,16 @@ class Station:
         if result.verdict != "PASS" and self.runner is not None:
             try:
                 self._queue.put_nowait(InspectionResult.from_dict(result.to_dict()))
+                with self._stats_lock:
+                    self._stats["advisory_queue_high_water"] = max(
+                        self._stats["advisory_queue_high_water"],
+                        self._queue.qsize(),
+                    )
             except queue.Full:
                 result.advisory["status"] = "template"
                 result.advisory["note"] = "advisory queue full"
+                with self._stats_lock:
+                    self._stats["advisories_dropped"] += 1
         return result
 
     def _loop(self) -> None:
@@ -129,6 +155,10 @@ class Station:
                 self.store.append(result, event="advisory", extra=outcome.to_dict())
                 with self._stats_lock:
                     self._stats["advisories_completed"] += 1
+                    if "generation timeout or busy" in outcome.verification.get(
+                        "violations", []
+                    ):
+                        self._stats["advisories_timed_out"] += 1
                 if self.on_advisory is not None:
                     self.on_advisory(result, outcome)
             except Exception as exc:

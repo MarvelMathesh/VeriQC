@@ -1,0 +1,15 @@
+{
+  "profile_id": "commutator",
+  "artifacts": {
+    "known": {
+      "path": "models/profiles/commutator/export/segmenter.onnx",
+      "sha256": "9e83042b55ba21461d9a696c9411eec70d9904bff9ab784557d45405266f7853",
+      "bytes": 27495,
+      "external_data": {
+        "path": "models/profiles/commutator/export/segmenter.onnx.data",
+        "sha256": "6704658adc22d03279718b50749b93db9a251396a04fb889cc27642ec7626697",
+        "bytes": 56939264
+      }
+    }
+  }
+}

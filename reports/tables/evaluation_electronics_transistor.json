@@ -1,0 +1,41 @@
+{
+  "images": 100,
+  "defect_images": 40,
+  "normal_images": 60,
+  "verdict_counts": {
+    "PASS": 61,
+    "REVIEW": 1,
+    "FAIL": 38
+  },
+  "confusion": {
+    "non_pass": {
+      "detected": 30,
+      "missed": 10,
+      "false_alarms": 9,
+      "true_negatives": 51
+    },
+    "fail": {
+      "detected": 30,
+      "missed": 10,
+      "false_alarms": 8,
+      "true_negatives": 52
+    }
+  },
+  "known_score_auroc": null,
+  "anomaly_score_auroc": 0.925,
+  "detection_rate_non_pass": 0.75,
+  "detection_rate_fail": 0.75,
+  "false_alarm_rate_non_pass": 0.15,
+  "false_alarm_rate_fail": 0.1333,
+  "review_rate": 0.01,
+  "qc_review_count": 0,
+  "qc_review_rate": 0.0,
+  "latency_ms_median": 13.41,
+  "latency_ms_p95": 13.76,
+  "anomaly_pixel_auroc": 0.8487,
+  "anomaly_pixel_ap": 0.5026,
+  "anomaly_au_pro": 0.7157,
+  "profile_id": "electronics_transistor",
+  "device": "cuda",
+  "calibration": "configs/calibration/electronics_transistor.json"
+}

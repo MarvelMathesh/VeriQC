@@ -1,0 +1,54 @@
+{
+  "schema": "veriqc.station-smoke/1",
+  "measured_at": "2026-11-23T00:09:37",
+  "profile": "commutator",
+  "startup_seconds": 17.0,
+  "health": {
+    "ok": true,
+    "error": null,
+    "profile": "commutator"
+  },
+  "advisory_available": true,
+  "inspection_id": "cb3979a5f89b4cbe8aadc0a485cf0ec6",
+  "verdict": "FAIL",
+  "findings": 1,
+  "vision_latency_ms": 1337.32,
+  "artifact_hashes": [
+    "advisory_model",
+    "advisory_tokenizer",
+    "advisory_tokenizer_bundle",
+    "calibration",
+    "cards",
+    "known_weights",
+    "profile",
+    "severity"
+  ],
+  "advisory_status": "accepted",
+  "advisory_accepted": true,
+  "advisory_latency_ms": 27913.6,
+  "advisory_model": {
+    "decode_ms": 17084.0,
+    "error": null,
+    "generated_tokens": 23,
+    "inference_ms": 24409.0,
+    "ok": true,
+    "path": "llm",
+    "prefill_tokens_per_second": 35.49,
+    "prompt_tokens": 260,
+    "resident_mb": 2342.9,
+    "tokens_per_second": 1.35,
+    "ttft_ms": 7325.0
+  },
+  "advisory_text": "Crack: a break in the commutator body, running with or across the turning marks. Probable cause: stress concentration at a machined step. Do now: quarantine the part and photograph the marked region. Inspect the fixture for any signs of damage. Escalate if: if the break appears on another part from the same batch, escalate to the quality engineer and hold the batch.",
+  "overlay_http": 200,
+  "overlay_bytes": 685876,
+  "csv_http": 200,
+  "csv_bytes": 343,
+  "audit_chain": {
+    "ok": true,
+    "rows": 2,
+    "first_bad": null,
+    "anchor_ok": true
+  },
+  "chain_ok": true
+}

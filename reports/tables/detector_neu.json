@@ -1,0 +1,26 @@
+{
+  "profile_id": "steel_surface",
+  "architecture": "yolo26n",
+  "input_size": 640,
+  "epochs": 80,
+  "seed": 20261121,
+  "classes": [
+    "crazing",
+    "inclusion",
+    "patches",
+    "pitted_surface",
+    "rolled-in_scale",
+    "scratches"
+  ],
+  "weights": "models/profiles/steel_surface/yolo26n_640.pt",
+  "weights_sha256": "6a79318213b38aef0cd65c65ef5f22f200afc60d9203f3b10bed801bc85c230c",
+  "train_seconds": 848.9,
+  "test": {
+    "split": "official NEU-DET validation",
+    "mAP50": 0.76,
+    "mAP50_95": 0.409,
+    "precision": 0.7029,
+    "recall": 0.7049
+  },
+  "command": "/home/mathesh/Documents/VeriQC/venv/bin/python scripts/train_detector.py --epochs 80 --imgsz 640 --batch 16 --device 0"
+}

@@ -1,0 +1,32 @@
+{
+  "arms": [
+    {
+      "profile_id": "textile_carpet",
+      "channel": "anomaly",
+      "fixed_0.5": {
+        "threshold": 0.5,
+        "recall": 0.9326,
+        "false_alarm_rate": 0.0714
+      },
+      "calibrated": {
+        "threshold": 0.529939,
+        "recall": 0.8427,
+        "false_alarm_rate": 0.0357
+      }
+    },
+    {
+      "profile_id": "commutator",
+      "channel": "known",
+      "fixed_0.5": {
+        "threshold": 0.5,
+        "recall": 1.0,
+        "false_alarm_rate": 0.1026
+      },
+      "calibrated": {
+        "threshold": 0.977652,
+        "recall": 1.0,
+        "false_alarm_rate": 0.0171
+      }
+    }
+  ]
+}

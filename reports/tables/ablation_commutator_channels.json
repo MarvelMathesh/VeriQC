@@ -1,0 +1,24 @@
+{
+  "profile_id": "commutator",
+  "fold": 0,
+  "alpha_fail": 0.05,
+  "arms": [
+    {
+      "arm": "segmentation-only",
+      "threshold": 0.9776520729064941,
+      "recall": 1.0,
+      "false_alarm_rate": 0.0171
+    },
+    {
+      "arm": "anomaly-only",
+      "threshold": 0.7276566624641418,
+      "recall": 0.0556,
+      "false_alarm_rate": 0.0085
+    },
+    {
+      "arm": "dual",
+      "recall": 1.0,
+      "false_alarm_rate": 0.0256
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+VeriQC 2.0
+Copyright (C) 2026 VeriQC contributors
+
+This project is licensed under the GNU Affero General Public License,
+version 3 (AGPL-3.0).  The full licence text is in LICENSE.  The project uses
+the AGPL-3.0 route because the deployed detector is trained with the
+Ultralytics YOLO implementation, whose default software and model terms are
+AGPL-3.0.  Any combined work conveyed under the AGPL must continue to comply
+with that licence.  A separate Ultralytics Enterprise Licence may be required
+for a private, proprietary, commercial, hosted, internal, edge or otherwise
+non-AGPL deployment.  The owner must confirm the actual distribution model
+before release.
+
+This notice records attribution and known restrictions.  It is not legal
+advice.  Runtime artifact hashes are recorded in configs/artifacts.json; export
+and advisory manifests are under reports/models/.
+
+--------------------------------------------------------------------------------
+Llama 3.2
+--------------------------------------------------------------------------------
+
+The advisory artifact is derived from Meta Llama 3.2 1B Instruct and is
+subject to the Llama 3.2 Community License and the Acceptable Use Policy
+incorporated by that licence.
+
+Llama 3.2 is licensed under the Llama 3.2 Community License, Copyright (c)
+Meta Platforms, Inc. All Rights Reserved.
+
+The agreement, its Acceptable Use Policy and the "Built with Llama"
+attribution must accompany any permitted redistribution.  The intended
+industrial-inspection use, including any critical-infrastructure or
+heavy-machinery context, requires an explicit owner review.  The local
+artifact is a development export with int8-stored linear weights and an fp32
+embedding; it is not a Meta release artifact.  The station verifies the PTE
+and tokenizer hashes against the local advisory manifest before enabling the
+advisory.
+
+--------------------------------------------------------------------------------
+Ultralytics YOLO
+--------------------------------------------------------------------------------
+
+Ultralytics YOLO software is used under AGPL-3.0 by default, with an
+alternative Ultralytics Enterprise Licence.  The VeriQC-trained steel detector
+is identified by SHA-256 in configs/artifacts.json.  The COCO-initialised
+checkpoint is resolved by Ultralytics at training time; it is not
+redistributed by this repository.  The datasets used to train the detector are
+not redistributed.
+
+--------------------------------------------------------------------------------
+Datasets (not redistributed)
+--------------------------------------------------------------------------------
+
+No image, mask, annotation or dataset archive is redistributed by this
+repository.  The top-level data/ directory is local and excluded from the
+published code/evidence.
+
+NEU-DET
+  The official Northeastern University page publishes the archive and asks for
+  citation, but does not state a reuse licence.  Treat redistribution and
+  commercial use as unresolved.  Obtain permission from the rights holder.
+  The official page requests citation of the NEU surface-defect works.
+
+KolektorSDD
+  Licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+  International (CC BY-NC-SA 4.0):
+  https://creativecommons.org/licenses/by-nc-sa/4.0/
+  Copyright Kolektor Group d.o.o.  Images were provided and annotated by
+  Kolektor Group d.o.o.  Commercial use requires contacting the rights
+  holder.  Cite Tabernik et al., "Segmentation-Based Deep-Learning Approach
+  for Surface-Defect Detection," Journal of Intelligent Manufacturing, 2019,
+  doi:10.1007/s10845-019-01476-x.
+
+MVTec AD
+  Licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+  International (CC BY-NC-SA 4.0):
+  https://creativecommons.org/licenses/by-nc-sa/4.0/
+  Copyright 2019 MVTec Software GmbH.  MVTec expressly states that the
+  dataset may not be used for commercial purposes.  Cite Bergmann et al.,
+  "MVTec AD - A Comprehensive Real-World Dataset for Unsupervised Anomaly
+  Detection," CVPR, 2019.
+
+The NEU-DET, KolektorSDD and MVTec AD sources are evaluation/research
+resources.  Any demo or release must respect their terms.
+
+--------------------------------------------------------------------------------
+Pretrained vision weights
+--------------------------------------------------------------------------------
+
+The anomaly backbone is derived from torchvision ImageNet-pretrained
+ResNet-18 weights.  The torchvision source licence is BSD-3-Clause, but that
+code licence does not settle the terms for the downloaded weights or the
+ImageNet-derived material.  The archived ImageNet Terms of Access restrict the
+database to non-commercial research and educational use.  Confirm authoritative
+terms covering the exact weight files before redistribution or commercial
+deployment.  The exact local backbone state is stored inside each profile
+artifact and is hash-locked by configs/artifacts.json.
+
+The Kolektor U-Net encoder is initialised from the same torchvision ResNet-18
+weights and then trained on KolektorSDD.  The steel detector is initialised
+from the Ultralytics YOLO COCO checkpoint and then trained on NEU-DET.
+
+--------------------------------------------------------------------------------
+Software dependencies
+--------------------------------------------------------------------------------
+
+The project uses these third-party components.  Their own licence and notice
+files remain authoritative and must be retained in any binary distribution.
+
+  PyTorch and torchvision      BSD-style / BSD-3-Clause (source code)
+  ExecuTorch                    BSD-3-Clause
+  Ultralytics YOLO              AGPL-3.0 or Enterprise licence
+  Meta Llama 3.2 1B Instruct    Llama 3.2 Community License + AUP
+  NumPy                         BSD-3-Clause
+  SciPy                         BSD-3-Clause
+  scikit-learn                  BSD-3-Clause
+  Pillow                        HPND
+  OpenCV                        Apache-2.0
+  PyYAML                        MIT
+  FastAPI                       MIT
+  Uvicorn                       BSD-3-Clause
+  websockets                    BSD-3-Clause
+  python-multipart              Apache-2.0
+  Transformers                  Apache-2.0
+  ONNX                          Apache-2.0
+  ONNX Runtime                  MIT
+  pytest                        MIT
+
+The project does not vendor the datasets, the PyTorch/ExecuTorch source
+checkout or the model snapshot in the published code/evidence.

@@ -1,0 +1,41 @@
+{
+  "images": 115,
+  "defect_images": 93,
+  "normal_images": 22,
+  "verdict_counts": {
+    "PASS": 25,
+    "REVIEW": 0,
+    "FAIL": 90
+  },
+  "confusion": {
+    "non_pass": {
+      "detected": 89,
+      "missed": 4,
+      "false_alarms": 1,
+      "true_negatives": 21
+    },
+    "fail": {
+      "detected": 89,
+      "missed": 4,
+      "false_alarms": 1,
+      "true_negatives": 21
+    }
+  },
+  "known_score_auroc": null,
+  "anomaly_score_auroc": 0.9858,
+  "detection_rate_non_pass": 0.957,
+  "detection_rate_fail": 0.957,
+  "false_alarm_rate_non_pass": 0.0455,
+  "false_alarm_rate_fail": 0.0455,
+  "review_rate": 0.0,
+  "qc_review_count": 0,
+  "qc_review_rate": 0.0,
+  "latency_ms_median": 11.93,
+  "latency_ms_p95": 12.43,
+  "anomaly_pixel_auroc": 0.963,
+  "anomaly_pixel_ap": 0.7475,
+  "anomaly_au_pro": 0.8863,
+  "profile_id": "automotive_metal_nut",
+  "device": "cuda",
+  "calibration": "configs/calibration/automotive_metal_nut.json"
+}

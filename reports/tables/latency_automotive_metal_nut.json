@@ -1,0 +1,23 @@
+{
+  "profile_id": "automotive_metal_nut",
+  "device": "cpu",
+  "threads": 4,
+  "warmup_images": 5,
+  "images": 50,
+  "total_ms": {
+    "median": 102.81,
+    "p95": 106.78,
+    "p99": 112.96,
+    "min": 98.92,
+    "max": 113.86
+  },
+  "peak_rss_mb": 877.3,
+  "artifact_sizes_bytes": {
+    "profile": 543,
+    "calibration": 1217,
+    "severity": 223,
+    "cards": 521,
+    "anomaly_weights": 17324371
+  },
+  "measured_at": "2026-11-22T03:21:49"
+}
