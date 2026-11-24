@@ -13,7 +13,11 @@ def test_document_layout_is_intentional() -> None:
         for path in REPO.rglob("*.md")
         if not any(part in EXCLUDED for part in path.parts)
     )
-    assert documents == [Path("README.md"), Path("RESEARCH.md")]
+    assert documents == [
+        Path("LICENSE-LLAMA-3.2.md"),
+        Path("README.md"),
+        Path("RESEARCH.md"),
+    ]
 
 
 def test_results_evidence_paths_exist() -> None:
@@ -28,6 +32,8 @@ def test_results_evidence_paths_exist() -> None:
         evidence = payload[key].get("evidence")
         if evidence:
             assert (REPO / evidence).exists(), evidence
+    for path in payload.get("design_bakeoffs", {}).get("files", []):
+        assert (REPO / path).exists(), path
 
 
 def test_pi_benchmarks_are_labeled_as_pi() -> None:

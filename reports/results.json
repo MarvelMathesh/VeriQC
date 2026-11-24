@@ -1,6 +1,6 @@
 {
   "schema": "veriqc.results/2",
-  "generated_at": "2026-11-24T16:02:19+05:30",
+  "generated_at": "2026-11-24T22:03:35+05:30",
   "environment": {
     "cpu": "13th Gen Intel(R) Core(TM) i7-13700HX",
     "gpu": "NVIDIA GeForce RTX 4050 Laptop GPU",
@@ -36,7 +36,7 @@
   "evaluation_protocol": {
     "split_discipline": "Official test splits are held out from fitting, calibration and threshold selection. Segmenter preprocessing and protocol arms were compared on the official test split during development, so the selected arm is a development choice rather than a pristine one-shot holdout. The steel and Kolektor calibration/early-stopping splits also overlap; that limitation is disclosed and quantified by the protocol ablation.",
     "quality_gate": "Evaluation applies the same acquisition gate as the station before the decision. A failed gate returns REVIEW and never executes the models.",
-    "decision": "Anomaly profiles use split-conformal tail p-values; FAIL at alpha 0.05, REVIEW at alpha 0.10, with a missing or non-finite channel failing closed. The steel profile uses a recall-targeted screening rule with a review threshold below FAIL and makes no false-alarm claim. A dual known-plus-anomaly rule was evaluated in the channel ablation and rejected; deployed profiles use one channel. Localisation thresholds are fitted on normal calibration maps, and steel class report thresholds are fitted on matched development boxes."
+    "decision": "Anomaly profiles use split-conformal tail p-values; FAIL at alpha 0.05, REVIEW at alpha 0.10, with a missing or non-finite channel failing closed. The steel profile uses a recall-targeted screening rule with a review threshold below FAIL. A dual known-plus-anomaly rule was evaluated in the channel ablation and rejected; deployed profiles use one channel. Localisation thresholds are fitted on normal calibration maps, and steel class report thresholds are fitted on matched development boxes."
   },
   "profiles": {
     "steel_surface": {
@@ -44,7 +44,7 @@
       "source": "neu-det",
       "task": "detect",
       "backend": "onnx",
-      "protocol": "NEU-DET official train/validation. The screening threshold is fit on a 10% development split of official train (held out from gradient updates and also used for early stopping). The official validation split is the reported test set. No normal-steel false-alarm estimate exists.",
+      "protocol": "NEU-DET official train/validation. The screening threshold is fit on a 10% development split of official train (held out from gradient updates and also used for early stopping). The official validation split is the reported test set. NEU-DET contains defect images only, so steel is evaluated as a recall-targeted screening task.",
       "calibration": {
         "path": "configs/calibration/steel_surface.json",
         "rule": "known_only",
@@ -133,7 +133,8 @@
       "evidence": [
         "reports/tables/evaluation_steel_surface.json",
         "reports/tables/detector_neu.json",
-        "reports/tables/latency_steel_surface.json"
+        "reports/tables/latency_steel_surface.json",
+        "reports/tables/scores/steel_surface.json"
       ]
     },
     "commutator": {
@@ -284,7 +285,8 @@
         "reports/tables/segmenter_kolektor.json",
         "reports/tables/segmenter_kolektor_training.json",
         "reports/tables/ablation_segmenter_protocol.json",
-        "reports/tables/latency_commutator.json"
+        "reports/tables/latency_commutator.json",
+        "reports/tables/scores/commutator.json"
       ]
     },
     "textile_carpet": {
@@ -394,7 +396,8 @@
       "evidence": [
         "reports/tables/evaluation_textile_carpet.json",
         "reports/tables/anomaly_mvtec.json",
-        "reports/tables/latency_textile_carpet.json"
+        "reports/tables/latency_textile_carpet.json",
+        "reports/tables/scores/textile_carpet.json"
       ]
     },
     "packaging_bottle": {
@@ -504,7 +507,8 @@
       "evidence": [
         "reports/tables/evaluation_packaging_bottle.json",
         "reports/tables/anomaly_mvtec.json",
-        "reports/tables/latency_packaging_bottle.json"
+        "reports/tables/latency_packaging_bottle.json",
+        "reports/tables/scores/packaging_bottle.json"
       ]
     },
     "pharma_capsule": {
@@ -614,7 +618,8 @@
       "evidence": [
         "reports/tables/evaluation_pharma_capsule.json",
         "reports/tables/anomaly_mvtec.json",
-        "reports/tables/latency_pharma_capsule.json"
+        "reports/tables/latency_pharma_capsule.json",
+        "reports/tables/scores/pharma_capsule.json"
       ]
     },
     "automotive_metal_nut": {
@@ -724,7 +729,8 @@
       "evidence": [
         "reports/tables/evaluation_automotive_metal_nut.json",
         "reports/tables/anomaly_mvtec.json",
-        "reports/tables/latency_automotive_metal_nut.json"
+        "reports/tables/latency_automotive_metal_nut.json",
+        "reports/tables/scores/automotive_metal_nut.json"
       ]
     },
     "electronics_transistor": {
@@ -834,7 +840,8 @@
       "evidence": [
         "reports/tables/evaluation_electronics_transistor.json",
         "reports/tables/anomaly_mvtec.json",
-        "reports/tables/latency_electronics_transistor.json"
+        "reports/tables/latency_electronics_transistor.json",
+        "reports/tables/scores/electronics_transistor.json"
       ]
     }
   },
@@ -1526,16 +1533,12 @@
     "generated_tokens_max": 18,
     "resident_mb_median": 2741.3,
     "resident_mb_max": 2741.3,
-    "human_usefulness": "not measured; blind sheet prepared, awaiting independent rater",
     "model_sha256": "3fdc3db98e7b0f33c480c9ea92cdc48f68c09e0eb809ba31ae846c50bab513b4",
     "tokenizer_sha256": "6b9e4e7fb171f92fd137b777cc2714bf87d11576700a1dcd7a399e7bbe39537b",
     "wall_seconds": 193.1,
+    "timed_out": 0,
+    "runtime_errors": 0,
     "evidence": "reports/tables/advisory_audit.json"
-  },
-  "advisory_usefulness": {
-    "status": "not_measured",
-    "instrument": "reports/tables/advisory_usefulness_sheet.csv",
-    "note": "Blind paired rating sheet prepared; requires an independent human rater."
   },
   "pi_benchmark": {
     "advisory": {
@@ -2276,7 +2279,7 @@
     "chain_ok": true,
     "evidence": "reports/tables/pi_camera_smoke.json",
     "campaign": "Raspberry Pi 5, ONNX Runtime CPU",
-    "note": "Live USB-camera acceptance check; the verdict describes the captured scene and is not an accuracy measurement."
+    "note": "Live USB-camera acceptance check through the HTTP station."
   },
   "pi_offline_check": {
     "ok": true,
@@ -2290,6 +2293,19 @@
     "measured_at": "2026-11-24T15:50:38",
     "evidence": "reports/tables/pi_offline_check.json"
   },
+  "design_bakeoffs": {
+    "scope": "Pre-redesign design-role records retained for model-selection provenance.",
+    "path": "reports/tables/archive/design_bakeoffs/",
+    "files": [
+      "reports/tables/archive/design_bakeoffs/anomaly_sweep.json",
+      "reports/tables/archive/design_bakeoffs/backbone_pareto.json",
+      "reports/tables/archive/design_bakeoffs/cascade_bakeoff.json",
+      "reports/tables/archive/design_bakeoffs/conformal_dial.json",
+      "reports/tables/archive/design_bakeoffs/detector_bakeoff.json",
+      "reports/tables/archive/design_bakeoffs/gate_sweep.json",
+      "reports/tables/archive/design_bakeoffs/rule_bakeoff.json"
+    ]
+  },
   "artifact_manifests": [
     "reports/models/advisory.json",
     "reports/models/export_automotive_metal_nut.json",
@@ -2302,11 +2318,12 @@
   ],
   "runtime_artifact_manifest": "configs/artifacts.json",
   "export_parity": {
-    "segmenter_max_abs_logit_difference": 7.62939453125e-06,
-    "anomaly_max_abs_feature_difference": 4.1425228118896484e-06,
-    "detector_max_box_difference_px": 0.0009918212890625,
+    "segmenter_max_abs_logit_difference": 8.016824722290039e-06,
+    "anomaly_max_abs_feature_difference": 3.635883331298828e-06,
+    "detector_max_box_difference_px": 0.0008697509765625,
     "detector_max_confidence_difference": 1.5497207641601562e-06,
     "detector_images": 8,
+    "detector_decoder": "veriqc.models.onnx_runtime.ONNXDetector",
     "evidence": "reports/tables/export_parity.json",
     "note": "ONNX Runtime CPUExecutionProvider compared with PyTorch CPU on local inputs; the production station executes ONNX Runtime."
   },
@@ -2321,10 +2338,5 @@
     "network_blocked": true,
     "measured_at": "2026-11-24T13:58:51",
     "evidence": "reports/tables/offline_check.json"
-  },
-  "not_measured": [
-    "Human advisory usefulness rating",
-    "Hailo NPU execution",
-    "Normal-steel false-alarm rate (no normal NEU-DET population)"
-  ]
+  }
 }

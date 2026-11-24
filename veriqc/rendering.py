@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import cv2
@@ -12,6 +13,22 @@ from veriqc import REPO_ROOT
 from veriqc.inspection import InspectionResult
 
 __all__ = ["save_overlay"]
+
+
+def _prune_overlays(directory: Path, keep: int) -> None:
+    """Bound the runtime overlay cache; old records keep their audit data."""
+
+    if keep <= 0:
+        return
+    files = sorted(
+        directory.glob("*.png"),
+        key=lambda path: path.stat().st_mtime,
+    )
+    for path in files[:-keep]:
+        try:
+            path.unlink()
+        except OSError:
+            pass
 
 
 def save_overlay(
@@ -77,6 +94,11 @@ def save_overlay(
     target.parent.mkdir(parents=True, exist_ok=True)
     if not cv2.imwrite(str(target), canvas):
         return None
+    try:
+        keep = int(os.environ.get("VERIQC_OVERLAY_KEEP", "500"))
+    except ValueError:
+        keep = 500
+    _prune_overlays(target.parent, keep)
     try:
         return str(target.relative_to(REPO_ROOT))
     except ValueError:

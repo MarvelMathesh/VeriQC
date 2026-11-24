@@ -384,6 +384,8 @@ def run_advisory(args: argparse.Namespace) -> dict[str, Any]:
                     ),
                     "accepted": outcome.accepted,
                     "path": outcome.path,
+                    "timed_out": outcome.timed_out,
+                    "error": outcome.error,
                     "latency_ms": round(outcome.latency_ms, 1),
                     "ttft_ms": outcome.model.get("ttft_ms"),
                     "tokens_per_second": outcome.model.get("tokens_per_second"),

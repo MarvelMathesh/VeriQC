@@ -1,0 +1,222 @@
+{
+  "domains": [
+    {
+      "domain": "kolektor",
+      "bank_scope": "one bank, fitted on the commutator normals of the fit parts",
+      "split_manifest": {
+        "manifest": "reports/tables/part_split_manifest.json",
+        "manifest_sha256": "c6472f0624c41b83852e33fb1a59e41bd3a16be321ab817e61ebddda0991f2ce",
+        "policy": "veriqc.data.splits.stage_partitions",
+        "seed": 0,
+        "detector_parts": {
+          "train": 29,
+          "val": 5,
+          "test": 16
+        },
+        "station_parts": {
+          "fit": 18,
+          "calibration": 16,
+          "holdout": 16
+        },
+        "overlap": {
+          "station_holdout_parts": 16,
+          "detector_training_parts": 34,
+          "detector_training_parts_in_station_holdout": 0,
+          "detector_test_parts_are_the_station_holdout": true
+        }
+      },
+      "n_fit": 124,
+      "n_calib": 112,
+      "n_holdout_normals": 111,
+      "threshold_review": 0.7129,
+      "threshold_fail": 0.7216,
+      "alpha_review": 0.05,
+      "alpha_fail": 0.03,
+      "fail_line_achievable": true,
+      "order_statistic_k": 108,
+      "alarms_on_holdout": 0,
+      "cp_95_upper_fpr_on_holdout": 0.02663,
+      "bound_vs_alpha": {
+        "alpha_review": 0.05,
+        "certified_fpr_review": 0.02663,
+        "review_bound_exceeds_alpha": false,
+        "alarms_on_holdout": 0,
+        "n_holdout": 111,
+        "alpha_fail": 0.03,
+        "certified_fpr_fail": 0.02663,
+        "fail_bound_exceeds_alpha": false,
+        "fail_alarms_on_holdout": 0,
+        "note": "the certified bound is a 95% Clopper-Pearson upper bound on the gate-score exceedance rate on the held-out normals. It exceeds alpha when the holdout is too small to certify the target."
+      },
+      "quality_gate": {
+        "review_rate_on_holdout_normals": 0.0,
+        "rejected": 0,
+        "denominator": 111,
+        "rejection_reasons": {},
+        "bands_calibrated_on": "112 calibration normals of this domain",
+        "note": "a frame the optical quality gate rejects is REVIEW ('re-image') before either model runs, so this is part of the station's non-PASS rate on normals that no model contributes to"
+      },
+      "counts": {
+        "normal": 111,
+        "known_defect": 17,
+        "novel_defect": 0
+      },
+      "detector_only": {
+        "known_defect_detection_rate": 1.0,
+        "novel_defect_detection_rate": null,
+        "normal_false_alarm_rate": 0.009,
+        "note": "this arm is a flag, not a verdict: the detector confirmed a class. It produces no PASS, REVIEW or FAIL of its own, so it has no FAIL recall."
+      },
+      "anomaly_gate_only": {
+        "known_defect_detection_rate": 0.1176,
+        "novel_defect_detection_rate": null,
+        "normal_false_alarm_rate": 0.0,
+        "note": "this arm is a flag, not a verdict: the gate scored the frame above the review line. It produces no PASS, REVIEW or FAIL of its own, so it has no FAIL recall."
+      },
+      "cascade_gated": {
+        "known_defect_nonpass_recall": 0.1176,
+        "known_defect_fail_recall": 0.0588,
+        "novel_defect_nonpass_recall": null,
+        "novel_defect_fail_recall": null,
+        "normal_nonpass_rate": 0.0,
+        "normal_fail_rate": 0.0,
+        "detector_execution_rate": 0.0156,
+        "detector_calls": 2,
+        "triage_rule": "agreement",
+        "note": "the gated cascade, counterfactual to the production pass: the detector is consulted only when the gate score is above the review line"
+      },
+      "production": {
+        "known_defect_nonpass_recall": 1.0,
+        "known_defect_fail_recall": 0.0588,
+        "novel_defect_nonpass_recall": null,
+        "novel_defect_fail_recall": null,
+        "normal_nonpass_rate": 0.027,
+        "normal_fail_rate": 0.0,
+        "detector_execution_rate": 1.0,
+        "detector_calls": 128,
+        "triage_rule": "agreement",
+        "note": "the production configuration: the detector is consulted on every part. FAIL recall is reported apart from non-PASS recall, because REVIEW is the safe outcome and counting it as a hit would overstate the system's decisive power."
+      },
+      "wall_seconds": 18.7
+    },
+    {
+      "domain": "mvtec",
+      "bank_scope": "one pooled bank and one pooled threshold over 15 categories; this is a cross-product test, not the station's per-product regime",
+      "split_manifest": null,
+      "n_fit": 1815,
+      "n_calib": 908,
+      "n_holdout_normals": 1086,
+      "threshold_review": 0.7875,
+      "threshold_fail": 0.7927,
+      "alpha_review": 0.05,
+      "alpha_fail": 0.03,
+      "fail_line_achievable": true,
+      "order_statistic_k": 864,
+      "alarms_on_holdout": 50,
+      "cp_95_upper_fpr_on_holdout": 0.05792,
+      "bound_vs_alpha": {
+        "alpha_review": 0.05,
+        "certified_fpr_review": 0.05792,
+        "review_bound_exceeds_alpha": true,
+        "alarms_on_holdout": 50,
+        "n_holdout": 1086,
+        "alpha_fail": 0.03,
+        "certified_fpr_fail": 0.03518,
+        "fail_bound_exceeds_alpha": true,
+        "fail_alarms_on_holdout": 28,
+        "note": "the certified bound is a 95% Clopper-Pearson upper bound on the gate-score exceedance rate on the held-out normals. It exceeds alpha when the holdout is too small to certify the target."
+      },
+      "quality_gate": {
+        "review_rate_on_holdout_normals": 0.0,
+        "rejected": 0,
+        "denominator": 1086,
+        "rejection_reasons": {},
+        "bands_calibrated_on": "908 calibration normals of this domain",
+        "note": "a frame the optical quality gate rejects is REVIEW ('re-image') before either model runs, so this is part of the station's non-PASS rate on normals that no model contributes to"
+      },
+      "counts": {
+        "normal": 1086,
+        "known_defect": 0,
+        "novel_defect": 180
+      },
+      "detector_only": {
+        "known_defect_detection_rate": null,
+        "novel_defect_detection_rate": 0.4222,
+        "normal_false_alarm_rate": 0.4033,
+        "note": "this arm is a flag, not a verdict: the detector confirmed a class. It produces no PASS, REVIEW or FAIL of its own, so it has no FAIL recall."
+      },
+      "anomaly_gate_only": {
+        "known_defect_detection_rate": null,
+        "novel_defect_detection_rate": 0.6333,
+        "normal_false_alarm_rate": 0.046,
+        "note": "this arm is a flag, not a verdict: the gate scored the frame above the review line. It produces no PASS, REVIEW or FAIL of its own, so it has no FAIL recall."
+      },
+      "cascade_gated": {
+        "known_defect_nonpass_recall": null,
+        "known_defect_fail_recall": null,
+        "novel_defect_nonpass_recall": 0.6333,
+        "novel_defect_fail_recall": 0.2722,
+        "normal_nonpass_rate": 0.046,
+        "normal_fail_rate": 0.012,
+        "detector_execution_rate": 0.1295,
+        "detector_calls": 164,
+        "triage_rule": "agreement",
+        "note": "the gated cascade, counterfactual to the production pass: the detector is consulted only when the gate score is above the review line"
+      },
+      "production": {
+        "known_defect_nonpass_recall": null,
+        "known_defect_fail_recall": null,
+        "novel_defect_nonpass_recall": 0.7778,
+        "novel_defect_fail_recall": 0.2722,
+        "normal_nonpass_rate": 0.43,
+        "normal_fail_rate": 0.012,
+        "detector_execution_rate": 1.0,
+        "detector_calls": 1266,
+        "triage_rule": "agreement",
+        "note": "the production configuration: the detector is consulted on every part. FAIL recall is reported apart from non-PASS recall, because REVIEW is the safe outcome and counting it as a hit would overstate the system's decisive power."
+      },
+      "wall_seconds": 464.7
+    }
+  ],
+  "detector_classes": [
+    "crazing",
+    "inclusion",
+    "patches",
+    "pitted_surface",
+    "rolled-in_scale",
+    "scratches",
+    "crack"
+  ],
+  "split_manifest": {
+    "manifest": "reports/tables/part_split_manifest.json",
+    "manifest_sha256": "c6472f0624c41b83852e33fb1a59e41bd3a16be321ab817e61ebddda0991f2ce",
+    "policy": "veriqc.data.splits.stage_partitions",
+    "seed": 0,
+    "detector_parts": {
+      "train": 29,
+      "val": 5,
+      "test": 16
+    },
+    "station_parts": {
+      "fit": 18,
+      "calibration": 16,
+      "holdout": 16
+    },
+    "overlap": {
+      "station_holdout_parts": 16,
+      "detector_training_parts": 34,
+      "detector_training_parts_in_station_holdout": 0,
+      "detector_test_parts_are_the_station_holdout": true
+    }
+  },
+  "note": "each domain is scored with a memory bank fitted on that domain's own normals and a conformal threshold calibrated on that domain's own held-out normals; the KolektorSDD split is by physical part and is the partition named in the split manifest. The MVTec arm is pooled over fifteen categories into one bank and one threshold, so it is a cross-product test and not the station's per-product regime. The production arm is produced by the production VisionPipeline with the detector consulted on every part, so the measured cascade is the cascade the station runs; the gated arm is the counterfactual computed from the same pass. FAIL recall is reported apart from non-PASS recall.",
+  "provenance": {
+    "script": "ablations/cascade_bakeoff.py",
+    "command": "python ablations/cascade_bakeoff.py",
+    "git_commit": "1ef864d",
+    "datasets": "KolektorSDD (deployment domain) and MVTec AD (novel defects)",
+    "created": "2026-11-16T13:29:28",
+    "wall_seconds": 484.7,
+    "kind": "measured"
+  }
+}

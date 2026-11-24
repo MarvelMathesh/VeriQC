@@ -1,0 +1,231 @@
+{
+  "profile_id": "commutator",
+  "source_id": "kolektor-sdd",
+  "dataset": "KolektorSDD",
+  "role_manifest_sha256": "6aee322934fcdd3ed4bc2d5c77a54e5a195ae06764dceca5762896a371ffa5fd",
+  "units": {
+    "design_units": 14,
+    "design_normal_items": 96,
+    "design_defect_items": 15
+  },
+  "protocol": {
+    "role": "design",
+    "fold_group": "unit_id",
+    "fit": "normal items from training units",
+    "score": "normal and defective items from held-out units",
+    "folds": 10,
+    "seed": 0
+  },
+  "arms": [
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 224,
+        "resize_mode": "squash",
+        "bank_size": 2000
+      },
+      "image_auroc": 0.6285,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.688,
+        "achievable": true,
+        "order_statistic_k": 93
+      },
+      "false_alarm_rate_at_threshold": 0.0312,
+      "cp_95_upper_fpr": 0.07879,
+      "detection_rate_at_threshold": 0.0667,
+      "miss_rate_at_threshold": 0.9333,
+      "memory_bank_bytes": 512000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 6.614,
+      "fit_seconds_median": 2.387
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 224,
+        "resize_mode": "letterbox",
+        "bank_size": 2000
+      },
+      "image_auroc": 0.8271,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6228,
+        "achievable": true,
+        "order_statistic_k": 93
+      },
+      "false_alarm_rate_at_threshold": 0.0312,
+      "cp_95_upper_fpr": 0.07879,
+      "detection_rate_at_threshold": 0.4667,
+      "miss_rate_at_threshold": 0.5333,
+      "memory_bank_bytes": 512000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 6.608,
+      "fit_seconds_median": 2.381
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 320,
+        "resize_mode": "letterbox",
+        "bank_size": 2000
+      },
+      "image_auroc": 0.8403,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6348,
+        "achievable": true,
+        "order_statistic_k": 93
+      },
+      "false_alarm_rate_at_threshold": 0.0312,
+      "cp_95_upper_fpr": 0.07879,
+      "detection_rate_at_threshold": 0.4667,
+      "miss_rate_at_threshold": 0.5333,
+      "memory_bank_bytes": 512000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 8.878,
+      "fit_seconds_median": 4.409
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 448,
+        "resize_mode": "letterbox",
+        "bank_size": 2000
+      },
+      "image_auroc": 0.859,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6403,
+        "achievable": true,
+        "order_statistic_k": 93
+      },
+      "false_alarm_rate_at_threshold": 0.0312,
+      "cp_95_upper_fpr": 0.07879,
+      "detection_rate_at_threshold": 0.5333,
+      "miss_rate_at_threshold": 0.4667,
+      "memory_bank_bytes": 512000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 13.316,
+      "fit_seconds_median": 8.222
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 224,
+        "resize_mode": "letterbox",
+        "bank_size": 500
+      },
+      "image_auroc": 0.7806,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6715,
+        "achievable": true,
+        "order_statistic_k": 93
+      },
+      "false_alarm_rate_at_threshold": 0.0312,
+      "cp_95_upper_fpr": 0.07879,
+      "detection_rate_at_threshold": 0.3333,
+      "miss_rate_at_threshold": 0.6667,
+      "memory_bank_bytes": 128000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 5.909,
+      "fit_seconds_median": 0.923
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 224,
+        "resize_mode": "letterbox",
+        "bank_size": 1000
+      },
+      "image_auroc": 0.8208,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6352,
+        "achievable": true,
+        "order_statistic_k": 93
+      },
+      "false_alarm_rate_at_threshold": 0.0312,
+      "cp_95_upper_fpr": 0.07879,
+      "detection_rate_at_threshold": 0.4667,
+      "miss_rate_at_threshold": 0.5333,
+      "memory_bank_bytes": 256000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 5.893,
+      "fit_seconds_median": 1.426
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 224,
+        "resize_mode": "letterbox",
+        "bank_size": 4000
+      },
+      "image_auroc": 0.8028,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6119,
+        "achievable": true,
+        "order_statistic_k": 93
+      },
+      "false_alarm_rate_at_threshold": 0.0312,
+      "cp_95_upper_fpr": 0.07879,
+      "detection_rate_at_threshold": 0.4667,
+      "miss_rate_at_threshold": 0.5333,
+      "memory_bank_bytes": 1024000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 7.553,
+      "fit_seconds_median": 4.324
+    },
+    {
+      "config": {
+        "backbone": "mobilenet_v3_small",
+        "input_size": 224,
+        "resize_mode": "letterbox",
+        "bank_size": 2000
+      },
+      "image_auroc": 0.5667,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.5144,
+        "achievable": true,
+        "order_statistic_k": 93
+      },
+      "false_alarm_rate_at_threshold": 0.0312,
+      "cp_95_upper_fpr": 0.07879,
+      "detection_rate_at_threshold": 0.2,
+      "miss_rate_at_threshold": 0.8,
+      "memory_bank_bytes": 384000,
+      "executed_parameters": 10488,
+      "nominal_parameters": 2542856,
+      "score_ms_per_image_median": 5.468,
+      "fit_seconds_median": 0.942
+    }
+  ],
+  "folds": 10,
+  "alpha": 0.05,
+  "seed": 0,
+  "provenance": {
+    "script": "ablations/anomaly_sweep.py",
+    "command": "python ablations/anomaly_sweep.py --folds 10 --device cuda",
+    "git_commit": "1ef864d",
+    "dataset": "KolektorSDD",
+    "device": "cuda",
+    "roles": [
+      "design"
+    ],
+    "final_test_opened": false,
+    "claim_scope": "design-role selection evidence; not a detection or release claim",
+    "created": "2026-11-19T11:02:35Z",
+    "wall_seconds": 258.039,
+    "kind": "measured-on-host"
+  }
+}

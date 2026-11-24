@@ -32,6 +32,7 @@ def evaluate_items(
     *,
     need_masks: bool = False,
     metric_size: tuple[int, int] = (512, 512),
+    collect_scores: bool = False,
 ) -> dict:
     verdicts: list[str] = []
     labels: list[bool] = []
@@ -41,6 +42,7 @@ def evaluate_items(
     known_maps: list[np.ndarray] = []
     masks: list[np.ndarray] = []
     latencies: list[float] = []
+    per_image: list[dict] = []
     qc_review = 0
     want_anomaly_maps = need_masks and pipeline.profile.anomaly is not None
     want_known_maps = need_masks and pipeline.segmenter is not None
@@ -63,6 +65,18 @@ def evaluate_items(
         )
         if not result.acquisition.get("qc_ok", True):
             qc_review += 1
+        if collect_scores:
+            per_image.append(
+                {
+                    "part_id": str(item.get("part") or "EVAL"),
+                    "defect_class": item.get("defect_class"),
+                    "label": bool(item["is_defect"]),
+                    "verdict": result.verdict,
+                    "qc_ok": bool(result.acquisition.get("qc_ok", True)),
+                    "known_score": result.known_score,
+                    "anomaly_score": result.anomaly_score,
+                }
+            )
 
         if need_masks:
             if item.get("label"):
@@ -178,6 +192,8 @@ def evaluate_items(
                     "known_au_pro": round(au_pro(masks_array, maps_array), 4),
                 }
             )
+    if collect_scores:
+        result["per_image"] = per_image
     return result
 
 
@@ -186,6 +202,11 @@ def main() -> None:
     parser.add_argument("--profile", required=True)
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--out", default=None)
+    parser.add_argument(
+        "--dump-scores",
+        action="store_true",
+        help="write per-image scores for ROC/PR figures",
+    )
     args = parser.parse_args()
     path = REPO / "configs" / "profiles" / f"{args.profile}.yaml"
     os.environ["VERIQC_THREADS"] = str(max(1, args.threads))
@@ -201,7 +222,9 @@ def main() -> None:
         items,
         need_masks=need_masks,
         metric_size=metric_size,
+        collect_scores=args.dump_scores,
     )
+    per_image = result.pop("per_image", [])
     result["profile_id"] = args.profile
     result["task"] = profile.task
     result["source"] = profile.source
@@ -211,6 +234,25 @@ def main() -> None:
     output = REPO / (args.out or f"reports/tables/evaluation_{args.profile}.json")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, indent=2) + "\n")
+    if args.dump_scores:
+        score_dir = REPO / "reports" / "tables" / "scores"
+        score_dir.mkdir(parents=True, exist_ok=True)
+        score_path = score_dir / f"{args.profile}.json"
+        score_path.write_text(
+            json.dumps(
+                {
+                    "schema": "veriqc.scores/1",
+                    "profile_id": args.profile,
+                    "task": profile.task,
+                    "source": profile.source,
+                    "score_kind": "known_score" if profile.task != "anomaly" else "anomaly_score",
+                    "rows": per_image,
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+        print(score_path.relative_to(REPO))
     print(json.dumps(result, indent=2))
 
 

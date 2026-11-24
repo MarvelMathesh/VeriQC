@@ -1,0 +1,1197 @@
+{
+  "schema": "veriqc.scores/1",
+  "profile_id": "pharma_capsule",
+  "task": "anomaly",
+  "source": "mvtec-ad:capsule",
+  "score_kind": "anomaly_score",
+  "rows": [
+    {
+      "part_id": "000",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.569380521774292
+    },
+    {
+      "part_id": "001",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.814285933971405
+    },
+    {
+      "part_id": "002",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6508461833000183
+    },
+    {
+      "part_id": "003",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.667612612247467
+    },
+    {
+      "part_id": "004",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7804765105247498
+    },
+    {
+      "part_id": "005",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6341473460197449
+    },
+    {
+      "part_id": "006",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6228936910629272
+    },
+    {
+      "part_id": "007",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6790817975997925
+    },
+    {
+      "part_id": "008",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5417281985282898
+    },
+    {
+      "part_id": "009",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6054598689079285
+    },
+    {
+      "part_id": "010",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7326489686965942
+    },
+    {
+      "part_id": "011",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7451609373092651
+    },
+    {
+      "part_id": "012",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7620649933815002
+    },
+    {
+      "part_id": "013",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7401155233383179
+    },
+    {
+      "part_id": "014",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7482451796531677
+    },
+    {
+      "part_id": "015",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.8070485591888428
+    },
+    {
+      "part_id": "016",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5525705218315125
+    },
+    {
+      "part_id": "017",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7778790593147278
+    },
+    {
+      "part_id": "018",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6796789765357971
+    },
+    {
+      "part_id": "019",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6898408532142639
+    },
+    {
+      "part_id": "020",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7160397171974182
+    },
+    {
+      "part_id": "021",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5133451223373413
+    },
+    {
+      "part_id": "022",
+      "defect_class": "crack",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5810403227806091
+    },
+    {
+      "part_id": "000",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.67514967918396
+    },
+    {
+      "part_id": "001",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6024697422981262
+    },
+    {
+      "part_id": "002",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.648727536201477
+    },
+    {
+      "part_id": "003",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6100659370422363
+    },
+    {
+      "part_id": "004",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5419036746025085
+    },
+    {
+      "part_id": "005",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5502322912216187
+    },
+    {
+      "part_id": "006",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.675099790096283
+    },
+    {
+      "part_id": "007",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6324918866157532
+    },
+    {
+      "part_id": "008",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.675516664981842
+    },
+    {
+      "part_id": "009",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.636657178401947
+    },
+    {
+      "part_id": "010",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7474934458732605
+    },
+    {
+      "part_id": "011",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6083430647850037
+    },
+    {
+      "part_id": "012",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6014196276664734
+    },
+    {
+      "part_id": "013",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7014417052268982
+    },
+    {
+      "part_id": "014",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6806737184524536
+    },
+    {
+      "part_id": "015",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6195111274719238
+    },
+    {
+      "part_id": "016",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6461402177810669
+    },
+    {
+      "part_id": "017",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6308156251907349
+    },
+    {
+      "part_id": "018",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5606053471565247
+    },
+    {
+      "part_id": "019",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5231926441192627
+    },
+    {
+      "part_id": "020",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6862995624542236
+    },
+    {
+      "part_id": "021",
+      "defect_class": "faulty_imprint",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.67983478307724
+    },
+    {
+      "part_id": "000",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5090776085853577
+    },
+    {
+      "part_id": "001",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.4006607234477997
+    },
+    {
+      "part_id": "002",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5097059011459351
+    },
+    {
+      "part_id": "003",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.4870782196521759
+    },
+    {
+      "part_id": "004",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.4722146689891815
+    },
+    {
+      "part_id": "005",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.3783215582370758
+    },
+    {
+      "part_id": "006",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5698180198669434
+    },
+    {
+      "part_id": "007",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5337634086608887
+    },
+    {
+      "part_id": "008",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.4651365280151367
+    },
+    {
+      "part_id": "009",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5677279233932495
+    },
+    {
+      "part_id": "010",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5236110091209412
+    },
+    {
+      "part_id": "011",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5363073348999023
+    },
+    {
+      "part_id": "012",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.45707181096076965
+    },
+    {
+      "part_id": "013",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.48314571380615234
+    },
+    {
+      "part_id": "014",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.49486950039863586
+    },
+    {
+      "part_id": "015",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5225289463996887
+    },
+    {
+      "part_id": "016",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.478212833404541
+    },
+    {
+      "part_id": "017",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5026628375053406
+    },
+    {
+      "part_id": "018",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5068212151527405
+    },
+    {
+      "part_id": "019",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5225220918655396
+    },
+    {
+      "part_id": "020",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5330719947814941
+    },
+    {
+      "part_id": "021",
+      "defect_class": null,
+      "label": false,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6338241696357727
+    },
+    {
+      "part_id": "022",
+      "defect_class": null,
+      "label": false,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.43961668014526367
+    },
+    {
+      "part_id": "000",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.777511477470398
+    },
+    {
+      "part_id": "001",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6620947122573853
+    },
+    {
+      "part_id": "002",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5812655687332153
+    },
+    {
+      "part_id": "003",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7282073497772217
+    },
+    {
+      "part_id": "004",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6733022928237915
+    },
+    {
+      "part_id": "005",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6492018103599548
+    },
+    {
+      "part_id": "006",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5364437699317932
+    },
+    {
+      "part_id": "007",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5870550870895386
+    },
+    {
+      "part_id": "008",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7550408840179443
+    },
+    {
+      "part_id": "009",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6770031452178955
+    },
+    {
+      "part_id": "010",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6518619656562805
+    },
+    {
+      "part_id": "011",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6922996640205383
+    },
+    {
+      "part_id": "012",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6268339157104492
+    },
+    {
+      "part_id": "013",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7390336394309998
+    },
+    {
+      "part_id": "014",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7084895372390747
+    },
+    {
+      "part_id": "015",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6954178214073181
+    },
+    {
+      "part_id": "016",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6546661853790283
+    },
+    {
+      "part_id": "017",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6555917263031006
+    },
+    {
+      "part_id": "018",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6564536690711975
+    },
+    {
+      "part_id": "019",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6628033518791199
+    },
+    {
+      "part_id": "020",
+      "defect_class": "poke",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6349004507064819
+    },
+    {
+      "part_id": "000",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5650898218154907
+    },
+    {
+      "part_id": "001",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6021463871002197
+    },
+    {
+      "part_id": "002",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5666584372520447
+    },
+    {
+      "part_id": "003",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5879775881767273
+    },
+    {
+      "part_id": "004",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5788254737854004
+    },
+    {
+      "part_id": "005",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5456843972206116
+    },
+    {
+      "part_id": "006",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6275556087493896
+    },
+    {
+      "part_id": "007",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5809334516525269
+    },
+    {
+      "part_id": "008",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7194251418113708
+    },
+    {
+      "part_id": "009",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6591929793357849
+    },
+    {
+      "part_id": "010",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6261411905288696
+    },
+    {
+      "part_id": "011",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6935611963272095
+    },
+    {
+      "part_id": "012",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6406581997871399
+    },
+    {
+      "part_id": "013",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6213617324829102
+    },
+    {
+      "part_id": "014",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6769276857376099
+    },
+    {
+      "part_id": "015",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5962061882019043
+    },
+    {
+      "part_id": "016",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6600697636604309
+    },
+    {
+      "part_id": "017",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "PASS",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5760419368743896
+    },
+    {
+      "part_id": "018",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6515886187553406
+    },
+    {
+      "part_id": "019",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6893370151519775
+    },
+    {
+      "part_id": "020",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6211835741996765
+    },
+    {
+      "part_id": "021",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.603757917881012
+    },
+    {
+      "part_id": "022",
+      "defect_class": "scratch",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6712333559989929
+    },
+    {
+      "part_id": "000",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6798533201217651
+    },
+    {
+      "part_id": "001",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7247871160507202
+    },
+    {
+      "part_id": "002",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.5955376029014587
+    },
+    {
+      "part_id": "003",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7685611844062805
+    },
+    {
+      "part_id": "004",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6508508920669556
+    },
+    {
+      "part_id": "005",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6323466300964355
+    },
+    {
+      "part_id": "006",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6661182045936584
+    },
+    {
+      "part_id": "007",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7137171030044556
+    },
+    {
+      "part_id": "008",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "REVIEW",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6141911745071411
+    },
+    {
+      "part_id": "009",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6807413697242737
+    },
+    {
+      "part_id": "010",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.652654767036438
+    },
+    {
+      "part_id": "011",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7401689291000366
+    },
+    {
+      "part_id": "012",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6327072978019714
+    },
+    {
+      "part_id": "013",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6826117634773254
+    },
+    {
+      "part_id": "014",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6900373101234436
+    },
+    {
+      "part_id": "015",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7212936282157898
+    },
+    {
+      "part_id": "016",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6861430406570435
+    },
+    {
+      "part_id": "017",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.698461651802063
+    },
+    {
+      "part_id": "018",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.7298323512077332
+    },
+    {
+      "part_id": "019",
+      "defect_class": "squeeze",
+      "label": true,
+      "verdict": "FAIL",
+      "qc_ok": true,
+      "known_score": null,
+      "anomaly_score": 0.6894730925559998
+    }
+  ]
+}

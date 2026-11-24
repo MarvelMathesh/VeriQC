@@ -10,10 +10,10 @@
         448,
         448
       ],
-      "max_abs_feature_difference": 3.725290298461914e-06,
+      "max_abs_feature_difference": 3.635883331298828e-06,
       "per_layer": {
-        "layer2": 3.725290298461914e-06,
-        "layer3": 2.8014183044433594e-06
+        "layer2": 3.635883331298828e-06,
+        "layer3": 2.205371856689453e-06
       },
       "profile_id": "automotive_metal_nut"
     },
@@ -25,7 +25,7 @@
         1024,
         384
       ],
-      "max_abs_logit_difference": 7.62939453125e-06,
+      "max_abs_logit_difference": 8.016824722290039e-06,
       "profile_id": "commutator"
     },
     {
@@ -36,10 +36,10 @@
         448,
         448
       ],
-      "max_abs_feature_difference": 3.5762786865234375e-06,
+      "max_abs_feature_difference": 3.337860107421875e-06,
       "per_layer": {
-        "layer2": 3.5762786865234375e-06,
-        "layer3": 2.041459083557129e-06
+        "layer2": 3.337860107421875e-06,
+        "layer3": 2.294778823852539e-06
       },
       "profile_id": "electronics_transistor"
     },
@@ -51,10 +51,10 @@
         448,
         448
       ],
-      "max_abs_feature_difference": 4.1425228118896484e-06,
+      "max_abs_feature_difference": 3.0994415283203125e-06,
       "per_layer": {
-        "layer2": 4.1425228118896484e-06,
-        "layer3": 2.4139881134033203e-06
+        "layer2": 3.0994415283203125e-06,
+        "layer3": 2.115964889526367e-06
       },
       "profile_id": "packaging_bottle"
     },
@@ -66,17 +66,18 @@
         448,
         448
       ],
-      "max_abs_feature_difference": 3.2186508178710938e-06,
+      "max_abs_feature_difference": 3.159046173095703e-06,
       "per_layer": {
-        "layer2": 3.2186508178710938e-06,
-        "layer3": 2.1457672119140625e-06
+        "layer2": 3.159046173095703e-06,
+        "layer3": 1.952052116394043e-06
       },
       "profile_id": "pharma_capsule"
     },
     {
       "artifact": "models/profiles/steel_surface/export/detector.onnx",
+      "decoder": "veriqc.models.onnx_runtime.ONNXDetector",
       "images": 8,
-      "max_box_difference_px": 0.0009918212890625,
+      "max_box_difference_px": 0.0008697509765625,
       "max_confidence_difference": 1.5497207641601562e-06,
       "count_mismatches": [],
       "profile_id": "steel_surface"
@@ -89,10 +90,10 @@
         448,
         448
       ],
-      "max_abs_feature_difference": 3.1739473342895508e-06,
+      "max_abs_feature_difference": 2.9355287551879883e-06,
       "per_layer": {
-        "layer2": 3.1739473342895508e-06,
-        "layer3": 1.8775463104248047e-06
+        "layer2": 2.9355287551879883e-06,
+        "layer3": 2.339482307434082e-06
       },
       "profile_id": "textile_carpet"
     }

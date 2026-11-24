@@ -1,0 +1,166 @@
+{
+  "schema_version": "veriqc.detector-bakeoff/1.0",
+  "profile_id": "commutator",
+  "dataset": {
+    "name": "KolektorSDD",
+    "path": "data/profiles/commutator/dataset.yaml",
+    "sha256": "d390aae2297221d1d76cecd9c6318ede09abcdefa0fd7deef3f439277d343cac"
+  },
+  "role_manifest_sha256": {
+    "kolektor-sdd": "6aee322934fcdd3ed4bc2d5c77a54e5a195ae06764dceca5762896a371ffa5fd"
+  },
+  "roles": {
+    "used": [
+      "design",
+      "defect_validation"
+    ],
+    "counts": {
+      "kolektor-sdd": {
+        "design": 111,
+        "defect_validation": 80
+      }
+    }
+  },
+  "arms": [
+    {
+      "id": "yolo26n_640",
+      "label": {
+        "architecture": "yolo26n",
+        "input_size": 640
+      },
+      "status": "measured",
+      "valid": true,
+      "invalid_reasons": [],
+      "training_record": "reports/tables/profiles/commutator/detector_bakeoff/yolo26n_640.json",
+      "training_command": null,
+      "returncode": null,
+      "arm_wall_seconds": null,
+      "checkpoint_architecture": "yolo26n",
+      "checkpoint_yaml_file": "yolo26n.yaml",
+      "architecture_matches_label": true,
+      "parameter_count": 2533886,
+      "weights_path": "models/profiles/commutator/weights/yolo26n_640.pt",
+      "weights_bytes": 5438725,
+      "weights_sha256": "65672e1626d514cc66a95f1a9f441170bc1ef1f739e99f97d54eef78f07cbd8d",
+      "training_seconds": 138.6,
+      "dataset_sha256": "d390aae2297221d1d76cecd9c6318ede09abcdefa0fd7deef3f439277d343cac",
+      "role_manifest_sha256": {
+        "kolektor-sdd": "6aee322934fcdd3ed4bc2d5c77a54e5a195ae06764dceca5762896a371ffa5fd"
+      },
+      "evaluation_role": "defect_validation",
+      "map50": 0.7347,
+      "map50_95": 0.2801,
+      "precision": 0.7254,
+      "recall": 0.7,
+      "per_class": [
+        {
+          "class": "crack",
+          "ap50": 0.7347,
+          "ap50_95": 0.2801,
+          "precision": 0.7254,
+          "recall": 0.7
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "yolo26n_320",
+      "label": {
+        "architecture": "yolo26n",
+        "input_size": 320
+      },
+      "status": "measured",
+      "valid": true,
+      "invalid_reasons": [],
+      "training_record": "reports/tables/profiles/commutator/detector_bakeoff/yolo26n_320.json",
+      "training_command": null,
+      "returncode": null,
+      "arm_wall_seconds": null,
+      "checkpoint_architecture": "yolo26n",
+      "checkpoint_yaml_file": "yolo26n.yaml",
+      "architecture_matches_label": true,
+      "parameter_count": 2533886,
+      "weights_path": "models/profiles/commutator/weights/yolo26n_320.pt",
+      "weights_bytes": 5414789,
+      "weights_sha256": "231df30b5018f104c4a8c96d2fe300b5c6484d907e39f6988cf3230a9f92726b",
+      "training_seconds": 52.7,
+      "dataset_sha256": "d390aae2297221d1d76cecd9c6318ede09abcdefa0fd7deef3f439277d343cac",
+      "role_manifest_sha256": {
+        "kolektor-sdd": "6aee322934fcdd3ed4bc2d5c77a54e5a195ae06764dceca5762896a371ffa5fd"
+      },
+      "evaluation_role": "defect_validation",
+      "map50": 0.3534,
+      "map50_95": 0.0704,
+      "precision": 0.5228,
+      "recall": 0.5,
+      "per_class": [
+        {
+          "class": "crack",
+          "ap50": 0.3534,
+          "ap50_95": 0.0704,
+          "precision": 0.5228,
+          "recall": 0.5
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "yolo26s_640",
+      "label": {
+        "architecture": "yolo26s",
+        "input_size": 640
+      },
+      "status": "measured",
+      "valid": true,
+      "invalid_reasons": [],
+      "training_record": "reports/tables/profiles/commutator/detector_bakeoff/yolo26s_640.json",
+      "training_command": null,
+      "returncode": null,
+      "arm_wall_seconds": null,
+      "checkpoint_architecture": "yolo26s",
+      "checkpoint_yaml_file": "yolo26s.yaml",
+      "architecture_matches_label": true,
+      "parameter_count": 9948638,
+      "weights_path": "models/profiles/commutator/weights/yolo26s_640.pt",
+      "weights_bytes": 20291781,
+      "weights_sha256": "9b5751006610385cab384df8672eb84fd25b2bd8fd39d8cd8b1f7e2ac4e5bc03",
+      "training_seconds": 221.1,
+      "dataset_sha256": "d390aae2297221d1d76cecd9c6318ede09abcdefa0fd7deef3f439277d343cac",
+      "role_manifest_sha256": {
+        "kolektor-sdd": "6aee322934fcdd3ed4bc2d5c77a54e5a195ae06764dceca5762896a371ffa5fd"
+      },
+      "evaluation_role": "defect_validation",
+      "map50": 0.265,
+      "map50_95": 0.0736,
+      "precision": 0.3329,
+      "recall": 0.4,
+      "per_class": [
+        {
+          "class": "crack",
+          "ap50": 0.265,
+          "ap50_95": 0.0736,
+          "precision": 0.3329,
+          "recall": 0.4
+        }
+      ],
+      "error": null
+    }
+  ],
+  "claim_scope": "validation_evidence_comparison_on_defect_validation_role_not_final_test_certified",
+  "provenance": {
+    "script": "ablations/detector_bakeoff.py",
+    "command": "python ablations/detector_bakeoff.py --profile commutator --epochs 150 --device 0",
+    "git_commit": "1ef864d",
+    "profile_id": "commutator",
+    "dataset": "KolektorSDD",
+    "roles": [
+      "design",
+      "defect_validation"
+    ],
+    "final_test_opened": false,
+    "claim_scope": "validation_evidence_comparison_on_defect_validation_role_not_final_test_certified",
+    "created": "2026-11-19T11:43:24+00:00",
+    "wall_seconds": 427.166,
+    "kind": "measured-on-host"
+  }
+}

@@ -19,7 +19,7 @@ from veriqc.datasets import NEU_CLASSES  # noqa: E402
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="data/prepared/neu/dataset.yaml")
-    parser.add_argument("--init-weights", default="yolo26n.pt")
+    parser.add_argument("--init-weights", default="models/weights/yolo26n.pt")
     parser.add_argument("--arch", default="yolo26n")
     parser.add_argument("--epochs", type=int, default=80)
     parser.add_argument("--imgsz", type=int, default=640)
@@ -33,11 +33,18 @@ def main() -> None:
     from ultralytics import YOLO
 
     data = str(REPO / args.data)
-    init = args.init_weights
-    if not Path(init).is_absolute() and (REPO / init).exists():
-        init = str(REPO / init)
+    init = Path(args.init_weights)
+    if not init.is_absolute():
+        init = REPO / init
+    if not init.is_file():
+        raise SystemExit(
+            f"initial detector checkpoint not found: {init}. "
+            "Place the COCO-initialised yolo26n.pt there instead of relying "
+            "on an implicit download."
+        )
+    init_hash = sha256_file(init)
     started = time.time()
-    model = YOLO(init)
+    model = YOLO(str(init))
     model.train(
         data=data,
         epochs=args.epochs,
@@ -70,6 +77,8 @@ def main() -> None:
         "epochs": args.epochs,
         "seed": args.seed,
         "classes": list(NEU_CLASSES),
+        "init_weights": str(init.relative_to(REPO)) if init.is_relative_to(REPO) else str(init),
+        "init_weights_sha256": init_hash,
         "weights": str(out.relative_to(REPO)),
         "weights_sha256": sha256_file(out),
         "train_seconds": round(time.time() - started, 1),

@@ -1,0 +1,440 @@
+{
+  "kind": "measured-on-host",
+  "profile_id": "commutator",
+  "source_id": "kolektor-sdd",
+  "role_manifest_sha256": "6aee322934fcdd3ed4bc2d5c77a54e5a195ae06764dceca5762896a371ffa5fd",
+  "units": {
+    "design_normal_frames": 96,
+    "calibration_normal_frames": 105,
+    "calibration_reference_objects": 15,
+    "validation_frames": 80,
+    "validation_normal_units": 10,
+    "validation_defect_units": 10,
+    "normal_unit_definition": "maximum over the normal frames of one held-out defective object",
+    "defect_unit_definition": "maximum over the defective frames of one held-out object"
+  },
+  "calibration": {
+    "anomaly_reference_values": 15,
+    "known_reference_values": 15,
+    "reference_unit": "object",
+    "bank_size": 2000,
+    "known_conf_threshold": 0.01,
+    "known_channel_available": true
+  },
+  "detector": {
+    "path": "models/profiles/commutator/weights/yolo26n_640.pt",
+    "sha256": "65672e1626d514cc66a95f1a9f441170bc1ef1f739e99f97d54eef78f07cbd8d",
+    "classes": [
+      "crack"
+    ]
+  },
+  "operating_grid": {
+    "alpha_fail": [
+      0.0625
+    ],
+    "alpha_review": [
+      0.125,
+      0.25,
+      0.5
+    ],
+    "p_value_step": 0.0625,
+    "points_per_rule": 3,
+    "total_points": 6
+  },
+  "curves": [
+    {
+      "rule": "anomaly_only",
+      "points": [
+        {
+          "rule": "anomaly_only",
+          "config": {
+            "rule": "anomaly_only",
+            "alpha_review": 0.125,
+            "alpha_fail": 0.0625
+          },
+          "counts": {
+            "normal_units": 10,
+            "defect_units": 10,
+            "normal_nonpass": 0,
+            "normal_review": 0,
+            "normal_fail": 0,
+            "defect_miss": 10,
+            "defect_fail": 0
+          },
+          "rates": {
+            "normal_nonpass_rate": 0.0,
+            "normal_review_rate": 0.0,
+            "defect_miss_rate": 1.0,
+            "defect_fail_rate": 0.0
+          }
+        },
+        {
+          "rule": "anomaly_only",
+          "config": {
+            "rule": "anomaly_only",
+            "alpha_review": 0.25,
+            "alpha_fail": 0.0625
+          },
+          "counts": {
+            "normal_units": 10,
+            "defect_units": 10,
+            "normal_nonpass": 2,
+            "normal_review": 2,
+            "normal_fail": 0,
+            "defect_miss": 8,
+            "defect_fail": 0
+          },
+          "rates": {
+            "normal_nonpass_rate": 0.2,
+            "normal_review_rate": 0.2,
+            "defect_miss_rate": 0.8,
+            "defect_fail_rate": 0.0
+          }
+        },
+        {
+          "rule": "anomaly_only",
+          "config": {
+            "rule": "anomaly_only",
+            "alpha_review": 0.5,
+            "alpha_fail": 0.0625
+          },
+          "counts": {
+            "normal_units": 10,
+            "defect_units": 10,
+            "normal_nonpass": 6,
+            "normal_review": 6,
+            "normal_fail": 0,
+            "defect_miss": 4,
+            "defect_fail": 0
+          },
+          "rates": {
+            "normal_nonpass_rate": 0.6,
+            "normal_review_rate": 0.6,
+            "defect_miss_rate": 0.4,
+            "defect_fail_rate": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "rule": "composed",
+      "points": [
+        {
+          "rule": "composed",
+          "config": {
+            "rule": "composed",
+            "alpha_review": 0.125,
+            "alpha_fail": 0.0625
+          },
+          "counts": {
+            "normal_units": 10,
+            "defect_units": 10,
+            "normal_nonpass": 4,
+            "normal_review": 4,
+            "normal_fail": 0,
+            "defect_miss": 0,
+            "defect_fail": 9
+          },
+          "rates": {
+            "normal_nonpass_rate": 0.4,
+            "normal_review_rate": 0.4,
+            "defect_miss_rate": 0.0,
+            "defect_fail_rate": 0.9
+          }
+        },
+        {
+          "rule": "composed",
+          "config": {
+            "rule": "composed",
+            "alpha_review": 0.25,
+            "alpha_fail": 0.0625
+          },
+          "counts": {
+            "normal_units": 10,
+            "defect_units": 10,
+            "normal_nonpass": 5,
+            "normal_review": 5,
+            "normal_fail": 0,
+            "defect_miss": 0,
+            "defect_fail": 9
+          },
+          "rates": {
+            "normal_nonpass_rate": 0.5,
+            "normal_review_rate": 0.5,
+            "defect_miss_rate": 0.0,
+            "defect_fail_rate": 0.9
+          }
+        },
+        {
+          "rule": "composed",
+          "config": {
+            "rule": "composed",
+            "alpha_review": 0.5,
+            "alpha_fail": 0.0625
+          },
+          "counts": {
+            "normal_units": 10,
+            "defect_units": 10,
+            "normal_nonpass": 9,
+            "normal_review": 9,
+            "normal_fail": 0,
+            "defect_miss": 0,
+            "defect_fail": 9
+          },
+          "rates": {
+            "normal_nonpass_rate": 0.9,
+            "normal_review_rate": 0.9,
+            "defect_miss_rate": 0.0,
+            "defect_fail_rate": 0.9
+          }
+        }
+      ]
+    }
+  ],
+  "curve_rows": [
+    {
+      "rule": "anomaly_only",
+      "config": {
+        "rule": "anomaly_only",
+        "alpha_review": 0.125,
+        "alpha_fail": 0.0625
+      },
+      "counts": {
+        "normal_units": 10,
+        "defect_units": 10,
+        "normal_nonpass": 0,
+        "normal_review": 0,
+        "normal_fail": 0,
+        "defect_miss": 10,
+        "defect_fail": 0
+      },
+      "rates": {
+        "normal_nonpass_rate": 0.0,
+        "normal_review_rate": 0.0,
+        "defect_miss_rate": 1.0,
+        "defect_fail_rate": 0.0
+      },
+      "diagnostic_normal_nonpass_rate": {
+        "point_estimate": 0.0,
+        "cp_95_upper_bound": 0.25887,
+        "n_normal_units": 10,
+        "n_nonpass": 0,
+        "note": "This is a diagnostic Clopper-Pearson bound on held-out normal-frame summaries from defective objects. It is not a certificate and it does not establish an object-level false-alarm budget."
+      }
+    },
+    {
+      "rule": "anomaly_only",
+      "config": {
+        "rule": "anomaly_only",
+        "alpha_review": 0.25,
+        "alpha_fail": 0.0625
+      },
+      "counts": {
+        "normal_units": 10,
+        "defect_units": 10,
+        "normal_nonpass": 2,
+        "normal_review": 2,
+        "normal_fail": 0,
+        "defect_miss": 8,
+        "defect_fail": 0
+      },
+      "rates": {
+        "normal_nonpass_rate": 0.2,
+        "normal_review_rate": 0.2,
+        "defect_miss_rate": 0.8,
+        "defect_fail_rate": 0.0
+      },
+      "diagnostic_normal_nonpass_rate": {
+        "point_estimate": 0.2,
+        "cp_95_upper_bound": 0.5069,
+        "n_normal_units": 10,
+        "n_nonpass": 2,
+        "note": "This is a diagnostic Clopper-Pearson bound on held-out normal-frame summaries from defective objects. It is not a certificate and it does not establish an object-level false-alarm budget."
+      }
+    },
+    {
+      "rule": "anomaly_only",
+      "config": {
+        "rule": "anomaly_only",
+        "alpha_review": 0.5,
+        "alpha_fail": 0.0625
+      },
+      "counts": {
+        "normal_units": 10,
+        "defect_units": 10,
+        "normal_nonpass": 6,
+        "normal_review": 6,
+        "normal_fail": 0,
+        "defect_miss": 4,
+        "defect_fail": 0
+      },
+      "rates": {
+        "normal_nonpass_rate": 0.6,
+        "normal_review_rate": 0.6,
+        "defect_miss_rate": 0.4,
+        "defect_fail_rate": 0.0
+      },
+      "diagnostic_normal_nonpass_rate": {
+        "point_estimate": 0.6,
+        "cp_95_upper_bound": 0.84997,
+        "n_normal_units": 10,
+        "n_nonpass": 6,
+        "note": "This is a diagnostic Clopper-Pearson bound on held-out normal-frame summaries from defective objects. It is not a certificate and it does not establish an object-level false-alarm budget."
+      }
+    },
+    {
+      "rule": "composed",
+      "config": {
+        "rule": "composed",
+        "alpha_review": 0.125,
+        "alpha_fail": 0.0625
+      },
+      "counts": {
+        "normal_units": 10,
+        "defect_units": 10,
+        "normal_nonpass": 4,
+        "normal_review": 4,
+        "normal_fail": 0,
+        "defect_miss": 0,
+        "defect_fail": 9
+      },
+      "rates": {
+        "normal_nonpass_rate": 0.4,
+        "normal_review_rate": 0.4,
+        "defect_miss_rate": 0.0,
+        "defect_fail_rate": 0.9
+      },
+      "diagnostic_normal_nonpass_rate": {
+        "point_estimate": 0.4,
+        "cp_95_upper_bound": 0.69646,
+        "n_normal_units": 10,
+        "n_nonpass": 4,
+        "note": "This is a diagnostic Clopper-Pearson bound on held-out normal-frame summaries from defective objects. It is not a certificate and it does not establish an object-level false-alarm budget."
+      }
+    },
+    {
+      "rule": "composed",
+      "config": {
+        "rule": "composed",
+        "alpha_review": 0.25,
+        "alpha_fail": 0.0625
+      },
+      "counts": {
+        "normal_units": 10,
+        "defect_units": 10,
+        "normal_nonpass": 5,
+        "normal_review": 5,
+        "normal_fail": 0,
+        "defect_miss": 0,
+        "defect_fail": 9
+      },
+      "rates": {
+        "normal_nonpass_rate": 0.5,
+        "normal_review_rate": 0.5,
+        "defect_miss_rate": 0.0,
+        "defect_fail_rate": 0.9
+      },
+      "diagnostic_normal_nonpass_rate": {
+        "point_estimate": 0.5,
+        "cp_95_upper_bound": 0.77756,
+        "n_normal_units": 10,
+        "n_nonpass": 5,
+        "note": "This is a diagnostic Clopper-Pearson bound on held-out normal-frame summaries from defective objects. It is not a certificate and it does not establish an object-level false-alarm budget."
+      }
+    },
+    {
+      "rule": "composed",
+      "config": {
+        "rule": "composed",
+        "alpha_review": 0.5,
+        "alpha_fail": 0.0625
+      },
+      "counts": {
+        "normal_units": 10,
+        "defect_units": 10,
+        "normal_nonpass": 9,
+        "normal_review": 9,
+        "normal_fail": 0,
+        "defect_miss": 0,
+        "defect_fail": 9
+      },
+      "rates": {
+        "normal_nonpass_rate": 0.9,
+        "normal_review_rate": 0.9,
+        "defect_miss_rate": 0.0,
+        "defect_fail_rate": 0.9
+      },
+      "diagnostic_normal_nonpass_rate": {
+        "point_estimate": 0.9,
+        "cp_95_upper_bound": 0.99488,
+        "n_normal_units": 10,
+        "n_nonpass": 9,
+        "note": "This is a diagnostic Clopper-Pearson bound on held-out normal-frame summaries from defective objects. It is not a certificate and it does not establish an object-level false-alarm budget."
+      }
+    }
+  ],
+  "selection": {
+    "status": "refused",
+    "causes": [
+      "no operating point can be certified at alpha=0.05 with delta=0.05: the grid has 6 points and 10 normal units, and zero non-PASS verdicts would need at least 94 normal units"
+    ],
+    "protocol_refusal": "No owner-approved risk_normals role exists. The held-out normal population consists of normal-frame summaries from objects that also contain defects, so the diagnostic curves cannot certify a false-alarm budget.",
+    "certificate_eligible": false
+  },
+  "channel_overlap": {
+    "0.0625": {
+      "alpha": 0.0625,
+      "defect_units": 10,
+      "anomaly_only": 0,
+      "known_only": 9,
+      "both": 0,
+      "neither": 1,
+      "note": "A known-only defect can be missed by anomaly_only but is caught by composed because the composed p-value is the minimum. The price is that a known-only firing on a normal frame adds a false alarm to composed."
+    },
+    "0.125": {
+      "alpha": 0.125,
+      "defect_units": 10,
+      "anomaly_only": 0,
+      "known_only": 10,
+      "both": 0,
+      "neither": 0,
+      "note": "A known-only defect can be missed by anomaly_only but is caught by composed because the composed p-value is the minimum. The price is that a known-only firing on a normal frame adds a false alarm to composed."
+    },
+    "0.25": {
+      "alpha": 0.25,
+      "defect_units": 10,
+      "anomaly_only": 0,
+      "known_only": 8,
+      "both": 2,
+      "neither": 0,
+      "note": "A known-only defect can be missed by anomaly_only but is caught by composed because the composed p-value is the minimum. The price is that a known-only firing on a normal frame adds a false alarm to composed."
+    },
+    "0.5": {
+      "alpha": 0.5,
+      "defect_units": 10,
+      "anomaly_only": 0,
+      "known_only": 4,
+      "both": 6,
+      "neither": 0,
+      "note": "A known-only defect can be missed by anomaly_only but is caught by composed because the composed p-value is the minimum. The price is that a known-only firing on a normal frame adds a false alarm to composed."
+    }
+  },
+  "claim_scope": "defect_validation_diagnostic_only_not_final_test_certified",
+  "geometry_scope": "whole-frame diagnostic scoring because the profile has no frozen registered ROI; this is not production geometry evidence",
+  "provenance": {
+    "script": "ablations/rule_bakeoff.py",
+    "command": "python ablations/rule_bakeoff.py --profile commutator --device cuda",
+    "git_commit": "1ef864d",
+    "dataset": "KolektorSDD",
+    "roles": [
+      "design",
+      "calibration",
+      "defect_validation"
+    ],
+    "final_test_opened": false,
+    "created": "2026-11-21T11:58:03",
+    "wall_seconds": 6.3,
+    "kind": "measured-on-host",
+    "host_scope": "Synthetic workstation computation on this host only; no Raspberry Pi latency, memory, thermal or energy number."
+  }
+}

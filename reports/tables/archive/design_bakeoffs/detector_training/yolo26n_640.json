@@ -1,0 +1,45 @@
+{
+  "schema_version": "veriqc.detector-training/1.0",
+  "profile_id": "commutator",
+  "classes": [
+    "crack"
+  ],
+  "architecture": "yolo26n",
+  "input_size": 640,
+  "epochs": 150,
+  "patience": 40,
+  "batch": 16,
+  "seed": 1729,
+  "initialisation": "pretrained (yolo26n.pt)",
+  "train_seconds": 138.6,
+  "dataset": "data/profiles/commutator/dataset.yaml",
+  "dataset_sha256": "d390aae2297221d1d76cecd9c6318ede09abcdefa0fd7deef3f439277d343cac",
+  "weights": "models/profiles/commutator/weights/best.pt",
+  "weights_sha256": "65672e1626d514cc66a95f1a9f441170bc1ef1f739e99f97d54eef78f07cbd8d",
+  "weights_bytes": 5438725,
+  "evaluation": {
+    "split": "defect_validation",
+    "claim_scope": "validation_evidence_not_final_test_certified",
+    "metrics": {
+      "mAP50": 0.7347,
+      "mAP50_95": 0.2801,
+      "precision": 0.7254,
+      "recall": 0.7
+    },
+    "per_class": [
+      {
+        "class": "crack",
+        "ap50": 0.7347,
+        "ap50_95": 0.2801,
+        "precision": 0.7254,
+        "recall": 0.7
+      }
+    ]
+  },
+  "provenance": {
+    "git_commit": "1ef864d",
+    "command": "python scripts/train.py --profile commutator --arch yolo26n --imgsz 640 --epochs 150 --patience 40 --batch 16 --seed 1729 --device 0 --init-weights models/weights/yolo26n.pt --dataset data/profiles/commutator/dataset.yaml --out reports/tables/profiles/commutator/detector_bakeoff/yolo26n_640.json",
+    "created": "2026-11-19T17:08:40",
+    "kind": "measured-on-host"
+  }
+}

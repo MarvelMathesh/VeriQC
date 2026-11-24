@@ -16,6 +16,7 @@ from veriqc.advisory.guidance import (
     primary_finding,
     verify_selection,
 )
+from veriqc.advisory.process_runner import AdvisoryTimeout
 from veriqc.inspection import InspectionResult
 
 __all__ = ["AdvisoryOutcome", "AdvisoryWorker"]
@@ -32,6 +33,7 @@ class AdvisoryOutcome:
     action: str | None = None
     note: str | None = None
     timed_out: bool = False
+    error: str | None = None
     verification: dict[str, Any] = field(default_factory=dict)
     model: dict[str, Any] = field(default_factory=dict)
 
@@ -47,6 +49,7 @@ class AdvisoryOutcome:
             "action": self.action,
             "note": self.note,
             "timed_out": self.timed_out,
+            "error": self.error,
             "verification": dict(self.verification),
             "model": dict(self.model),
         }
@@ -140,8 +143,9 @@ class AdvisoryWorker:
                 verification={"ok": False, "violations": [f"prompt error: {exc!r}"]},
             )
 
-        generated = self._generate(prompt)
-        if generated is None:
+        generated, generation_error = self._generate(prompt)
+        if generation_error is not None:
+            timed_out = generation_error.startswith("timeout:")
             return AdvisoryOutcome(
                 text=template,
                 template=template,
@@ -150,8 +154,30 @@ class AdvisoryWorker:
                 cause=default_cause,
                 action=default_action,
                 latency_ms=(time.perf_counter() - started) * 1000.0,
-                timed_out=True,
-                verification={"ok": False, "violations": ["generation timeout or busy"]},
+                timed_out=timed_out,
+                error=generation_error,
+                verification={
+                    "ok": False,
+                    "violations": [generation_error],
+                },
+            )
+        if generated is None or not generated.ok:
+            error = (
+                generated.error
+                if generated is not None and generated.error
+                else "advisory runtime returned no result"
+            )
+            return AdvisoryOutcome(
+                text=template,
+                template=template,
+                path="template",
+                accepted=False,
+                cause=default_cause,
+                action=default_action,
+                latency_ms=(time.perf_counter() - started) * 1000.0,
+                error=error,
+                verification={"ok": False, "violations": [f"runtime error: {error}"]},
+                model=generated.to_dict() if generated is not None else {},
             )
         selection = parse_selection(generated.text, card)
         if selection is None:
@@ -214,18 +240,31 @@ class AdvisoryWorker:
             return "check the fixture alignment before the next part"
         return "check the process before the next part"
 
-    def _generate(self, prompt: str):
+    def _restart(self) -> None:
+        restart = getattr(self.runner, "restart", None)
+        if restart is not None:
+            try:
+                restart()
+            except Exception:
+                pass
+
+    def _generate(self, prompt: str) -> tuple[Any | None, str | None]:
+        """Return ``(result, error)`` and never conflate an error with a timeout."""
+
         try:
-            return self.runner.generate(
+            result = self.runner.generate(
                 prompt,
                 max_new_tokens=self.max_new_tokens,
                 timeout_s=self.deadline_s,
             )
-        except Exception:
-            restart = getattr(self.runner, "restart", None)
-            if restart is not None:
-                try:
-                    restart()
-                except Exception:
-                    pass
-            return None
+        except AdvisoryTimeout as exc:
+            self._restart()
+            return None, f"timeout: {exc}"
+        except Exception as exc:
+            self._restart()
+            return None, f"runtime error: {exc!r}"
+        if result is None:
+            return None, "runtime error: advisory runtime returned no result"
+        if not result.ok:
+            self._restart()
+        return result, None

@@ -1,0 +1,101 @@
+{
+  "profile_id": "commutator",
+  "source_id": "kolektor-sdd",
+  "dataset": "KolektorSDD",
+  "role_manifest_sha256": "6aee322934fcdd3ed4bc2d5c77a54e5a195ae06764dceca5762896a371ffa5fd",
+  "units": {
+    "design_units": 14,
+    "design_normal_items": 96,
+    "design_defect_items": 15
+  },
+  "protocol": {
+    "role": "design",
+    "fold_group": "unit_id",
+    "fit": "normal items from training units",
+    "score": "normal and defective items from held-out units",
+    "folds": 5,
+    "seed": 0
+  },
+  "arms": [
+    {
+      "backbone": "efficientnet_b0",
+      "scorer": "coreset_knn",
+      "resize_mode": "letterbox",
+      "input_size": 224,
+      "mean_image_auroc": 0.8514,
+      "memory_bank_bytes": 512000,
+      "memory_bank_mb": 0.512,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "cpu_latency_ms_4_threads": 4.14,
+      "within_memory_budget": true,
+      "within_parameter_budget": true,
+      "shipped_weight_file": "models/vision/efficientnet_b0_stages2-3.pt"
+    },
+    {
+      "backbone": "mobilenet_v3_small",
+      "scorer": "coreset_knn",
+      "resize_mode": "letterbox",
+      "input_size": 224,
+      "mean_image_auroc": 0.5444,
+      "memory_bank_bytes": 384000,
+      "memory_bank_mb": 0.384,
+      "executed_parameters": 10488,
+      "nominal_parameters": 2542856,
+      "cpu_latency_ms_4_threads": 1.12,
+      "within_memory_budget": true,
+      "within_parameter_budget": true,
+      "shipped_weight_file": null
+    },
+    {
+      "backbone": "resnet18",
+      "scorer": "coreset_knn",
+      "resize_mode": "letterbox",
+      "input_size": 224,
+      "mean_image_auroc": 0.8507,
+      "memory_bank_bytes": 3072000,
+      "memory_bank_mb": 3.072,
+      "executed_parameters": 2782784,
+      "nominal_parameters": 11689512,
+      "cpu_latency_ms_4_threads": 12.48,
+      "within_memory_budget": false,
+      "within_parameter_budget": true,
+      "shipped_weight_file": null
+    },
+    {
+      "backbone": "wide_resnet50_2",
+      "scorer": "coreset_knn",
+      "resize_mode": "letterbox",
+      "input_size": 224,
+      "mean_image_auroc": 0.9222,
+      "memory_bank_bytes": 12288000,
+      "memory_bank_mb": 12.288,
+      "executed_parameters": 24862528,
+      "nominal_parameters": 68883240,
+      "cpu_latency_ms_4_threads": 80.89,
+      "within_memory_budget": false,
+      "within_parameter_budget": false,
+      "shipped_weight_file": null
+    }
+  ],
+  "budgets": {
+    "memory_bank_bytes": 1000000,
+    "vision_parameters": 5000000,
+    "weights_bytes": 8000000
+  },
+  "provenance": {
+    "script": "ablations/backbone_pareto.py",
+    "command": "python ablations/backbone_pareto.py --folds 5 --device cuda",
+    "git_commit": "1ef864d",
+    "dataset": "KolektorSDD",
+    "device": "cuda",
+    "roles": [
+      "design"
+    ],
+    "final_test_opened": false,
+    "claim_scope": "design-role selection evidence; not a detection or release claim",
+    "created": "2026-11-19T11:04:36Z",
+    "wall_seconds": 118.69,
+    "kind": "measured-on-host"
+  }
+}

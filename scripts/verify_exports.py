@@ -27,43 +27,65 @@ def _session(path: Path):
 
 
 def detector_parity(profile, manifest: dict) -> dict:
-    from ultralytics import YOLO
+    """Compare the production decoder, not a second Ultralytics predictor."""
+
+    from PIL import Image
+
+    from veriqc.models.onnx_runtime import ONNXDetector
+    from veriqc.models.torch_detector import Detector
 
     export = manifest["artifacts"]["known"]
-    source = profile.known.path
     onnx_path = REPO / export["path"]
-    reference = YOLO(str(source))
-    exported = YOLO(str(onnx_path))
+    reference = Detector.from_weights(
+        profile.known.path,
+        profile.known.classes,
+        input_size=int(profile.known.input_size or 640),
+        conf_threshold=0.01,
+        device="cpu",
+    )
+    exported = ONNXDetector(
+        onnx_path,
+        profile.known.classes,
+        input_size=int(profile.known.input_size or 640),
+        conf_threshold=0.01,
+        iou_threshold=0.5,
+    )
     items = load_manifest(REPO / "data" / "prepared" / "neu" / "manifest.json")["items"]["test"][:8]
     box_diffs = []
     confidence_diffs = []
     counts = []
     for item in items:
-        first = reference.predict(
-            item["image"], imgsz=profile.known.input_size, conf=0.01, iou=0.5,
-            device="cpu", verbose=False,
-        )[0].boxes
-        second = exported.predict(
-            item["image"], imgsz=profile.known.input_size, conf=0.01, iou=0.5,
-            device="cpu", verbose=False,
-        )[0].boxes
-        a_boxes = first.xyxy.cpu().numpy()
-        b_boxes = second.xyxy.cpu().numpy()
-        a_conf = first.conf.cpu().numpy()
-        b_conf = second.conf.cpu().numpy()
-        a_cls = first.cls.cpu().numpy()
-        b_cls = second.cls.cpu().numpy()
-        if len(a_boxes) != len(b_boxes):
-            counts.append({"reference": len(a_boxes), "onnx": len(b_boxes)})
+        with Image.open(item["image"]) as opened:
+            image = opened.convert("RGB")
+        first, _ = reference.predict(image)
+        second, _ = exported.predict(image)
+        if len(first) != len(second):
+            counts.append({"reference": len(first), "onnx": len(second)})
             continue
-        if len(a_boxes) == 0:
+        if not first:
             continue
-        order_a = np.lexsort((a_conf, a_cls))
-        order_b = np.lexsort((b_conf, b_cls))
-        box_diffs.append(float(np.abs(a_boxes[order_a] - b_boxes[order_b]).max()))
-        confidence_diffs.append(float(np.abs(a_conf[order_a] - b_conf[order_b]).max()))
+        first_sorted = sorted(first, key=lambda row: (row.class_id, -row.confidence))
+        second_sorted = sorted(second, key=lambda row: (row.class_id, -row.confidence))
+        box_diffs.append(
+            float(
+                max(
+                    abs(a - b)
+                    for left, right in zip(first_sorted, second_sorted)
+                    for a, b in zip(left.bbox, right.bbox)
+                )
+            )
+        )
+        confidence_diffs.append(
+            float(
+                max(
+                    abs(left.confidence - right.confidence)
+                    for left, right in zip(first_sorted, second_sorted)
+                )
+            )
+        )
     return {
         "artifact": export["path"],
+        "decoder": "veriqc.models.onnx_runtime.ONNXDetector",
         "images": len(items),
         "max_box_difference_px": max(box_diffs) if box_diffs else 0.0,
         "max_confidence_difference": max(confidence_diffs) if confidence_diffs else 0.0,

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Audit the advisory path on real inspection findings.
 
-The audit measures acceptance, grounding violations and latency.  Usefulness
-requires an independent human rating and is reported as not measured unless a
-rating sheet is supplied.
+The audit measures acceptance, grounding violations, runtime errors and
+latency on real inspection findings.
 """
 
 from __future__ import annotations
@@ -83,6 +82,7 @@ def main() -> None:
                         "path": outcome.path,
                         "accepted": outcome.accepted,
                         "timed_out": outcome.timed_out,
+                        "error": outcome.error,
                         "violations": outcome.verification.get("violations", []),
                         "verification": outcome.verification,
                         "model": outcome.model,
@@ -134,6 +134,7 @@ def main() -> None:
         "rejected": len(rejected),
         "rejected_format": len(format_rejected),
         "timed_out": sum(1 for row in rows if row.get("timed_out")),
+        "runtime_errors": sum(1 for row in rows if row.get("error")),
         "accepted_grounding_violations": len(accepted_with_violation),
         "rejection_reasons": dict(sorted(rejection_reasons.items())),
         "latency_ms_median": round(statistics.median(latencies), 1) if latencies else None,
@@ -155,7 +156,6 @@ def main() -> None:
         "generated_tokens_max": max(generated_tokens) if generated_tokens else None,
         "resident_mb_median": round(statistics.median(resident), 1) if resident else None,
         "resident_mb_max": round(max(resident), 1) if resident else None,
-        "human_usefulness": "not measured; blind sheet prepared, awaiting independent rater",
         "model_sha256": sha256_file(pte),
         "tokenizer_sha256": sha256_file(tokenizer / "tokenizer.json"),
         "wall_seconds": round(time.time() - started, 1),

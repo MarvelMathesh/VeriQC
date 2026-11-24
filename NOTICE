@@ -23,17 +23,17 @@ The advisory artifact is derived from Meta Llama 3.2 1B Instruct and is
 subject to the Llama 3.2 Community License and the Acceptable Use Policy
 incorporated by that licence.
 
-Llama 3.2 is licensed under the Llama 3.2 Community License, Copyright (c)
+Llama 3.2 is licensed under the Llama 3.2 Community License, Copyright ©
 Meta Platforms, Inc. All Rights Reserved.
 
 The agreement, its Acceptable Use Policy and the "Built with Llama"
-attribution must accompany any permitted redistribution.  The intended
-industrial-inspection use, including any critical-infrastructure or
-heavy-machinery context, requires an explicit owner review.  The local
-artifact is a development export with int8-stored linear weights and an fp32
-embedding; it is not a Meta release artifact.  The station verifies the PTE
-and tokenizer hashes against the local advisory manifest before enabling the
-advisory.
+attribution must accompany any permitted redistribution.  The full agreement
+is reproduced in LICENSE-LLAMA-3.2.md.  The intended industrial-inspection
+use, including any critical-infrastructure or heavy-machinery context, requires
+an explicit owner review.  The advisory artifact is a development export with
+int8-stored linear weights and an fp32 embedding; it is not a Meta release
+artifact.  The station verifies the PTE and tokenizer hashes against the local
+advisory manifest before enabling the advisory.
 
 --------------------------------------------------------------------------------
 Ultralytics YOLO
@@ -42,9 +42,9 @@ Ultralytics YOLO
 Ultralytics YOLO software is used under AGPL-3.0 by default, with an
 alternative Ultralytics Enterprise Licence.  The VeriQC-trained steel detector
 is identified by SHA-256 in configs/artifacts.json.  The COCO-initialised
-checkpoint is resolved by Ultralytics at training time; it is not
-redistributed by this repository.  The datasets used to train the detector are
-not redistributed.
+checkpoint used to start training is included at models/weights/yolo26n.pt and
+remains subject to the Ultralytics terms.  The datasets used to train the
+detector are not redistributed.
 
 --------------------------------------------------------------------------------
 Datasets (not redistributed)
@@ -80,7 +80,19 @@ MVTec AD
   Detection," CVPR, 2019.
 
 The NEU-DET, KolektorSDD and MVTec AD sources are evaluation/research
-resources.  Any demo or release must respect their terms.
+resources.  Any release or deployment must respect their terms.
+
+--------------------------------------------------------------------------------
+Model artifacts trained on the datasets
+--------------------------------------------------------------------------------
+
+The repository includes the runtime exports and training checkpoints under
+models/.  Models trained on NEU-DET, KolektorSDD or MVTec AD carry the terms of
+those sources: NEU-DET reuse is unresolved, KolektorSDD is CC BY-NC-SA 4.0 and
+MVTec AD is non-commercial/research.  Treat the included checkpoints and ONNX
+exports as research and evaluation artifacts.  Commercial use, hosted services
+or redistribution beyond the source terms require permission from the rights
+holders.  This is a compliance boundary.
 
 --------------------------------------------------------------------------------
 Pretrained vision weights
@@ -125,5 +137,6 @@ files remain authoritative and must be retained in any binary distribution.
   ONNX Runtime                  MIT
   pytest                        MIT
 
-The project does not vendor the datasets, the PyTorch/ExecuTorch source
-checkout or the model snapshot in the published code/evidence.
+The project does not vendor the datasets or the PyTorch/ExecuTorch source
+checkout.  Model artifacts are tracked separately from the source datasets and
+are covered by the notices above.

@@ -1,0 +1,233 @@
+{
+  "arms": [
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 224,
+        "resize_mode": "squash",
+        "max_exemplars": 2000
+      },
+      "image_auroc": 0.6937,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6491,
+        "achievable": true,
+        "order_statistic_k": 331
+      },
+      "false_alarm_rate_at_threshold": 0.0461,
+      "cp_95_upper_fpr": 0.06919,
+      "detection_rate_at_threshold": 0.1731,
+      "miss_rate_at_threshold": 0.8269,
+      "bank_bytes": 512000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 4.38,
+      "fit_seconds_median": 7.69
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 224,
+        "resize_mode": "letterbox",
+        "max_exemplars": 2000
+      },
+      "image_auroc": 0.8899,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6143,
+        "achievable": true,
+        "order_statistic_k": 331
+      },
+      "false_alarm_rate_at_threshold": 0.0461,
+      "cp_95_upper_fpr": 0.06919,
+      "detection_rate_at_threshold": 0.5,
+      "miss_rate_at_threshold": 0.5,
+      "bank_bytes": 512000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 4.26,
+      "fit_seconds_median": 7.61
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 224,
+        "resize_mode": "crop",
+        "max_exemplars": 2000
+      },
+      "image_auroc": 0.8094,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.7163,
+        "achievable": true,
+        "order_statistic_k": 331
+      },
+      "false_alarm_rate_at_threshold": 0.0461,
+      "cp_95_upper_fpr": 0.06919,
+      "detection_rate_at_threshold": 0.5,
+      "miss_rate_at_threshold": 0.5,
+      "bank_bytes": 512000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 3.83,
+      "fit_seconds_median": 7.47
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 320,
+        "resize_mode": "letterbox",
+        "max_exemplars": 2000
+      },
+      "image_auroc": 0.8536,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6322,
+        "achievable": true,
+        "order_statistic_k": 331
+      },
+      "false_alarm_rate_at_threshold": 0.0461,
+      "cp_95_upper_fpr": 0.06919,
+      "detection_rate_at_threshold": 0.5577,
+      "miss_rate_at_threshold": 0.4423,
+      "bank_bytes": 512000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 6.78,
+      "fit_seconds_median": 14.89
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 448,
+        "resize_mode": "letterbox",
+        "max_exemplars": 2000
+      },
+      "image_auroc": 0.867,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6471,
+        "achievable": true,
+        "order_statistic_k": 331
+      },
+      "false_alarm_rate_at_threshold": 0.0461,
+      "cp_95_upper_fpr": 0.06919,
+      "detection_rate_at_threshold": 0.4615,
+      "miss_rate_at_threshold": 0.5385,
+      "bank_bytes": 512000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 11.03,
+      "fit_seconds_median": 28.58
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 224,
+        "resize_mode": "letterbox",
+        "max_exemplars": 500
+      },
+      "image_auroc": 0.8599,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6651,
+        "achievable": true,
+        "order_statistic_k": 331
+      },
+      "false_alarm_rate_at_threshold": 0.0461,
+      "cp_95_upper_fpr": 0.06919,
+      "detection_rate_at_threshold": 0.5385,
+      "miss_rate_at_threshold": 0.4615,
+      "bank_bytes": 128000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 3.56,
+      "fit_seconds_median": 2.54
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 224,
+        "resize_mode": "letterbox",
+        "max_exemplars": 1000
+      },
+      "image_auroc": 0.872,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.6363,
+        "achievable": true,
+        "order_statistic_k": 331
+      },
+      "false_alarm_rate_at_threshold": 0.0461,
+      "cp_95_upper_fpr": 0.06919,
+      "detection_rate_at_threshold": 0.5769,
+      "miss_rate_at_threshold": 0.4231,
+      "bank_bytes": 256000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 3.65,
+      "fit_seconds_median": 4.25
+    },
+    {
+      "config": {
+        "backbone": "efficientnet_b0",
+        "input_size": 224,
+        "resize_mode": "letterbox",
+        "max_exemplars": 4000
+      },
+      "image_auroc": 0.8615,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.5947,
+        "achievable": true,
+        "order_statistic_k": 331
+      },
+      "false_alarm_rate_at_threshold": 0.0461,
+      "cp_95_upper_fpr": 0.06919,
+      "detection_rate_at_threshold": 0.5385,
+      "miss_rate_at_threshold": 0.4615,
+      "bank_bytes": 1024000,
+      "executed_parameters": 65730,
+      "nominal_parameters": 5288548,
+      "score_ms_per_image_median": 5.25,
+      "fit_seconds_median": 14.39
+    },
+    {
+      "config": {
+        "backbone": "mobilenet_v3_small",
+        "input_size": 224,
+        "resize_mode": "letterbox",
+        "max_exemplars": 2000
+      },
+      "image_auroc": 0.686,
+      "threshold_at_alpha": {
+        "alpha": 0.05,
+        "value": 0.503,
+        "achievable": true,
+        "order_statistic_k": 331
+      },
+      "false_alarm_rate_at_threshold": 0.0461,
+      "cp_95_upper_fpr": 0.06919,
+      "detection_rate_at_threshold": 0.2885,
+      "miss_rate_at_threshold": 0.7115,
+      "bank_bytes": 384000,
+      "executed_parameters": 10488,
+      "nominal_parameters": 2542856,
+      "score_ms_per_image_median": 2.98,
+      "fit_seconds_median": 2.42
+    }
+  ],
+  "folds": 10,
+  "alpha": 0.05,
+  "seed": 0,
+  "provenance": {
+    "script": "ablations/gate_sweep.py",
+    "command": "python ablations/gate_sweep.py",
+    "git_commit": "1ef864d",
+    "dataset": "KolektorSDD, split by part",
+    "device": "cuda",
+    "created": "2026-11-16T13:15:09",
+    "wall_seconds": 1011.6,
+    "kind": "measured"
+  }
+}

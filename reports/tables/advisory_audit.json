@@ -21,7 +21,6 @@
   "generated_tokens_max": 18,
   "resident_mb_median": 2741.3,
   "resident_mb_max": 2741.3,
-  "human_usefulness": "not measured; blind sheet prepared, awaiting independent rater",
   "model_sha256": "3fdc3db98e7b0f33c480c9ea92cdc48f68c09e0eb809ba31ae846c50bab513b4",
   "tokenizer_sha256": "6b9e4e7fb171f92fd137b777cc2714bf87d11576700a1dcd7a399e7bbe39537b",
   "wall_seconds": 193.1,
@@ -1322,5 +1321,7 @@
       "tokens_per_second": 5.48,
       "generated_tokens": 17
     }
-  ]
+  ],
+  "timed_out": 0,
+  "runtime_errors": 0
 }

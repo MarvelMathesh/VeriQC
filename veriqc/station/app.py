@@ -300,7 +300,8 @@ def overlay(
     if record is None or not record.get("overlay"):
         raise HTTPException(status_code=404, detail="overlay not found")
     path = (REPO_ROOT / record["overlay"]).resolve()
-    if REPO_ROOT not in path.parents or not path.exists():
+    overlay_root = (REPO_ROOT / "artifacts" / "overlays").resolve()
+    if not path.is_relative_to(overlay_root) or not path.exists():
         raise HTTPException(status_code=404, detail="overlay not found")
     return FileResponse(path, media_type="image/png")
 

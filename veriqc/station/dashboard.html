@@ -5,123 +5,841 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VeriQC Edge Station</title>
 <style>
-  :root { color-scheme: dark; --bg:#0a0f1c; --panel:#111827; --line:#1f2937; --text:#e5e7eb; --muted:#94a3b8; --pass:#34d399; --fail:#f87171; --review:#fbbf24; --accent:#60a5fa; }
+  :root {
+    color-scheme: light;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-subtle: #f1f5f9;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --text: #0f172a;
+    --text-secondary: #475569;
+    --muted: #64748b;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-soft: #eff6ff;
+    --accent-border: #bfdbfe;
+    --pass: #059669;
+    --pass-bg: #ecfdf5;
+    --pass-border: #a7f3d0;
+    --fail: #dc2626;
+    --fail-bg: #fef2f2;
+    --fail-border: #fecaca;
+    --review: #d97706;
+    --review-bg: #fffbeb;
+    --review-border: #fde68a;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+
   * { box-sizing: border-box; }
-  body { margin:0; font:14px/1.5 ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; background:var(--bg); color:var(--text); }
-  header { display:flex; align-items:center; gap:12px; padding:12px 20px; border-bottom:1px solid var(--line); background:#0d1424; flex-wrap:wrap; }
-  header h1 { font-size:18px; margin:0; letter-spacing:.02em; }
-  header .spacer { flex:1; }
-  header select, header button, input, button { background:#0b1220; color:var(--text); border:1px solid var(--line); border-radius:6px; padding:7px 9px; font:inherit; }
-  button { cursor:pointer; }
-  button.primary { border-color:var(--accent); color:#dbeafe; }
-  button.danger { border-color:var(--fail); color:#fecaca; }
-  main { display:grid; grid-template-columns: minmax(0,1.55fr) minmax(340px,.9fr); gap:14px; padding:16px 20px 40px; }
-  section { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:13px; }
-  h2 { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 9px; }
-  .verdict { font-size:42px; font-weight:800; letter-spacing:.04em; padding:8px 0 2px; }
-  .pass { color:var(--pass); } .fail { color:var(--fail); } .review { color:var(--review); }
-  .muted { color:var(--muted); }
-  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .images { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
-  .imagebox { background:#050914; border:1px solid var(--line); border-radius:8px; min-height:220px; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
-  .imagebox img { max-width:100%; max-height:440px; display:block; }
-  .imagebox .tag { position:absolute; left:8px; top:8px; background:#000a; padding:2px 7px; border-radius:4px; font-size:10px; color:var(--muted); }
-  table { width:100%; border-collapse:collapse; margin-top:5px; }
-  th, td { text-align:left; padding:6px 7px; border-bottom:1px solid var(--line); font-size:12px; }
-  th { color:var(--muted); font-weight:600; }
-  .advice { white-space:pre-wrap; line-height:1.5; font-size:14px; }
-  .chips { display:flex; gap:5px; flex-wrap:wrap; margin:7px 0; }
-  .chip { border:1px solid var(--line); border-radius:999px; padding:2px 8px; font-size:10px; color:var(--muted); }
-  .metric { display:grid; grid-template-columns:1fr auto; gap:4px 12px; font-size:12px; }
-  .metric div:nth-child(odd) { color:var(--muted); }
-  .history tr { cursor:pointer; }
-  .history tr:hover td { background:#0b1220; }
-  .ok { color:var(--pass); } .bad { color:var(--fail); }
-  .sourcebar { display:grid; grid-template-columns: 110px 1fr auto auto; gap:7px; align-items:center; }
-  .sourcebar input { min-width:80px; }
-  .small { font-size:11px; }
-  @media (max-width: 1000px) { main { grid-template-columns:1fr; } .images { grid-template-columns:1fr; } .sourcebar { grid-template-columns:1fr 1fr; } }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 8px;
+  }
+
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    flex-shrink: 0;
+  }
+
+  .brand h1 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .brand-sub {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    padding-left: 10px;
+    border-left: 1px solid var(--border);
+  }
+
+  .spacer { flex: 1; }
+
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* Inputs & Buttons */
+  select, input[type="text"], input[type="number"], input:not([type]), button {
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 7px 11px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+  }
+
+  select:focus, input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+
+  button {
+    cursor: pointer;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  button:hover:not(:disabled) {
+    background: var(--surface-subtle);
+    border-color: #94a3b8;
+  }
+
+  button:active:not(:disabled) {
+    transform: translateY(0.5px);
+  }
+
+  button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+  }
+
+  button.primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+
+  button.danger {
+    background: var(--surface);
+    border-color: var(--fail-border);
+    color: var(--fail);
+  }
+
+  button.danger:hover:not(:disabled) {
+    background: var(--fail-bg);
+    border-color: #fca5a5;
+  }
+
+  button.success {
+    background: var(--pass-bg);
+    border-color: var(--pass-border);
+    color: var(--pass);
+  }
+
+  button.success:hover:not(:disabled) {
+    background: #d1fae5;
+  }
+
+  button.ghost {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text-secondary);
+  }
+
+  button.ghost.active {
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+    color: var(--accent);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--surface-subtle);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+
+  .status-pill.ok {
+    background: var(--pass-bg);
+    color: var(--pass);
+    border-color: var(--pass-border);
+  }
+
+  .status-pill.bad {
+    background: var(--fail-bg);
+    color: var(--fail);
+    border-color: var(--fail-border);
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* Main Grid */
+  main {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px 24px 48px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.62fr) minmax(330px, 0.92fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+  }
+
+  section.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  /* Verdict Hero */
+  .verdict-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .verdict-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 4px 0 2px;
+    transition: color 0.2s ease;
+  }
+
+  .verdict.muted { color: var(--muted); }
+  .verdict.pass { color: var(--pass); }
+  .verdict.fail { color: var(--fail); }
+  .verdict.review { color: var(--review); }
+
+  .part-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .capture-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: var(--surface-subtle);
+    padding: 6px 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+
+  .capture-controls input[type="number"] {
+    width: 58px;
+    padding: 6px 8px;
+    text-align: center;
+  }
+
+  .auto-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0 4px;
+    user-select: none;
+  }
+
+  .auto-toggle input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+  }
+
+  /* Chips */
+  .chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .chips:empty { display: none; }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Dual Image Viewport */
+  .images {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .imagebox {
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    min-height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .imagebox.dragover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .imagebox img {
+    max-width: 100%;
+    max-height: 440px;
+    width: auto;
+    height: auto;
+    display: block;
+    position: relative;
+    z-index: 2;
+  }
+
+  .imagebox .tag {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 3;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+  }
+
+  .empty-viewport {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 20px;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .empty-viewport svg {
+    opacity: 0.45;
+  }
+
+  /* Source & Upload Bar */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+  }
+
+  .sourcebar {
+    display: grid;
+    grid-template-columns: 116px 1fr auto auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .upload-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .upload-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  input[type="file"] {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--surface-subtle);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 5px 8px;
+    max-width: 260px;
+  }
+
+  input[type="file"]::file-selector-button {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin-right: 8px;
+    cursor: pointer;
+  }
+
+  /* Tables */
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--surface-subtle);
+  }
+
+  th:first-child { border-top-left-radius: 6px; }
+  th:last-child { border-top-right-radius: 6px; }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .history tr {
+    cursor: pointer;
+    transition: background-color 0.12s ease;
+  }
+
+  .history tr:hover td {
+    background: var(--surface-subtle);
+  }
+
+  .history tr.selected td {
+    background: var(--accent-soft);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .badge.pass { background: var(--pass-bg); color: var(--pass); border: 1px solid var(--pass-border); }
+  .badge.fail { background: var(--fail-bg); color: var(--fail); border: 1px solid var(--fail-border); }
+  .badge.review { background: var(--review-bg); color: var(--review); border: 1px solid var(--review-border); }
+  .badge.neutral { background: var(--surface-subtle); color: var(--text-secondary); border: 1px solid var(--border); }
+
+  .empty-row {
+    text-align: center;
+    color: var(--muted);
+    padding: 18px 10px;
+    font-size: 12.5px;
+  }
+
+  /* Advisory & Right Column */
+  .advice {
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-size: 13.5px;
+    color: var(--text);
+  }
+
+  .advice.muted {
+    color: var(--muted);
+  }
+
+  .review-actions {
+    display: none;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .metric {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0;
+    font-size: 12.5px;
+  }
+
+  .metric > div {
+    padding: 7px 2px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .metric > div:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
+
+  .metric > div:nth-child(odd) {
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .metric > div:nth-child(even) {
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    text-align: right;
+  }
+
+  .export-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background-color 0.15s ease;
+  }
+
+  .export-link:hover {
+    background: var(--accent-soft);
+  }
+
+  .small { font-size: 12px; }
+  .muted { color: var(--muted); }
+
+  @media (max-width: 1024px) {
+    main { grid-template-columns: 1fr; padding: 16px; }
+    .header-inner { padding: 12px 16px; }
+  }
+
+  @media (max-width: 680px) {
+    .images { grid-template-columns: 1fr; }
+    .sourcebar { grid-template-columns: 1fr 1fr; }
+    .brand-sub { display: none; }
+  }
 </style>
 </head>
 <body>
 <header>
-  <h1>VeriQC <span class="muted">| edge inspection</span></h1>
-  <select id="profile" aria-label="profile"></select>
-  <button id="activate">activate</button>
-  <span class="spacer"></span>
-  <button id="alarm" class="small">enable alert</button>
-  <span id="chain" class="muted small">chain: --</span>
-  <span id="device" class="muted small">device: --</span>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+      </div>
+      <h1>VeriQC</h1>
+      <span class="brand-sub">Edge Inspection Station</span>
+    </div>
+
+    <div class="control-group">
+      <select id="profile" aria-label="profile"></select>
+      <button id="activate">Activate</button>
+    </div>
+
+    <span class="spacer"></span>
+
+    <div class="control-group">
+      <span id="chain" class="status-pill"><span class="dot"></span><span>chain: --</span></span>
+      <span id="device" class="status-pill mono">device: --</span>
+      <button id="alarm" class="ghost small" title="Toggle audible verdict alert">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+        <span id="alarm-label">Enable alert</span>
+      </button>
+    </div>
+  </div>
 </header>
+
 <main>
-  <div>
-    <section>
-      <div class="row">
-        <div>
-          <h2>verdict</h2>
+  <div class="col">
+    <section class="card">
+      <div class="verdict-row">
+        <div class="verdict-wrap">
+          <h2>Inspection Verdict</h2>
           <div id="verdict" class="verdict muted">STANDBY</div>
-          <div id="part" class="muted">waiting for a part</div>
+          <div id="part" class="part-meta">waiting for a part</div>
         </div>
-        <span class="spacer" style="flex:1"></span>
-        <div class="row">
-          <input id="part-id" value="PART-0001" aria-label="part id" style="width:140px">
-          <button class="primary" id="capture">capture</button>
-          <label class="small muted"><input id="auto" type="checkbox"> auto</label>
-          <input id="interval" type="number" min="1" max="60" value="3" style="width:62px" aria-label="auto interval seconds">
+
+        <div class="capture-controls">
+          <input id="part-id" class="mono" value="PART-0001" aria-label="part id" style="width:136px">
+          <button class="primary" id="capture">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/><path d="M3 9a2 2 0 0 1 2-2h2l2-3h6l2 3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            Capture
+          </button>
+          <label class="auto-toggle"><input id="auto" type="checkbox"> Auto</label>
+          <input id="interval" class="mono" type="number" min="1" max="60" value="3" aria-label="auto interval seconds">
           <span class="small muted">s</span>
         </div>
       </div>
+
       <div class="chips" id="chips"></div>
+
       <div class="images">
-        <div class="imagebox"><span class="tag">LIVE</span><img id="live" alt="" style="display:none"></div>
-        <div class="imagebox"><span class="tag">RESULT</span><img id="overlay" alt="" style="display:none"></div>
+        <div class="imagebox" id="live-box">
+          <span class="tag">LIVE</span>
+          <div class="empty-viewport" id="live-empty">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+            </svg>
+            <span>No active stream</span>
+          </div>
+          <img id="live" alt="Live stream" style="display:none">
+        </div>
+        <div class="imagebox" id="overlay-box">
+          <span class="tag">RESULT</span>
+          <div class="empty-viewport" id="overlay-empty">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+            </svg>
+            <span>Drop an image or run capture</span>
+          </div>
+          <img id="overlay" alt="Inspection overlay" style="display:none">
+        </div>
       </div>
-      <div class="sourcebar" style="margin-top:10px">
-        <select id="source-type">
+
+      <div class="divider"></div>
+
+      <div class="sourcebar">
+        <select id="source-type" aria-label="source type">
           <option value="folder">folder</option>
           <option value="video">video</option>
           <option value="camera">camera</option>
         </select>
-        <input id="source-path" placeholder="folder or video path (camera: index)">
-        <button id="source-start" class="primary">start source</button>
-        <button id="source-stop" class="danger">stop</button>
+        <input id="source-path" placeholder="Folder or video path (camera: index)">
+        <button id="source-start" class="primary">Start source</button>
+        <button id="source-stop" class="danger">Stop</button>
       </div>
-      <div class="row" style="margin-top:8px">
-        <input id="file" type="file" accept="image/*" aria-label="image">
-        <button id="inspect">inspect upload</button>
-        <span id="source-status" class="muted small">source: stopped</span>
+
+      <div class="upload-row">
+        <div class="upload-controls">
+          <input id="file" type="file" accept="image/*" aria-label="image">
+          <button id="inspect">Inspect upload</button>
+        </div>
+        <span id="source-status" class="status-pill">source: stopped</span>
       </div>
     </section>
-    <section style="margin-top:14px">
-      <h2>findings</h2>
-      <table><thead><tr><th>source</th><th>class</th><th>confidence</th><th>score</th><th>area %</th><th>zone</th><th>severity</th></tr></thead><tbody id="findings"></tbody></table>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Findings</h2>
+        <span id="findings-count" class="badge neutral mono">0</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Class</th>
+              <th>Confidence</th>
+              <th>Score</th>
+              <th>Area %</th>
+              <th>Zone</th>
+              <th>Severity</th>
+            </tr>
+          </thead>
+          <tbody id="findings">
+            <tr><td colspan="7" class="empty-row">No findings recorded for current inspection</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
-    <section style="margin-top:14px">
-      <h2>audit history</h2>
-      <table class="history"><thead><tr><th>id</th><th>part</th><th>verdict</th><th>event</th></tr></thead><tbody id="history"></tbody></table>
-      <div class="row" style="margin-top:9px"><a id="export" href="/export.csv" class="muted small">export csv</a></div>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Audit History</h2>
+        <a id="export" href="/export.csv" class="export-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+          </svg>
+          Export CSV
+        </a>
+      </div>
+      <div class="table-wrap">
+        <table class="history">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Part</th>
+              <th>Verdict</th>
+              <th>Event</th>
+            </tr>
+          </thead>
+          <tbody id="history">
+            <tr><td colspan="4" class="empty-row">No audit entries yet</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </div>
-  <div>
-    <section>
-      <h2>on-device advisory</h2>
-      <div id="advisory" class="advice muted">no advisory requested</div>
+
+  <div class="col">
+    <section class="card">
+      <div class="card-head">
+        <h2>On-Device Advisory</h2>
+        <span class="badge neutral">Llama 3.2 1B</span>
+      </div>
+      <div id="advisory" class="advice muted">No advisory requested</div>
       <div class="chips" id="advisory-meta"></div>
-      <div class="row" id="review-actions" style="display:none; margin-top:9px">
-        <button id="review-pass">confirm pass</button>
-        <button id="review-fail" class="danger">confirm fail</button>
+      <div class="review-actions" id="review-actions">
+        <button id="review-pass" class="success" style="flex:1">Confirm Pass</button>
+        <button id="review-fail" class="danger" style="flex:1">Confirm Fail</button>
       </div>
     </section>
-    <section style="margin-top:14px">
-      <h2>station</h2>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Station Telemetry</h2>
+      </div>
       <div class="metric" id="metrics"></div>
     </section>
-    <section style="margin-top:14px">
-      <h2>runtime separation</h2>
-      <div class="advice muted" id="runtime"></div>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Runtime Separation</h2>
+      </div>
+      <div class="advice muted small" id="runtime"></div>
     </section>
   </div>
 </main>
+
 <script>
 const TOKEN = new URLSearchParams(location.search).get("token") || "";
 const headers = () => TOKEN ? {"X-VeriQC-Token": TOKEN} : {};
@@ -135,17 +853,34 @@ function setText(id, value) {
   const node = document.getElementById(id);
   node.textContent = value === null || value === undefined ? "--" : String(value);
 }
+
 function assetUrl(path) {
   const params = new URLSearchParams();
   if (TOKEN) params.set("token", TOKEN);
   params.set("t", Date.now());
   return path + "?" + params.toString();
 }
-function cell(row, value) {
+
+function cell(row, value, mono = false) {
   const td = document.createElement("td");
+  if (mono) td.className = "mono";
   td.textContent = value === null || value === undefined ? "--" : String(value);
   row.appendChild(td);
 }
+
+function badgeCell(row, value) {
+  const td = document.createElement("td");
+  const span = document.createElement("span");
+  const v = String(value || "--").toUpperCase();
+  const cls = v === "PASS" || v === "LOW" ? "pass"
+    : v === "FAIL" || v === "HIGH" || v === "CRITICAL" ? "fail"
+    : v === "REVIEW" || v === "MEDIUM" ? "review" : "neutral";
+  span.className = "badge " + cls;
+  span.textContent = value || "--";
+  td.appendChild(span);
+  row.appendChild(td);
+}
+
 function beep(kind) {
   if (!alertEnabled || !audioCtx) return;
   const osc = audioCtx.createOscillator();
@@ -153,157 +888,294 @@ function beep(kind) {
   osc.type = "sine";
   osc.frequency.value = kind === "FAIL" ? 880 : 520;
   gain.gain.value = 0.06;
-  osc.connect(gain); gain.connect(audioCtx.destination);
-  osc.start(); osc.stop(audioCtx.currentTime + (kind === "FAIL" ? 0.35 : 0.18));
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + (kind === "FAIL" ? 0.35 : 0.18));
 }
+
+function setOverlayVisible(visible) {
+  document.getElementById("overlay").style.display = visible ? "block" : "none";
+  document.getElementById("overlay-empty").style.display = visible ? "none" : "flex";
+}
+
+function setLiveVisible(visible) {
+  document.getElementById("live").style.display = visible ? "block" : "none";
+  document.getElementById("live-empty").style.display = visible ? "none" : "flex";
+}
+
 function render(result) {
   currentId = result.inspection_id;
   const verdict = document.getElementById("verdict");
   verdict.textContent = result.verdict;
   verdict.className = "verdict " + (result.verdict === "PASS" ? "pass" : result.verdict === "FAIL" ? "fail" : "review");
-  setText("part", (result.part_id || "--") + " | " + (result.latency_ms?.total_ms ?? "--") + " ms");
+  setText("part", (result.part_id || "--") + "  •  " + (result.latency_ms?.total_ms ?? "--") + " ms");
+
   const overlay = document.getElementById("overlay");
   if (result.overlay) {
     overlay.src = assetUrl("/overlay/" + result.inspection_id);
-    overlay.style.display = "block";
-  } else { overlay.style.display = "none"; }
+    setOverlayVisible(true);
+  } else {
+    setOverlayVisible(false);
+  }
+
+  const findingsList = result.findings || [];
+  setText("findings-count", findingsList.length);
   const findings = document.getElementById("findings");
   findings.textContent = "";
-  for (const f of result.findings || []) {
+  if (findingsList.length === 0) {
     const tr = document.createElement("tr");
-    cell(tr, f.source); cell(tr, f.defect_class); cell(tr, f.confidence); cell(tr, f.score);
-    cell(tr, f.area_ratio === null || f.area_ratio === undefined ? "--" : (100 * f.area_ratio).toFixed(3));
-    cell(tr, f.zone); cell(tr, f.severity);
+    const td = document.createElement("td");
+    td.colSpan = 7;
+    td.className = "empty-row";
+    td.textContent = "No findings recorded for current inspection";
+    tr.appendChild(td);
     findings.appendChild(tr);
+  } else {
+    for (const f of findingsList) {
+      const tr = document.createElement("tr");
+      cell(tr, f.source);
+      cell(tr, f.defect_class);
+      cell(tr, f.confidence, true);
+      cell(tr, f.score, true);
+      cell(tr, f.area_ratio === null || f.area_ratio === undefined ? "--" : (100 * f.area_ratio).toFixed(3), true);
+      cell(tr, f.zone);
+      badgeCell(tr, f.severity);
+      findings.appendChild(tr);
+    }
   }
+
   const chips = document.getElementById("chips");
   chips.textContent = "";
   for (const [key, value] of Object.entries(result.thresholds || {})) {
-    const span = document.createElement("span"); span.className = "chip"; span.textContent = key + "=" + value; chips.appendChild(span);
+    const span = document.createElement("span");
+    span.className = "chip";
+    span.textContent = key + "=" + value;
+    chips.appendChild(span);
   }
   if (result.anomaly_p_value !== null && result.anomaly_p_value !== undefined) {
-    const span = document.createElement("span"); span.className = "chip"; span.textContent = "anomaly p=" + Number(result.anomaly_p_value).toFixed(4); chips.appendChild(span);
+    const span = document.createElement("span");
+    span.className = "chip";
+    span.textContent = "anomaly p=" + Number(result.anomaly_p_value).toFixed(4);
+    chips.appendChild(span);
   }
   if (result.decision_rule) {
-    const span = document.createElement("span"); span.className = "chip"; span.textContent = result.decision_rule; chips.appendChild(span);
+    const span = document.createElement("span");
+    span.className = "chip";
+    span.textContent = result.decision_rule;
+    chips.appendChild(span);
   }
+
   const adv = result.advisory || {};
-  setText("advisory", adv.text || (result.verdict === "PASS" ? "Part accepted." : "no advisory"));
+  const advNode = document.getElementById("advisory");
+  const advText = adv.text || (result.verdict === "PASS" ? "Part accepted." : "No advisory available.");
+  advNode.textContent = advText;
+  advNode.className = adv.text ? "advice" : "advice muted";
+
   const meta = document.getElementById("advisory-meta");
   meta.textContent = "";
   for (const text of [adv.status, adv.accepted ? "verified model" : "template floor", adv.latency_ms ? Math.round(adv.latency_ms) + " ms" : null]) {
     if (!text) continue;
-    const span = document.createElement("span"); span.className = "chip"; span.textContent = text; meta.appendChild(span);
+    const span = document.createElement("span");
+    span.className = "chip";
+    span.textContent = text;
+    meta.appendChild(span);
   }
+
   document.getElementById("review-actions").style.display = (result.verdict === "REVIEW" || result.verdict === "FAIL") ? "flex" : "none";
   if (result.verdict !== "PASS") beep(result.verdict);
   fetchHistory();
 }
+
+async function inspectFile(file) {
+  if (!file) { setText("advisory", "Select an image first."); return; }
+  const btn = document.getElementById("inspect");
+  btn.disabled = true;
+  try {
+    const part = document.getElementById("part-id").value || "PART-0001";
+    const form = new FormData();
+    form.append("file", file);
+    form.append("part_id", part);
+    const response = await fetch("/inspect", {method: "POST", body: form, headers: headers()});
+    if (!response.ok) { setText("advisory", "Inspection failed: " + await response.text()); return; }
+    render(await response.json());
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 async function inspectUpload() {
   const file = document.getElementById("file").files[0];
-  if (!file) { setText("advisory", "select an image first"); return; }
-  const part = document.getElementById("part-id").value || "PART-0001";
-  const form = new FormData(); form.append("file", file); form.append("part_id", part);
-  const response = await fetch("/inspect", {method:"POST", body:form, headers:headers()});
-  if (!response.ok) { setText("advisory", "inspection failed: " + await response.text()); return; }
-  render(await response.json());
+  return inspectFile(file);
 }
+
 async function capture() {
   if (busy) return;
   busy = true;
+  const btn = document.getElementById("capture");
+  btn.disabled = true;
   try {
     const part = document.getElementById("part-id").value || "PART-0001";
-    const form = new FormData(); form.append("part_id", part);
-    const response = await fetch("/capture", {method:"POST", body:form, headers:headers()});
-    if (!response.ok) { setText("advisory", "capture failed: " + await response.text()); return; }
+    const form = new FormData();
+    form.append("part_id", part);
+    const response = await fetch("/capture", {method: "POST", body: form, headers: headers()});
+    if (!response.ok) { setText("advisory", "Capture failed: " + await response.text()); return; }
     render(await response.json());
-  } finally { busy = false; }
+  } finally {
+    busy = false;
+    btn.disabled = false;
+  }
 }
+
 async function startSource() {
   const type = document.getElementById("source-type").value;
   const path = document.getElementById("source-path").value.trim();
   const payload = {type};
   if (type === "folder" || type === "video") payload.path = path;
   if (type === "camera") payload.camera = {kind: "usb", index: Number(path || 0)};
-  const response = await fetch("/source/start", {method:"POST", headers:{...headers(), "Content-Type":"application/json"}, body:JSON.stringify(payload)});
-  if (!response.ok) { setText("source-status", "source failed: " + await response.text()); return; }
+  const response = await fetch("/source/start", {
+    method: "POST",
+    headers: {...headers(), "Content-Type": "application/json"},
+    body: JSON.stringify(payload)
+  });
+  const statusEl = document.getElementById("source-status");
+  if (!response.ok) {
+    statusEl.className = "status-pill bad";
+    statusEl.textContent = "source failed: " + await response.text();
+    return;
+  }
   const status = await response.json();
-  setText("source-status", "source: running (" + (status.frames_captured || 0) + " frames)");
+  statusEl.className = "status-pill ok";
+  statusEl.textContent = "source: running (" + (status.frames_captured || 0) + " frames)";
   const live = document.getElementById("live");
   live.src = assetUrl("/stream.mjpg");
-  live.style.display = "block";
+  setLiveVisible(true);
   fetchMetrics();
 }
+
 async function stopSource() {
-  await fetch("/source/stop", {method:"POST", headers:headers()});
-  document.getElementById("live").style.display = "none";
-  setText("source-status", "source: stopped");
+  await fetch("/source/stop", {method: "POST", headers: headers()});
+  setLiveVisible(false);
+  const statusEl = document.getElementById("source-status");
+  statusEl.className = "status-pill";
+  statusEl.textContent = "source: stopped";
   fetchMetrics();
 }
+
 async function fetchHistory() {
-  const response = await fetch("/history?limit=12", {headers:headers()});
+  const response = await fetch("/history?limit=12", {headers: headers()});
   const data = await response.json();
-  setText("chain", "chain: " + (data.integrity_ok ? "verified" : "BROKEN"));
-  const body = document.getElementById("history"); body.textContent = "";
-  for (const row of data.entries || []) {
+  const chainEl = document.getElementById("chain");
+  chainEl.className = "status-pill " + (data.integrity_ok ? "ok" : "bad");
+  chainEl.innerHTML = '<span class="dot"></span><span>chain: ' + (data.integrity_ok ? "verified" : "BROKEN") + "</span>";
+
+  const body = document.getElementById("history");
+  body.textContent = "";
+  const entries = data.entries || [];
+  if (entries.length === 0) {
     const tr = document.createElement("tr");
-    cell(tr, row.id); cell(tr, row.part_id); cell(tr, row.verdict); cell(tr, row.event);
+    const td = document.createElement("td");
+    td.colSpan = 4;
+    td.className = "empty-row";
+    td.textContent = "No audit entries yet";
+    tr.appendChild(td);
+    body.appendChild(tr);
+    return;
+  }
+  for (const row of entries) {
+    const tr = document.createElement("tr");
+    if (row.inspection_id === currentId) tr.className = "selected";
+    cell(tr, row.id, true);
+    cell(tr, row.part_id, true);
+    badgeCell(tr, row.verdict);
+    cell(tr, row.event);
     tr.onclick = async () => {
-      const r = await fetch("/result/" + row.inspection_id, {headers:headers()});
+      const r = await fetch("/result/" + row.inspection_id, {headers: headers()});
       if (r.ok) render(await r.json());
     };
     body.appendChild(tr);
   }
 }
+
 async function fetchMetrics() {
-  const response = await fetch("/metrics", {headers:headers()});
+  const response = await fetch("/metrics", {headers: headers()});
   const data = await response.json();
   setText("device", "device: " + (data.device || "--") + " / " + (data.backend || "--"));
-  const box = document.getElementById("metrics"); box.textContent = "";
+  const box = document.getElementById("metrics");
+  box.textContent = "";
   const entries = {
-    profile: data.profile_id, domain: data.domain, task: data.task,
-    advisory: data.advisory?.available ? "available" : "unavailable",
-    queue: data.advisory?.queue, inspections: data.stats?.inspections,
-    capture: data.capture?.running ? "running" : "stopped",
-    frames: data.capture?.frames_captured,
-    chain_rows: data.chain?.rows, chain_ok: data.chain?.ok,
+    Profile: data.profile_id,
+    Domain: data.domain,
+    Task: data.task,
+    Advisory: data.advisory?.available ? "available" : "unavailable",
+    Queue: data.advisory?.queue,
+    Inspections: data.stats?.inspections,
+    Capture: data.capture?.running ? "running" : "stopped",
+    Frames: data.capture?.frames_captured,
+    "Chain rows": data.chain?.rows,
+    "Chain intact": data.chain?.ok,
   };
   for (const [key, value] of Object.entries(entries)) {
-    const k = document.createElement("div"); k.textContent = key;
-    const v = document.createElement("div"); v.textContent = value === true ? "yes" : value === false ? "no" : value ?? "--";
-    box.appendChild(k); box.appendChild(v);
+    const k = document.createElement("div");
+    k.textContent = key;
+    const v = document.createElement("div");
+    v.textContent = value === true ? "yes" : value === false ? "no" : value ?? "--";
+    box.appendChild(k);
+    box.appendChild(v);
   }
-  setText("runtime", "Vision: ONNX Runtime CPU unless a profile explicitly selects PyTorch. Advisory: Built with Llama. Llama 3.2 1B Instruct runs via ExecuTorch in an isolated child process. The advisory cannot change the verdict; the template is the floor.");
+  setText("runtime", "Vision: ONNX Runtime CPU. Advisory: Built with Llama. Llama 3.2 1B Instruct runs via ExecuTorch in an isolated child process. The advisory cannot change the verdict; the template is the floor.");
+  const statusEl = document.getElementById("source-status");
   if (data.capture?.running) {
-    setText("source-status", "source: running (" + (data.capture.frames_captured || 0) + " frames)");
+    statusEl.className = "status-pill ok";
+    statusEl.textContent = "source: running (" + (data.capture.frames_captured || 0) + " frames)";
     const live = document.getElementById("live");
     if (!live.src) {
       live.src = assetUrl("/stream.mjpg");
-      live.style.display = "block";
+      setLiveVisible(true);
     }
   }
 }
+
 async function fetchProfiles() {
-  const response = await fetch("/profiles", {headers:headers()});
+  const response = await fetch("/profiles", {headers: headers()});
   const data = await response.json();
-  const select = document.getElementById("profile"); select.textContent = "";
+  const select = document.getElementById("profile");
+  select.textContent = "";
   for (const p of data.profiles || []) {
-    const option = document.createElement("option"); option.value = p.id;
-    option.textContent = p.domain + " / " + p.id; option.selected = p.id === data.active;
+    const option = document.createElement("option");
+    option.value = p.id;
+    option.textContent = p.domain + " / " + p.id;
+    option.selected = p.id === data.active;
     select.appendChild(option);
   }
 }
+
 async function activate() {
-  const id = document.getElementById("profile").value;
-  const response = await fetch("/profiles/" + id + "/activate", {method:"POST", headers:headers()});
-  if (!response.ok) { setText("advisory", "profile activation failed: " + await response.text()); return; }
-  currentId = null; fetchMetrics(); fetchHistory(); stopSource();
+  const btn = document.getElementById("activate");
+  btn.disabled = true;
+  try {
+    const id = document.getElementById("profile").value;
+    const response = await fetch("/profiles/" + id + "/activate", {method: "POST", headers: headers()});
+    if (!response.ok) { setText("advisory", "Profile activation failed: " + await response.text()); return; }
+    currentId = null;
+    fetchMetrics();
+    fetchHistory();
+    stopSource();
+  } finally {
+    btn.disabled = false;
+  }
 }
+
 async function review(label) {
   if (!currentId) return;
-  await fetch("/review/" + currentId, {method:"POST", headers:{...headers(), "Content-Type":"application/json"}, body:JSON.stringify({label, note:"operator confirmation"})});
+  await fetch("/review/" + currentId, {
+    method: "POST",
+    headers: {...headers(), "Content-Type": "application/json"},
+    body: JSON.stringify({label, note: "operator confirmation"})
+  });
   fetchHistory();
 }
+
 function autoChanged() {
   if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
   if (document.getElementById("auto").checked) {
@@ -311,6 +1183,18 @@ function autoChanged() {
     autoTimer = setInterval(capture, seconds * 1000);
   }
 }
+
+// Drag-and-drop support on RESULT viewport
+const overlayBox = document.getElementById("overlay-box");
+overlayBox.addEventListener("dragover", (e) => { e.preventDefault(); overlayBox.classList.add("dragover"); });
+overlayBox.addEventListener("dragleave", () => overlayBox.classList.remove("dragover"));
+overlayBox.addEventListener("drop", (e) => {
+  e.preventDefault();
+  overlayBox.classList.remove("dragover");
+  const file = e.dataTransfer?.files?.[0];
+  if (file && file.type.startsWith("image/")) inspectFile(file);
+});
+
 document.getElementById("inspect").onclick = inspectUpload;
 document.getElementById("capture").onclick = capture;
 document.getElementById("activate").onclick = activate;
@@ -322,7 +1206,8 @@ document.getElementById("review-fail").onclick = () => review("FAIL");
 document.getElementById("alarm").onclick = () => {
   audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
   alertEnabled = !alertEnabled;
-  document.getElementById("alarm").textContent = alertEnabled ? "alert on" : "enable alert";
+  document.getElementById("alarm").classList.toggle("active", alertEnabled);
+  document.getElementById("alarm-label").textContent = alertEnabled ? "Alert on" : "Enable alert";
 };
 if (TOKEN) document.getElementById("export").href = "/export.csv?token=" + encodeURIComponent(TOKEN);
 const socket = new WebSocket((location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws" + (TOKEN ? "?token=" + encodeURIComponent(TOKEN) : ""));
@@ -333,7 +1218,9 @@ socket.onmessage = (event) => {
 };
 socket.onclose = () => setTimeout(() => location.reload(), 2500);
 setInterval(fetchMetrics, 5000);
-fetchProfiles(); fetchMetrics(); fetchHistory();
+fetchProfiles();
+fetchMetrics();
+fetchHistory();
 </script>
 </body>
 </html>

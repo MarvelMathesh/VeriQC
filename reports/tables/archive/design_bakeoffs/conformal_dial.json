@@ -1,0 +1,197 @@
+{
+  "conformal": [
+    {
+      "target_alpha": 0.01,
+      "achievable": false,
+      "min_n_required": 299,
+      "n_calibration_objects": 15,
+      "note": "15 calibration objects cannot certify a 1% object-level false-alarm rate; 299 are needed"
+    },
+    {
+      "target_alpha": 0.05,
+      "achievable": false,
+      "min_n_required": 59,
+      "n_calibration_objects": 15,
+      "note": "15 calibration objects cannot certify a 5% object-level false-alarm rate; 59 are needed"
+    },
+    {
+      "target_alpha": 0.1,
+      "achievable": false,
+      "min_n_required": 29,
+      "n_calibration_objects": 15,
+      "note": "15 calibration objects cannot certify a 10% object-level false-alarm rate; 29 are needed"
+    },
+    {
+      "threshold": 0.7282,
+      "source": "split_conformal",
+      "target_alpha": 0.2,
+      "objects_detected": 3,
+      "object_detection_rate": 0.3,
+      "defect_frames_detected": 1,
+      "defect_frame_detection_rate": 0.1,
+      "normal_frames_alarmed": 2,
+      "normal_frame_alarm_rate": 0.0286,
+      "cp_95_upper_normal_frame_alarm_rate": 0.08722,
+      "objects_alarmed_on_their_normal_frames": 2,
+      "cp_95_upper_object_alarm_rate_on_normal_frames": 0.5069,
+      "achievable": true,
+      "min_n_required": 14,
+      "n_calibration_objects": 15,
+      "order_statistic_k": 13,
+      "calibration_objects_alarmed": 2,
+      "guarantee_holds": false
+    }
+  ],
+  "fixed_percentile": {
+    "0.01": {
+      "threshold": 0.9159,
+      "source": "fixed_percentile",
+      "target_alpha": 0.01,
+      "objects_detected": 0,
+      "object_detection_rate": 0.0,
+      "defect_frames_detected": 0,
+      "defect_frame_detection_rate": 0.0,
+      "normal_frames_alarmed": 0,
+      "normal_frame_alarm_rate": 0.0,
+      "cp_95_upper_normal_frame_alarm_rate": 0.04189,
+      "objects_alarmed_on_their_normal_frames": 0,
+      "cp_95_upper_object_alarm_rate_on_normal_frames": 0.25887,
+      "note": "a fixed percentile carries no guarantee on unseen objects; the measured alarm rate is the honest number"
+    },
+    "0.05": {
+      "threshold": 0.9159,
+      "source": "fixed_percentile",
+      "target_alpha": 0.05,
+      "objects_detected": 0,
+      "object_detection_rate": 0.0,
+      "defect_frames_detected": 0,
+      "defect_frame_detection_rate": 0.0,
+      "normal_frames_alarmed": 0,
+      "normal_frame_alarm_rate": 0.0,
+      "cp_95_upper_normal_frame_alarm_rate": 0.04189,
+      "objects_alarmed_on_their_normal_frames": 0,
+      "cp_95_upper_object_alarm_rate_on_normal_frames": 0.25887,
+      "note": "a fixed percentile carries no guarantee on unseen objects; the measured alarm rate is the honest number"
+    },
+    "0.1": {
+      "threshold": 0.8408,
+      "source": "fixed_percentile",
+      "target_alpha": 0.1,
+      "objects_detected": 0,
+      "object_detection_rate": 0.0,
+      "defect_frames_detected": 0,
+      "defect_frame_detection_rate": 0.0,
+      "normal_frames_alarmed": 0,
+      "normal_frame_alarm_rate": 0.0,
+      "cp_95_upper_normal_frame_alarm_rate": 0.04189,
+      "objects_alarmed_on_their_normal_frames": 0,
+      "cp_95_upper_object_alarm_rate_on_normal_frames": 0.25887,
+      "note": "a fixed percentile carries no guarantee on unseen objects; the measured alarm rate is the honest number"
+    },
+    "0.2": {
+      "threshold": 0.6713,
+      "source": "fixed_percentile",
+      "target_alpha": 0.2,
+      "objects_detected": 3,
+      "object_detection_rate": 0.3,
+      "defect_frames_detected": 2,
+      "defect_frame_detection_rate": 0.2,
+      "normal_frames_alarmed": 5,
+      "normal_frame_alarm_rate": 0.0714,
+      "cp_95_upper_normal_frame_alarm_rate": 0.14433,
+      "objects_alarmed_on_their_normal_frames": 2,
+      "cp_95_upper_object_alarm_rate_on_normal_frames": 0.5069,
+      "note": "a fixed percentile carries no guarantee on unseen objects; the measured alarm rate is the honest number"
+    }
+  },
+  "frame_level": {
+    "0.01": {
+      "target_alpha": 0.01,
+      "achievable": false,
+      "min_n_required": 299,
+      "n_calibration_frames": 105,
+      "note": "105 calibration frames cannot certify a 1% frame-level alarm rate"
+    },
+    "0.05": {
+      "threshold": 0.657,
+      "source": "frame_level_conformal",
+      "target_alpha": 0.05,
+      "objects_detected": 3,
+      "object_detection_rate": 0.3,
+      "defect_frames_detected": 2,
+      "defect_frame_detection_rate": 0.2,
+      "normal_frames_alarmed": 6,
+      "normal_frame_alarm_rate": 0.0857,
+      "cp_95_upper_normal_frame_alarm_rate": 0.16218,
+      "objects_alarmed_on_their_normal_frames": 2,
+      "cp_95_upper_object_alarm_rate_on_normal_frames": 0.5069,
+      "n_calibration_frames": 105,
+      "note": "a frame-level budget: the threshold is an order statistic of the calibration frames, so the object-level alarm rate it produces is several times the nominal rate"
+    },
+    "0.1": {
+      "threshold": 0.5931,
+      "source": "frame_level_conformal",
+      "target_alpha": 0.1,
+      "objects_detected": 8,
+      "object_detection_rate": 0.8,
+      "defect_frames_detected": 6,
+      "defect_frame_detection_rate": 0.6,
+      "normal_frames_alarmed": 14,
+      "normal_frame_alarm_rate": 0.2,
+      "cp_95_upper_normal_frame_alarm_rate": 0.29486,
+      "objects_alarmed_on_their_normal_frames": 6,
+      "cp_95_upper_object_alarm_rate_on_normal_frames": 0.84997,
+      "n_calibration_frames": 105,
+      "note": "a frame-level budget: the threshold is an order statistic of the calibration frames, so the object-level alarm rate it produces is several times the nominal rate"
+    },
+    "0.2": {
+      "threshold": 0.5739,
+      "source": "frame_level_conformal",
+      "target_alpha": 0.2,
+      "objects_detected": 10,
+      "object_detection_rate": 1.0,
+      "defect_frames_detected": 8,
+      "defect_frame_detection_rate": 0.8,
+      "normal_frames_alarmed": 21,
+      "normal_frame_alarm_rate": 0.3,
+      "cp_95_upper_normal_frame_alarm_rate": 0.40255,
+      "objects_alarmed_on_their_normal_frames": 8,
+      "cp_95_upper_object_alarm_rate_on_normal_frames": 0.96323,
+      "n_calibration_frames": 105,
+      "note": "a frame-level budget: the threshold is an order statistic of the calibration frames, so the object-level alarm rate it produces is several times the nominal rate"
+    }
+  },
+  "profile_id": "commutator",
+  "source_id": "kolektor-sdd",
+  "role_manifest_sha256": "6aee322934fcdd3ed4bc2d5c77a54e5a195ae06764dceca5762896a371ffa5fd",
+  "split": {
+    "method": "frozen evaluation roles: design fit, calibration threshold, defect-validation evaluation",
+    "n_fit_objects": 14,
+    "n_calibration_objects": 15,
+    "n_holdout_objects": 10,
+    "n_fit_images": 96,
+    "n_calibration_images": 105,
+    "n_holdout_normal_images": 70,
+    "n_holdout_defect_images": 10,
+    "rate_aggregation": "the budget is over physical objects: one value per object, the object's worst frame; the frame rates are reported beside them",
+    "held_out_normal_objects": 0,
+    "held_out_normal_object_note": "the frozen defect-validation role contains no all-normal object, so the held-out object-level false-alarm rate is reported as the number of objects whose normal frames alone alarmed, which is a lower bound on it"
+  },
+  "provenance": {
+    "script": "ablations/conformal_dial.py",
+    "command": "python ablations/conformal_dial.py --device cuda",
+    "git_commit": "1ef864d",
+    "dataset": "KolektorSDD",
+    "device": "cuda",
+    "roles": [
+      "design",
+      "calibration",
+      "defect_validation"
+    ],
+    "final_test_opened": false,
+    "claim_scope": "Validation evidence measured on the defect-validation role; it is not a final-test certification.",
+    "created": "2026-11-20T06:29:21+00:00",
+    "wall_seconds": 12.0,
+    "kind": "measured-on-host"
+  }
+}

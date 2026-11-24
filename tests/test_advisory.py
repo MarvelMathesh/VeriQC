@@ -4,6 +4,7 @@ from pathlib import Path
 
 from veriqc.advisory.cards import load_cards
 from veriqc.advisory.executorch import AdvisorResult
+from veriqc.advisory.process_runner import AdvisoryTimeout
 from veriqc.advisory.worker import AdvisoryWorker
 from veriqc.config import load_profile
 from veriqc.inspection import Finding, InspectionResult
@@ -53,21 +54,64 @@ def test_worker_accepts_compact_pipe_format() -> None:
     assert "quarantine the part" in outcome.text or "handling" in outcome.text
 
 
-def test_worker_falls_back_when_generation_raises() -> None:
-    class Broken:
+def test_worker_reports_timeout_separately_from_runtime_error() -> None:
+    class TimeoutRunner:
         tokenizer = None
 
         def restart(self):
             self.restarted = True
 
         def generate(self, prompt, max_new_tokens=None, timeout_s=None):
-            raise RuntimeError("timeout")
+            raise AdvisoryTimeout("deadline reached")
 
     profile = load_profile(REPO / "configs/profiles/commutator.yaml")
-    runner = Broken()
+    runner = TimeoutRunner()
     worker = AdvisoryWorker(load_cards(profile.cards_path), runner)
     outcome = worker.advise_result(_result())
     assert outcome.accepted is False
     assert outcome.path == "template"
     assert outcome.timed_out is True
+    assert outcome.error and outcome.error.startswith("timeout:")
+    assert getattr(runner, "restarted", False) is True
+
+
+def test_worker_reports_runtime_error_without_calling_it_a_timeout() -> None:
+    class BrokenRunner:
+        tokenizer = None
+
+        def restart(self):
+            self.restarted = True
+
+        def generate(self, prompt, max_new_tokens=None, timeout_s=None):
+            raise RuntimeError("native runner failed")
+
+    profile = load_profile(REPO / "configs/profiles/commutator.yaml")
+    runner = BrokenRunner()
+    worker = AdvisoryWorker(load_cards(profile.cards_path), runner)
+    outcome = worker.advise_result(_result())
+    assert outcome.accepted is False
+    assert outcome.path == "template"
+    assert outcome.timed_out is False
+    assert outcome.error and "native runner failed" in outcome.error
+    assert getattr(runner, "restarted", False) is True
+
+
+def test_worker_reports_failed_advisor_result() -> None:
+    class FailedResultRunner:
+        tokenizer = None
+
+        def restart(self):
+            self.restarted = True
+
+        def generate(self, prompt, max_new_tokens=None, timeout_s=None):
+            return AdvisorResult(text="", ok=False, path="llm", error="decoder failure")
+
+    profile = load_profile(REPO / "configs/profiles/commutator.yaml")
+    runner = FailedResultRunner()
+    worker = AdvisoryWorker(load_cards(profile.cards_path), runner)
+    outcome = worker.advise_result(_result())
+    assert outcome.accepted is False
+    assert outcome.path == "template"
+    assert outcome.timed_out is False
+    assert outcome.error == "decoder failure"
     assert getattr(runner, "restarted", False) is True

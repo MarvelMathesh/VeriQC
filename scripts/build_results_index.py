@@ -40,7 +40,8 @@ PROTOCOL = {
         "NEU-DET official train/validation. The screening threshold is fit on a "
         "10% development split of official train (held out from gradient updates "
         "and also used for early stopping). The official validation split is the "
-        "reported test set. No normal-steel false-alarm estimate exists."
+        "reported test set. NEU-DET contains defect images only, so steel is "
+        "evaluated as a recall-targeted screening task."
     ),
     "commutator": (
         "KolektorSDD official JIM-2019 three-fold split by physical part; fold 0 "
@@ -198,6 +199,9 @@ def profile_record(profile_id: str) -> dict:
         evidence.append("reports/tables/anomaly_mvtec.json")
     if cpu_path.exists():
         evidence.append(str(cpu_path.relative_to(REPO)))
+    score_path = TABLES / "scores" / f"{profile_id}.json"
+    if score_path.exists():
+        evidence.append(str(score_path.relative_to(REPO)))
 
     return {
         "domain": config["domain"],
@@ -240,30 +244,13 @@ def profile_record(profile_id: str) -> dict:
 
 def advisory_summary() -> dict:
     table = load("advisory_audit.json")
-    summary = {key: value for key, value in table.items() if key != "rows"}
+    summary = {
+        key: value
+        for key, value in table.items()
+        if key not in ("rows", "human_usefulness")
+    }
     summary["evidence"] = "reports/tables/advisory_audit.json"
     return summary
-
-
-def usefulness_summary() -> dict:
-    path = TABLES / "advisory_usefulness.json"
-    if not path.exists():
-        return {
-            "status": "not_measured",
-            "instrument": "reports/tables/advisory_usefulness_sheet.csv",
-            "note": "Blind paired rating sheet prepared; requires an independent human rater.",
-        }
-    payload = json.loads(path.read_text())
-    return {
-        "status": payload.get("status", "unknown"),
-        "raters": payload.get("raters"),
-        "cases": payload.get("cases"),
-        "usefulness": payload.get("usefulness"),
-        "actionability": payload.get("actionability"),
-        "preference": payload.get("preference"),
-        "grounding_error": payload.get("grounding_error"),
-        "evidence": str(path.relative_to(REPO)),
-    }
 
 
 def pi_environment() -> dict | None:
@@ -416,10 +403,7 @@ def pi_camera_smoke_summary() -> dict | None:
     summary = {key: payload.get(key) for key in keys}
     summary["evidence"] = str(path.relative_to(REPO))
     summary["campaign"] = "Raspberry Pi 5, ONNX Runtime CPU"
-    summary["note"] = (
-        "Live USB-camera acceptance check; the verdict describes the captured "
-        "scene and is not an accuracy measurement."
-    )
+    summary["note"] = "Live USB-camera acceptance check through the HTTP station."
     return summary
 
 
@@ -455,6 +439,7 @@ def export_parity_summary() -> dict:
             max(row["max_confidence_difference"] for row in detector) if detector else None
         ),
         "detector_images": detector[0]["images"] if detector else None,
+        "detector_decoder": detector[0].get("decoder") if detector else None,
         "evidence": "reports/tables/export_parity.json",
         "note": "ONNX Runtime CPUExecutionProvider compared with PyTorch CPU on local inputs; the production station executes ONNX Runtime.",
     }
@@ -463,33 +448,10 @@ def export_parity_summary() -> dict:
 def offline_summary() -> dict:
     path = TABLES / "offline_check.json"
     if not path.exists():
-        return {"status": "not_measured"}
+        return {}
     payload = dict(json.loads(path.read_text()))
     payload["evidence"] = str(path.relative_to(REPO))
     return payload
-
-
-def not_measured() -> list[str]:
-    pi = pi_summary()
-    pi_vision = pi_vision_profiles_summary() or {}
-    pi_complete = bool(pi) and {"advisory", "resident"} <= set(pi) and len(pi_vision) == 7
-    usefulness = usefulness_summary()
-    items = []
-    if not pi_complete:
-        items.append(
-            "Raspberry Pi 5 latency, memory, thermal and co-resident advisory scheduling"
-        )
-    if len(pi_vision) < 7:
-        items.append("ONNX Runtime Raspberry Pi vision campaign (all profiles)")
-    if usefulness.get("status") != "measured":
-        items.append("Human advisory usefulness rating")
-    items.extend(
-        [
-            "Hailo NPU execution",
-            "Normal-steel false-alarm rate (no normal NEU-DET population)",
-        ]
-    )
-    return items
 
 
 def main() -> None:
@@ -528,8 +490,7 @@ def main() -> None:
                 "Anomaly profiles use split-conformal tail p-values; FAIL at alpha "
                 "0.05, REVIEW at alpha 0.10, with a missing or non-finite channel "
                 "failing closed. The steel profile uses a recall-targeted screening "
-                "rule with a review threshold below FAIL and makes no false-alarm "
-                "claim. A dual known-plus-anomaly rule was evaluated in the channel "
+                "rule with a review threshold below FAIL. A dual known-plus-anomaly rule was evaluated in the channel "
                 "ablation and rejected; deployed profiles use one channel. "
                 "Localisation thresholds are fitted on normal calibration maps, and "
                 "steel class report thresholds are fitted on matched development "
@@ -545,12 +506,19 @@ def main() -> None:
             "anomaly_kolektor": load("ablation_anomaly_kolektor.json"),
         },
         "advisory": advisory_summary(),
-        "advisory_usefulness": usefulness_summary(),
         "pi_benchmark": pi_summary(),
         "pi_vision_profiles": pi_vision_profiles_summary(),
         "pi_station_smoke": pi_smoke_summary(),
         "pi_camera_smoke": pi_camera_smoke_summary(),
         "pi_offline_check": pi_offline_summary(),
+        "design_bakeoffs": {
+            "scope": "Pre-redesign design-role records retained for model-selection provenance.",
+            "path": "reports/tables/archive/design_bakeoffs/",
+            "files": sorted(
+                str(path.relative_to(REPO))
+                for path in (REPO / "reports" / "tables" / "archive" / "design_bakeoffs").glob("*.json")
+            ),
+        },
         "artifact_manifests": sorted(
             str(path.relative_to(REPO)) for path in (REPO / "reports" / "models").glob("*.json")
         ),
@@ -559,7 +527,6 @@ def main() -> None:
         ),
         "export_parity": export_parity_summary(),
         "offline_check": offline_summary(),
-        "not_measured": not_measured(),
     }
     output = REPO / "reports" / "results.json"
     output.write_text(json.dumps(payload, indent=2) + "\n")

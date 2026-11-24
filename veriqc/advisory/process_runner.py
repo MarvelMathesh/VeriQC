@@ -36,6 +36,7 @@ from veriqc.advisory.executorch import AdvisorResult
 
 __all__ = [
     "AdvisorRuntimeSpec",
+    "AdvisoryTimeout",
     "ProcessAdvisorError",
     "ProcessAdvisorRunner",
 ]
@@ -43,6 +44,10 @@ __all__ = [
 
 class ProcessAdvisorError(RuntimeError):
     """Raised when the isolated advisory runtime cannot be established."""
+
+
+class AdvisoryTimeout(ProcessAdvisorError):
+    """Raised when one generation exceeds its wall-clock deadline."""
 
 
 @dataclass(frozen=True)
@@ -343,7 +348,7 @@ class ProcessAdvisorRunner:
                 if deadline is not None:
                     remaining = deadline - time.monotonic()
                     if remaining <= 0:
-                        raise ProcessAdvisorError("advisory generation timed out")
+                        raise AdvisoryTimeout("advisory generation timed out")
                     if not connection.poll(min(remaining, 0.5)):
                         continue
                 else:
