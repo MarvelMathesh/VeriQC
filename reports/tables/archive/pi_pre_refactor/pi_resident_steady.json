@@ -1,0 +1,110 @@
+{
+  "schema": "veriqc.pi-benchmark/1",
+  "environment": {
+    "hostname": "Rpi5",
+    "model": "Raspberry Pi 5 Model B Rev 1.1",
+    "platform": "Linux-6.18.60+rpt-rpi-2712-aarch64-with-glibc2.41",
+    "machine": "aarch64",
+    "python": "3.13.5",
+    "cpu_governor": "ondemand",
+    "packages": {
+      "torch": "2.15.0+cpu",
+      "torchvision": "0.29.2+cpu",
+      "ultralytics": "8.4.216",
+      "onnxruntime": "1.32.0",
+      "numpy": "2.5.4",
+      "executorch": "1.6.0",
+      "transformers": "5.24.0",
+      "opencv": "5.1.0.95",
+      "psutil": "7.2.2"
+    },
+    "memory_total_mb": 8062.2,
+    "measured_at": "2026-11-23T23:12:32"
+  },
+  "mode": "resident",
+  "profile": "commutator",
+  "backend": "onnx",
+  "device": "cpu",
+  "startup_seconds": 16.4,
+  "inspections": 10,
+  "arrival_interval_s": 45.0,
+  "submit_seconds": 450.0,
+  "drain_seconds": 0.0,
+  "drained": true,
+  "vision_ms": {
+    "median": 746.39,
+    "p95": 752.09,
+    "p99": 753.15,
+    "min": 735.49,
+    "max": 753.42
+  },
+  "wall_ms": {
+    "median": 777.59,
+    "p95": 783.88,
+    "p99": 785.1,
+    "min": 765.58,
+    "max": 785.41
+  },
+  "qsize_max_observed": 1,
+  "queue_drops_reported": 0,
+  "stats": {
+    "inspections": 10,
+    "advisories_completed": 10,
+    "advisories_failed": 0,
+    "advisories_dropped": 0,
+    "advisories_timed_out": 0,
+    "advisory_queue_high_water": 1
+  },
+  "advisory_outcomes": {
+    "events": 10,
+    "paths": {
+      "llm": 10
+    },
+    "accepted": {
+      "true": 10,
+      "false": 0
+    },
+    "violations": {}
+  },
+  "verdict_counts": {
+    "FAIL": 10
+  },
+  "queue_remaining_at_end": 0,
+  "audit_chain": {
+    "ok": true,
+    "rows": 20,
+    "first_bad": null,
+    "anchor_ok": true
+  },
+  "monitor": {
+    "temperature_c": {
+      "start": 40.8,
+      "median": 39.7,
+      "max": 48.5,
+      "end": 37.0,
+      "samples": 435
+    },
+    "power_w": {
+      "core_median": 0.5,
+      "core_max": 6.69,
+      "sys_3v3_median": 0.18,
+      "samples": 435
+    },
+    "throttle": {
+      "before": {
+        "raw": "0x0",
+        "flags": []
+      },
+      "after": {
+        "raw": "0x0",
+        "flags": []
+      },
+      "occurred_flags": []
+    },
+    "rss_mb": {
+      "parent_max": 796.1,
+      "tree_max": 2977.5,
+      "samples": 435
+    }
+  }
+}

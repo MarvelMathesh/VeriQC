@@ -30,12 +30,15 @@
   "review_rate": 0.0,
   "qc_review_count": 0,
   "qc_review_rate": 0.0,
-  "latency_ms_median": 11.93,
-  "latency_ms_p95": 12.43,
+  "latency_ms_median": 168.71,
+  "latency_ms_p95": 226.21,
   "anomaly_pixel_auroc": 0.963,
   "anomaly_pixel_ap": 0.7475,
   "anomaly_au_pro": 0.8863,
   "profile_id": "automotive_metal_nut",
-  "device": "cuda",
+  "task": "anomaly",
+  "source": "mvtec-ad:metal_nut",
+  "backend": "onnx",
+  "device": "cpu",
   "calibration": "configs/calibration/automotive_metal_nut.json"
 }

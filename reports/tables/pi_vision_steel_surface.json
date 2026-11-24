@@ -1,0 +1,78 @@
+{
+  "schema": "veriqc.pi-benchmark/1",
+  "environment": {
+    "hostname": "Rpi5",
+    "model": "Raspberry Pi 5 Model B Rev 1.1",
+    "platform": "Linux-6.18.60+rpt-rpi-2712-aarch64-with-glibc2.41",
+    "machine": "aarch64",
+    "python": "3.13.5",
+    "cpu_governor": "ondemand",
+    "packages": {
+      "torch": "2.15.0+cpu",
+      "torchvision": "0.29.2+cpu",
+      "ultralytics": "8.4.216",
+      "onnxruntime": "1.32.0",
+      "numpy": "2.5.4",
+      "executorch": "1.6.0",
+      "transformers": "5.24.0",
+      "opencv": "5.1.0.95",
+      "psutil": "7.2.2"
+    },
+    "memory_total_mb": 8062.2,
+    "measured_at": "2026-11-24T15:23:42"
+  },
+  "mode": "vision",
+  "profile": "steel_surface",
+  "backend": "onnx",
+  "device": "cpu",
+  "threads": 4,
+  "images": 40,
+  "warmup_images": 3,
+  "total_ms": {
+    "median": 132.75,
+    "p95": 139.39,
+    "p99": 145.72,
+    "min": 131.67,
+    "max": 148.13
+  },
+  "wall_ms": {
+    "median": 132.79,
+    "p95": 139.43,
+    "p99": 145.76,
+    "min": 131.71,
+    "max": 148.17
+  },
+  "throughput_images_per_second": 7.443,
+  "elapsed_s": 5.4,
+  "monitor": {
+    "temperature_c": {
+      "start": 41.9,
+      "median": 47.5,
+      "max": 50.7,
+      "end": 50.7,
+      "samples": 6
+    },
+    "power_w": {
+      "core_median": 3.71,
+      "core_max": 5.28,
+      "sys_3v3_median": 0.18,
+      "samples": 6
+    },
+    "throttle": {
+      "before": {
+        "raw": "0x0",
+        "flags": []
+      },
+      "after": {
+        "raw": "0x0",
+        "flags": []
+      },
+      "occurred_flags": []
+    },
+    "rss_mb": {
+      "parent_max": 203.4,
+      "tree_max": 203.4,
+      "samples": 6
+    }
+  }
+}

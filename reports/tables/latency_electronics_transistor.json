@@ -1,23 +1,26 @@
 {
   "profile_id": "electronics_transistor",
+  "backend": "onnx",
   "device": "cpu",
   "threads": 4,
   "warmup_images": 5,
   "images": 50,
   "total_ms": {
-    "median": 112.81,
-    "p95": 118.84,
-    "p99": 123.41,
-    "min": 107.68,
-    "max": 126.02
+    "median": 164.02,
+    "p95": 201.57,
+    "p99": 240.16,
+    "min": 136.5,
+    "max": 243.95
   },
-  "peak_rss_mb": 885.8,
+  "peak_rss_mb": 282.1,
   "artifact_sizes_bytes": {
-    "profile": 596,
-    "calibration": 1201,
+    "profile": 621,
+    "calibration": 1479,
     "severity": 223,
     "cards": 561,
-    "anomaly_weights": 17324371
+    "anomaly_backbone": 12674,
+    "anomaly_backbone_data": 11120896,
+    "anomaly_banks": 6145342
   },
-  "measured_at": "2026-11-22T03:21:59"
+  "measured_at": "2026-11-23T21:43:44"
 }

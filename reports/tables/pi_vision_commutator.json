@@ -3,7 +3,7 @@
   "environment": {
     "hostname": "Rpi5",
     "model": "Raspberry Pi 5 Model B Rev 1.1",
-    "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+    "platform": "Linux-6.18.60+rpt-rpi-2712-aarch64-with-glibc2.41",
     "machine": "aarch64",
     "python": "3.13.5",
     "cpu_governor": "ondemand",
@@ -11,43 +11,52 @@
       "torch": "2.15.0+cpu",
       "torchvision": "0.29.2+cpu",
       "ultralytics": "8.4.216",
+      "onnxruntime": "1.32.0",
       "numpy": "2.5.4",
       "executorch": "1.6.0",
       "transformers": "5.24.0",
-      "opencv": "5.1.0.95"
+      "opencv": "5.1.0.95",
+      "psutil": "7.2.2"
     },
-    "memory_total_mb": 8058.3,
-    "measured_at": "2026-11-22T23:47:56"
+    "memory_total_mb": 8062.2,
+    "measured_at": "2026-11-24T15:23:49"
   },
   "mode": "vision",
   "profile": "commutator",
+  "backend": "onnx",
   "device": "cpu",
   "threads": 4,
-  "images": 60,
+  "images": 40,
   "warmup_images": 3,
   "total_ms": {
-    "median": 1333.54,
-    "p95": 1349.79,
-    "p99": 1384.22,
-    "min": 1320.39,
-    "max": 1411.22
+    "median": 729.58,
+    "p95": 735.05,
+    "p99": 738.39,
+    "min": 722.27,
+    "max": 740.2
   },
   "wall_ms": {
-    "median": 1333.59,
-    "p95": 1349.84,
-    "p99": 1384.27,
-    "min": 1320.44,
-    "max": 1411.27
+    "median": 729.62,
+    "p95": 735.1,
+    "p99": 738.44,
+    "min": 722.31,
+    "max": 740.25
   },
-  "throughput_images_per_second": 0.748,
-  "elapsed_s": 80.2,
+  "throughput_images_per_second": 1.372,
+  "elapsed_s": 29.2,
   "monitor": {
     "temperature_c": {
-      "start": 47.4,
-      "median": 55.6,
-      "max": 59.0,
-      "end": 57.9,
-      "samples": 79
+      "start": 54.0,
+      "median": 60.0,
+      "max": 64.5,
+      "end": 63.9,
+      "samples": 28
+    },
+    "power_w": {
+      "core_median": 5.97,
+      "core_max": 7.1,
+      "sys_3v3_median": 0.18,
+      "samples": 28
     },
     "throttle": {
       "before": {
@@ -61,9 +70,9 @@
       "occurred_flags": []
     },
     "rss_mb": {
-      "parent_max": 822.6,
-      "tree_max": 822.6,
-      "samples": 79
+      "parent_max": 478.8,
+      "tree_max": 478.8,
+      "samples": 28
     }
   }
 }

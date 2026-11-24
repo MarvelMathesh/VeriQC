@@ -1,23 +1,26 @@
 {
   "profile_id": "packaging_bottle",
+  "backend": "onnx",
   "device": "cpu",
   "threads": 4,
   "warmup_images": 5,
   "images": 50,
   "total_ms": {
-    "median": 102.25,
-    "p95": 104.46,
-    "p99": 108.69,
-    "min": 99.66,
-    "max": 110.64
+    "median": 166.19,
+    "p95": 218.41,
+    "p99": 243.13,
+    "min": 142.13,
+    "max": 260.19
   },
-  "peak_rss_mb": 883.5,
+  "peak_rss_mb": 304.4,
   "artifact_sizes_bytes": {
-    "profile": 531,
-    "calibration": 1167,
+    "profile": 556,
+    "calibration": 1445,
     "severity": 223,
     "cards": 585,
-    "anomaly_weights": 17324371
+    "anomaly_backbone": 12674,
+    "anomaly_backbone_data": 11120896,
+    "anomaly_banks": 6145342
   },
-  "measured_at": "2026-11-22T03:21:31"
+  "measured_at": "2026-11-23T21:43:07"
 }

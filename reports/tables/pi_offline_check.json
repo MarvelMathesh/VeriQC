@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "profile_id": "commutator",
+  "backend": "onnx",
+  "image": "/home/vit/VeriQC/data/kolektor/kos02/Part0.jpg",
+  "verdict": "PASS",
+  "latency_ms": 755.42,
+  "external_dashboard_assets": [],
+  "network_blocked": true,
+  "measured_at": "2026-11-24T15:50:38"
+}

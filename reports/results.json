@@ -1,6 +1,6 @@
 {
   "schema": "veriqc.results/2",
-  "generated_at": "2026-11-23T00:45:32+05:30",
+  "generated_at": "2026-11-24T16:02:19+05:30",
   "environment": {
     "cpu": "13th Gen Intel(R) Core(TM) i7-13700HX",
     "gpu": "NVIDIA GeForce RTX 4050 Laptop GPU",
@@ -15,32 +15,35 @@
     },
     "raspberry_pi": {
       "model": "Raspberry Pi 5 Model B Rev 1.1",
-      "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+      "platform": "Linux-6.18.60+rpt-rpi-2712-aarch64-with-glibc2.41",
       "python": "3.13.5",
-      "memory_total_mb": 8058.3,
+      "memory_total_mb": 8062.2,
       "cpu_governor": "ondemand",
       "packages": {
         "torch": "2.15.0+cpu",
         "torchvision": "0.29.2+cpu",
         "ultralytics": "8.4.216",
+        "onnxruntime": "1.32.0",
         "numpy": "2.5.4",
         "executorch": "1.6.0",
         "transformers": "5.24.0",
-        "opencv": "5.1.0.95"
+        "opencv": "5.1.0.95",
+        "psutil": "7.2.2"
       },
-      "evidence": "reports/tables/pi_vision.json"
+      "evidence": "reports/tables/pi_vision_commutator.json"
     }
   },
   "evaluation_protocol": {
     "split_discipline": "Official test splits are held out from fitting, calibration and threshold selection. Segmenter preprocessing and protocol arms were compared on the official test split during development, so the selected arm is a development choice rather than a pristine one-shot holdout. The steel and Kolektor calibration/early-stopping splits also overlap; that limitation is disclosed and quantified by the protocol ablation.",
     "quality_gate": "Evaluation applies the same acquisition gate as the station before the decision. A failed gate returns REVIEW and never executes the models.",
-    "decision": "Anomaly and dual profiles use split-conformal tail p-values; FAIL at alpha 0.05, REVIEW at alpha 0.10, with a missing or non-finite channel failing closed. The steel profile uses a recall-targeted screening threshold and makes no false-alarm claim."
+    "decision": "Anomaly profiles use split-conformal tail p-values; FAIL at alpha 0.05, REVIEW at alpha 0.10, with a missing or non-finite channel failing closed. The steel profile uses a recall-targeted screening rule with a review threshold below FAIL and makes no false-alarm claim. A dual known-plus-anomaly rule was evaluated in the channel ablation and rejected; deployed profiles use one channel. Localisation thresholds are fitted on normal calibration maps, and steel class report thresholds are fitted on matched development boxes."
   },
   "profiles": {
     "steel_surface": {
       "domain": "steel",
       "source": "neu-det",
       "task": "detect",
+      "backend": "onnx",
       "protocol": "NEU-DET official train/validation. The screening threshold is fit on a 10% development split of official train (held out from gradient updates and also used for early stopping). The official validation split is the reported test set. No normal-steel false-alarm estimate exists.",
       "calibration": {
         "path": "configs/calibration/steel_surface.json",
@@ -70,16 +73,16 @@
         "defect_images": 360,
         "normal_images": 0,
         "verdict_counts": {
-          "PASS": 31,
-          "REVIEW": 5,
+          "PASS": 17,
+          "REVIEW": 19,
           "FAIL": 324
         },
         "qc_review_count": 5,
-        "review_rate": 0.0139,
+        "review_rate": 0.0528,
         "confusion": {
           "non_pass": {
-            "detected": 329,
-            "missed": 31,
+            "detected": 343,
+            "missed": 17,
             "false_alarms": 0,
             "true_negatives": 0
           },
@@ -91,12 +94,12 @@
           }
         },
         "defect_recall_non_pass": {
-          "count": 329,
+          "count": 343,
           "n": 360,
-          "rate": 0.9139,
+          "rate": 0.9528,
           "ci95": [
-            0.88,
-            0.9407
+            0.9255,
+            0.9723
           ]
         },
         "defect_recall_fail": {
@@ -112,15 +115,17 @@
         "normal_false_alarm_fail": null
       },
       "latency": {
-        "cuda_evaluation_ms": {
-          "median": 4.86,
-          "p95": 5.82
+        "evaluation_ms": {
+          "median": 27.68,
+          "p95": 28.76,
+          "device": "cpu"
         },
         "cpu_station_ms": {
-          "median": 23.49,
-          "p95": 24.52,
-          "p99": 24.76,
-          "peak_rss_mb": 956.6,
+          "median": 26.05,
+          "p95": 27.4,
+          "p99": 28.08,
+          "peak_rss_mb": 203.9,
+          "backend": "onnx",
           "device": "cpu",
           "threads": 4
         }
@@ -135,6 +140,7 @@
       "domain": "automotive",
       "source": "kolektor-sdd",
       "task": "segment",
+      "backend": "onnx",
       "protocol": "KolektorSDD official JIM-2019 three-fold split by physical part; fold 0 is the operating point. A 15% physical-part holdout supplies both early-stopping and calibration scores; this shared split is a disclosed selection limitation. Portrait 384x1024 preprocessing is used.",
       "calibration": {
         "path": "configs/calibration/commutator.json",
@@ -142,7 +148,8 @@
         "alpha_fail": 0.05,
         "alpha_review": 0.1,
         "sample_sizes": {
-          "known_cal": 35
+          "known_cal": 35,
+          "region_cal": 9
         }
       },
       "model_metrics": {
@@ -190,7 +197,7 @@
         ],
         "fold_0_pixel": {
           "auroc": 0.95,
-          "ap": 0.8048,
+          "ap": 0.8047,
           "au_pro": 0.8879
         }
       },
@@ -257,15 +264,17 @@
         }
       },
       "latency": {
-        "cuda_evaluation_ms": {
-          "median": 21.72,
-          "p95": 22.48
+        "evaluation_ms": {
+          "median": 221.12,
+          "p95": 260.78,
+          "device": "cpu"
         },
         "cpu_station_ms": {
-          "median": 223.64,
-          "p95": 235.42,
-          "p99": 241.77,
-          "peak_rss_mb": 1075.1,
+          "median": 203.21,
+          "p95": 207.61,
+          "p99": 210.83,
+          "peak_rss_mb": 407.4,
+          "backend": "onnx",
           "device": "cpu",
           "threads": 4
         }
@@ -280,8 +289,9 @@
     },
     "textile_carpet": {
       "domain": "textile",
-      "source": "mvtec:carpet",
+      "source": "mvtec-ad:carpet",
       "task": "anomaly",
+      "backend": "onnx",
       "protocol": "MVTec AD official train/test; fit on 80% of train/good, calibrate on a disjoint 20%, report on the official test split.",
       "calibration": {
         "path": "configs/calibration/textile_carpet.json",
@@ -289,7 +299,8 @@
         "alpha_fail": 0.05,
         "alpha_review": 0.1,
         "sample_sizes": {
-          "anomaly_cal": 56
+          "anomaly_cal": 56,
+          "region_cal": 0
         }
       },
       "model_metrics": {
@@ -365,15 +376,17 @@
         }
       },
       "latency": {
-        "cuda_evaluation_ms": {
-          "median": 13.4,
-          "p95": 14.08
+        "evaluation_ms": {
+          "median": 143.76,
+          "p95": 176.23,
+          "device": "cpu"
         },
         "cpu_station_ms": {
-          "median": 119.51,
-          "p95": 123.66,
-          "p99": 125.73,
-          "peak_rss_mb": 886.3,
+          "median": 160.8,
+          "p95": 219.4,
+          "p99": 228.25,
+          "peak_rss_mb": 281.6,
+          "backend": "onnx",
           "device": "cpu",
           "threads": 4
         }
@@ -386,8 +399,9 @@
     },
     "packaging_bottle": {
       "domain": "packaging",
-      "source": "mvtec:bottle",
+      "source": "mvtec-ad:bottle",
       "task": "anomaly",
+      "backend": "onnx",
       "protocol": "MVTec AD official train/test; fit on 80% of train/good, calibrate on a disjoint 20%, report on the official test split.",
       "calibration": {
         "path": "configs/calibration/packaging_bottle.json",
@@ -395,7 +409,8 @@
         "alpha_fail": 0.05,
         "alpha_review": 0.1,
         "sample_sizes": {
-          "anomaly_cal": 42
+          "anomaly_cal": 42,
+          "region_cal": 0
         }
       },
       "model_metrics": {
@@ -471,15 +486,17 @@
         }
       },
       "latency": {
-        "cuda_evaluation_ms": {
-          "median": 12.77,
-          "p95": 13.25
+        "evaluation_ms": {
+          "median": 161.91,
+          "p95": 201.88,
+          "device": "cpu"
         },
         "cpu_station_ms": {
-          "median": 102.25,
-          "p95": 104.46,
-          "p99": 108.69,
-          "peak_rss_mb": 883.5,
+          "median": 166.19,
+          "p95": 218.41,
+          "p99": 243.13,
+          "peak_rss_mb": 304.4,
+          "backend": "onnx",
           "device": "cpu",
           "threads": 4
         }
@@ -492,8 +509,9 @@
     },
     "pharma_capsule": {
       "domain": "pharmaceutical",
-      "source": "mvtec:capsule",
+      "source": "mvtec-ad:capsule",
       "task": "anomaly",
+      "backend": "onnx",
       "protocol": "MVTec AD official train/test; fit on 80% of train/good, calibrate on a disjoint 20%, report on the official test split.",
       "calibration": {
         "path": "configs/calibration/pharma_capsule.json",
@@ -501,7 +519,8 @@
         "alpha_fail": 0.05,
         "alpha_review": 0.1,
         "sample_sizes": {
-          "anomaly_cal": 44
+          "anomaly_cal": 44,
+          "region_cal": 0
         }
       },
       "model_metrics": {
@@ -577,15 +596,17 @@
         }
       },
       "latency": {
-        "cuda_evaluation_ms": {
-          "median": 13.25,
-          "p95": 13.5
+        "evaluation_ms": {
+          "median": 149.18,
+          "p95": 186.68,
+          "device": "cpu"
         },
         "cpu_station_ms": {
-          "median": 112.25,
-          "p95": 117.16,
-          "p99": 123.99,
-          "peak_rss_mb": 886.5,
+          "median": 163.85,
+          "p95": 219.01,
+          "p99": 239.67,
+          "peak_rss_mb": 293.2,
+          "backend": "onnx",
           "device": "cpu",
           "threads": 4
         }
@@ -598,8 +619,9 @@
     },
     "automotive_metal_nut": {
       "domain": "automotive",
-      "source": "mvtec:metal_nut",
+      "source": "mvtec-ad:metal_nut",
       "task": "anomaly",
+      "backend": "onnx",
       "protocol": "MVTec AD official train/test; fit on 80% of train/good, calibrate on a disjoint 20%, report on the official test split.",
       "calibration": {
         "path": "configs/calibration/automotive_metal_nut.json",
@@ -607,7 +629,8 @@
         "alpha_fail": 0.05,
         "alpha_review": 0.1,
         "sample_sizes": {
-          "anomaly_cal": 44
+          "anomaly_cal": 44,
+          "region_cal": 0
         }
       },
       "model_metrics": {
@@ -683,15 +706,17 @@
         }
       },
       "latency": {
-        "cuda_evaluation_ms": {
-          "median": 11.93,
-          "p95": 12.43
+        "evaluation_ms": {
+          "median": 168.71,
+          "p95": 226.21,
+          "device": "cpu"
         },
         "cpu_station_ms": {
-          "median": 102.81,
-          "p95": 106.78,
-          "p99": 112.96,
-          "peak_rss_mb": 877.3,
+          "median": 168.85,
+          "p95": 230.59,
+          "p99": 241.85,
+          "peak_rss_mb": 281.6,
+          "backend": "onnx",
           "device": "cpu",
           "threads": 4
         }
@@ -704,8 +729,9 @@
     },
     "electronics_transistor": {
       "domain": "electronics",
-      "source": "mvtec:transistor",
+      "source": "mvtec-ad:transistor",
       "task": "anomaly",
+      "backend": "onnx",
       "protocol": "MVTec AD official train/test; fit on 80% of train/good, calibrate on a disjoint 20%, report on the official test split.",
       "calibration": {
         "path": "configs/calibration/electronics_transistor.json",
@@ -713,7 +739,8 @@
         "alpha_fail": 0.05,
         "alpha_review": 0.1,
         "sample_sizes": {
-          "anomaly_cal": 43
+          "anomaly_cal": 43,
+          "region_cal": 0
         }
       },
       "model_metrics": {
@@ -789,15 +816,17 @@
         }
       },
       "latency": {
-        "cuda_evaluation_ms": {
-          "median": 13.41,
-          "p95": 13.76
+        "evaluation_ms": {
+          "median": 155.76,
+          "p95": 214.14,
+          "device": "cpu"
         },
         "cpu_station_ms": {
-          "median": 112.81,
-          "p95": 118.84,
-          "p99": 123.41,
-          "peak_rss_mb": 885.8,
+          "median": 164.02,
+          "p95": 201.57,
+          "p99": 240.16,
+          "peak_rss_mb": 282.1,
+          "backend": "onnx",
           "device": "cpu",
           "threads": 4
         }
@@ -877,7 +906,7 @@
             "false_alarm_rate": 0.0714
           },
           "calibrated": {
-            "threshold": 0.529939,
+            "threshold": 0.529912,
             "recall": 0.8427,
             "false_alarm_rate": 0.0357
           }
@@ -1475,37 +1504,32 @@
     }
   },
   "advisory": {
-    "cases": 37,
+    "cases": 38,
     "accepted": 37,
-    "acceptance_rate": 1.0,
-    "rejected": 0,
-    "rejected_format": 0,
+    "acceptance_rate": 0.9737,
+    "rejected": 1,
+    "rejected_format": 1,
     "accepted_grounding_violations": 0,
-    "rejection_reasons": {},
-    "latency_ms_median": 6309.5,
-    "latency_ms_median_accepted": 6309.5,
-    "latency_ms_min": 5404.7,
-    "latency_ms_max": 10948.2,
-    "ttft_ms_median": 1902.0,
-    "ttft_ms_median_accepted": 1902.0,
-    "ttft_ms_min": 1639.0,
-    "ttft_ms_max": 2620.0,
-    "tokens_per_second_median": 5.63,
-    "generated_tokens_min": 20,
-    "generated_tokens_max": 47,
-    "resident_mb_median": 2765.8,
-    "resident_mb_max": 2765.8,
+    "rejection_reasons": {
+      "the model did not return a valid selection": 1
+    },
+    "latency_ms_median": 4789.0,
+    "latency_ms_median_accepted": 4789.8,
+    "latency_ms_min": 3038.9,
+    "latency_ms_max": 5294.5,
+    "ttft_ms_median": 1945.0,
+    "ttft_ms_median_accepted": 1948.0,
+    "ttft_ms_min": 1565.0,
+    "ttft_ms_max": 2429.0,
+    "tokens_per_second_median": 5.53,
+    "generated_tokens_min": 7,
+    "generated_tokens_max": 18,
+    "resident_mb_median": 2741.3,
+    "resident_mb_max": 2741.3,
     "human_usefulness": "not measured; blind sheet prepared, awaiting independent rater",
     "model_sha256": "3fdc3db98e7b0f33c480c9ea92cdc48f68c09e0eb809ba31ae846c50bab513b4",
     "tokenizer_sha256": "6b9e4e7fb171f92fd137b777cc2714bf87d11576700a1dcd7a399e7bbe39537b",
-    "wall_seconds": 263.1,
-    "tokenizer_files": {
-      "config.json": "dfb67fd8afe73a1c75245824ef9d64a6ba8983025447e3bf76aa1ea57ee46152",
-      "special_tokens_map.json": "94e708c3f5e64acf85bbe5ad01467a1248faadb73e83b41793087ecced586e8f",
-      "tokenizer.json": "6b9e4e7fb171f92fd137b777cc2714bf87d11576700a1dcd7a399e7bbe39537b",
-      "tokenizer_config.json": "9ddd255c19fe319c8d4e891163540382e9fbda99f394674f2a929efc47d57458"
-    },
-    "tokenizer_bundle_sha256": "eda224f03d112cb7fd5f24cd880af908c8da140d2a2c4895d3264700e54cffa2",
+    "wall_seconds": 193.1,
     "evidence": "reports/tables/advisory_audit.json"
   },
   "advisory_usefulness": {
@@ -1514,108 +1538,45 @@
     "note": "Blind paired rating sheet prepared; requires an independent human rater."
   },
   "pi_benchmark": {
-    "vision": {
-      "schema": "veriqc.pi-benchmark/1",
-      "mode": "vision",
-      "profile": "commutator",
-      "device": "cpu",
-      "threads": 4,
-      "images": 60,
-      "warmup_images": 3,
-      "total_ms": {
-        "median": 1333.54,
-        "p95": 1349.79,
-        "p99": 1384.22,
-        "min": 1320.39,
-        "max": 1411.22
-      },
-      "wall_ms": {
-        "median": 1333.59,
-        "p95": 1349.84,
-        "p99": 1384.27,
-        "min": 1320.44,
-        "max": 1411.27
-      },
-      "throughput_images_per_second": 0.748,
-      "elapsed_s": 80.2,
-      "monitor": {
-        "temperature_c": {
-          "start": 47.4,
-          "median": 55.6,
-          "max": 59.0,
-          "end": 57.9,
-          "samples": 79
-        },
-        "throttle": {
-          "before": {
-            "raw": "0x0",
-            "flags": []
-          },
-          "after": {
-            "raw": "0x0",
-            "flags": []
-          },
-          "occurred_flags": []
-        },
-        "rss_mb": {
-          "parent_max": 822.6,
-          "tree_max": 822.6,
-          "samples": 79
-        }
-      },
-      "environment": {
-        "hostname": "Rpi5",
-        "model": "Raspberry Pi 5 Model B Rev 1.1",
-        "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
-        "machine": "aarch64",
-        "python": "3.13.5",
-        "cpu_governor": "ondemand",
-        "packages": {
-          "torch": "2.15.0+cpu",
-          "torchvision": "0.29.2+cpu",
-          "ultralytics": "8.4.216",
-          "numpy": "2.5.4",
-          "executorch": "1.6.0",
-          "transformers": "5.24.0",
-          "opencv": "5.1.0.95"
-        },
-        "memory_total_mb": 8058.3,
-        "measured_at": "2026-11-22T23:47:56"
-      },
-      "evidence": "reports/tables/pi_vision.json"
-    },
     "advisory": {
       "schema": "veriqc.pi-benchmark/1",
       "mode": "advisory",
+      "vision_backend": "onnx",
       "device": "cpu",
-      "cases": 37,
-      "accepted": 37,
+      "cases": 38,
+      "accepted": 38,
       "acceptance_rate": 1.0,
-      "case_build_seconds": 31.2,
-      "model_load_seconds": 0.9,
+      "case_build_seconds": 16.7,
+      "model_startup_seconds": 14.6,
       "latency_ms": {
-        "median": 25478.6,
-        "p95": 44654.78,
-        "p99": 44763.26,
-        "min": 21770.1,
-        "max": 44791.7
+        "median": 17475.95,
+        "p95": 18617.95,
+        "p99": 18676.74,
+        "min": 15646.3,
+        "max": 18690.8
       },
       "ttft_ms": {
-        "median": 7053.0,
-        "p95": 9854.2,
-        "p99": 9879.64,
-        "min": 6885.0,
-        "max": 9880.0
+        "median": 5401.5,
+        "p95": 7224.65,
+        "p99": 7254.15,
+        "min": 4910.0,
+        "max": 7256.0
       },
-      "tokens_per_second_median": 1.35,
-      "resident_mb_max": 2367.3,
+      "tokens_per_second_median": 1.36,
+      "resident_mb_max": 2374.2,
       "monitor": {
         "temperature_c": {
-          "start": 51.8,
-          "median": 50.1,
-          "max": 56.8,
-          "end": 46.9,
-          "samples": 1063
+          "start": 59.5,
+          "median": 51.8,
+          "max": 59.5,
+          "end": 48.5,
+          "samples": 652
+        },
+        "power_w": {
+          "core_median": 2.71,
+          "core_max": 6.02,
+          "sys_3v3_median": 0.18,
+          "samples": 652
         },
         "throttle": {
           "before": {
@@ -1629,16 +1590,15 @@
           "occurred_flags": []
         },
         "rss_mb": {
-          "parent_max": 638.0,
-          "tree_max": 2826.9,
-          "samples": 1063
+          "parent_max": 613.5,
+          "tree_max": 2806.1,
+          "samples": 652
         }
       },
-      "startup_note": "model_load_seconds is the in-process runner constructor; full station startup is recorded in pi_resident_steady.json (10.8 s) and pi_station_smoke.json (17.0 s to HTTP health).",
       "environment": {
         "hostname": "Rpi5",
         "model": "Raspberry Pi 5 Model B Rev 1.1",
-        "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+        "platform": "Linux-6.18.60+rpt-rpi-2712-aarch64-with-glibc2.41",
         "machine": "aarch64",
         "python": "3.13.5",
         "cpu_governor": "ondemand",
@@ -1646,65 +1606,93 @@
           "torch": "2.15.0+cpu",
           "torchvision": "0.29.2+cpu",
           "ultralytics": "8.4.216",
+          "onnxruntime": "1.32.0",
           "numpy": "2.5.4",
           "executorch": "1.6.0",
           "transformers": "5.24.0",
-          "opencv": "5.1.0.95"
+          "opencv": "5.1.0.95",
+          "psutil": "7.2.2"
         },
-        "memory_total_mb": 8058.3,
-        "measured_at": "2026-11-22T23:49:40"
+        "memory_total_mb": 8062.2,
+        "measured_at": "2026-11-24T15:25:48"
       },
-      "evidence": "reports/tables/pi_advisory.json"
+      "evidence": "reports/tables/pi_advisory.json",
+      "campaign": "Raspberry Pi 5, ONNX Runtime CPU"
     },
     "resident": {
       "schema": "veriqc.pi-benchmark/1",
       "mode": "resident",
       "profile": "commutator",
+      "backend": "onnx",
       "device": "cpu",
-      "startup_seconds": 11.6,
+      "startup_seconds": 16.6,
       "inspections": 96,
       "arrival_interval_s": 2.0,
-      "submit_seconds": 298.1,
-      "drain_seconds": 120.1,
-      "drained": false,
+      "submit_seconds": 192.1,
+      "drain_seconds": 33.5,
+      "drained": true,
       "vision_ms": {
-        "median": 3110.25,
-        "p95": 3207.97,
-        "p99": 3250.4,
-        "min": 1376.95,
-        "max": 3268.16
+        "median": 1577.79,
+        "p95": 1747.56,
+        "p99": 1862.35,
+        "min": 740.57,
+        "max": 1961.66
       },
       "wall_ms": {
-        "median": 3162.43,
-        "p95": 3257.62,
-        "p99": 3302.49,
-        "min": 1411.7,
-        "max": 3321.38
+        "median": 1634.82,
+        "p95": 1801.13,
+        "p99": 1905.51,
+        "min": 775.27,
+        "max": 2008.63
       },
-      "qsize_max_observed": 57,
-      "queue_drops_reported": 0,
+      "qsize_max_observed": 1,
+      "queue_drops_reported": 88,
       "stats": {
         "inspections": 96,
-        "advisories_completed": 71,
+        "advisories_completed": 8,
         "advisories_failed": 0,
-        "advisories_dropped": 0,
-        "advisories_timed_out": 61,
-        "advisory_queue_high_water": 57
+        "advisories_dropped": 88,
+        "advisories_timed_out": 0,
+        "advisory_queue_high_water": 1
       },
-      "queue_remaining_at_end": 24,
+      "advisory_outcomes": {
+        "events": 96,
+        "paths": {
+          "llm": 8,
+          "template": 88
+        },
+        "accepted": {
+          "true": 8,
+          "false": 88
+        },
+        "violations": {
+          "replaced by a newer part": 88
+        }
+      },
+      "verdict_counts": {
+        "FAIL": 96
+      },
+      "queue_remaining_at_end": 0,
       "audit_chain": {
         "ok": true,
-        "rows": 167,
-        "first_bad": null,
-        "anchor_ok": true
+        "chain_ok": true,
+        "anchor_ok": true,
+        "rows": 192,
+        "first_bad": null
       },
       "monitor": {
         "temperature_c": {
-          "start": 40.8,
-          "median": 53.5,
-          "max": 59.0,
-          "end": 51.8,
-          "samples": 414
+          "start": 43.0,
+          "median": 59.0,
+          "max": 63.4,
+          "end": 50.1,
+          "samples": 216
+        },
+        "power_w": {
+          "core_median": 4.56,
+          "core_max": 6.97,
+          "sys_3v3_median": 0.18,
+          "samples": 216
         },
         "throttle": {
           "before": {
@@ -1718,18 +1706,15 @@
           "occurred_flags": []
         },
         "rss_mb": {
-          "parent_max": 791.3,
-          "tree_max": 3028.8,
-          "samples": 414
+          "parent_max": 798.0,
+          "tree_max": 2981.5,
+          "samples": 216
         }
-      },
-      "verdict_counts": {
-        "FAIL": 96
       },
       "environment": {
         "hostname": "Rpi5",
         "model": "Raspberry Pi 5 Model B Rev 1.1",
-        "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+        "platform": "Linux-6.18.60+rpt-rpi-2712-aarch64-with-glibc2.41",
         "machine": "aarch64",
         "python": "3.13.5",
         "cpu_governor": "ondemand",
@@ -1737,55 +1722,44 @@
           "torch": "2.15.0+cpu",
           "torchvision": "0.29.2+cpu",
           "ultralytics": "8.4.216",
+          "onnxruntime": "1.32.0",
           "numpy": "2.5.4",
           "executorch": "1.6.0",
           "transformers": "5.24.0",
-          "opencv": "5.1.0.95"
+          "opencv": "5.1.0.95",
+          "psutil": "7.2.2"
         },
-        "memory_total_mb": 8058.3,
-        "measured_at": "2026-11-23T00:09:52"
+        "memory_total_mb": 8062.2,
+        "measured_at": "2026-11-24T15:45:18"
       },
       "evidence": "reports/tables/pi_resident.json",
-      "advisory_outcomes": {
-        "events": 72,
-        "paths": {
-          "llm": 10,
-          "template": 62
-        },
-        "accepted": {
-          "true": 10,
-          "false": 62
-        },
-        "violations": {
-          "generation timeout or busy": 62
-        }
-      },
-      "advisory_outcomes_evidence": "reports/tables/pi_resident_outcomes.json"
+      "campaign": "Raspberry Pi 5, ONNX Runtime CPU"
     },
     "resident_steady": {
       "schema": "veriqc.pi-benchmark/1",
       "mode": "resident",
       "profile": "commutator",
+      "backend": "onnx",
       "device": "cpu",
-      "startup_seconds": 10.8,
+      "startup_seconds": 16.5,
       "inspections": 10,
       "arrival_interval_s": 45.0,
       "submit_seconds": 450.0,
       "drain_seconds": 0.0,
       "drained": true,
       "vision_ms": {
-        "median": 1358.03,
-        "p95": 1370.88,
-        "p99": 1375.16,
-        "min": 1329.31,
-        "max": 1376.23
+        "median": 749.75,
+        "p95": 755.77,
+        "p99": 755.9,
+        "min": 741.32,
+        "max": 755.93
       },
       "wall_ms": {
-        "median": 1389.62,
-        "p95": 1404.9,
-        "p99": 1408.4,
-        "min": 1360.44,
-        "max": 1409.27
+        "median": 781.04,
+        "p95": 793.12,
+        "p99": 795.98,
+        "min": 773.02,
+        "max": 796.69
       },
       "qsize_max_observed": 1,
       "queue_drops_reported": 0,
@@ -1808,20 +1782,30 @@
         },
         "violations": {}
       },
+      "verdict_counts": {
+        "FAIL": 10
+      },
       "queue_remaining_at_end": 0,
       "audit_chain": {
         "ok": true,
+        "chain_ok": true,
+        "anchor_ok": true,
         "rows": 20,
-        "first_bad": null,
-        "anchor_ok": true
+        "first_bad": null
       },
       "monitor": {
         "temperature_c": {
-          "start": 38.6,
-          "median": 46.3,
+          "start": 46.9,
+          "median": 43.0,
           "max": 53.5,
-          "end": 38.0,
-          "samples": 444
+          "end": 38.6,
+          "samples": 435
+        },
+        "power_w": {
+          "core_median": 0.53,
+          "core_max": 6.81,
+          "sys_3v3_median": 0.18,
+          "samples": 435
         },
         "throttle": {
           "before": {
@@ -1835,18 +1819,15 @@
           "occurred_flags": []
         },
         "rss_mb": {
-          "parent_max": 823.5,
-          "tree_max": 2999.2,
-          "samples": 444
+          "parent_max": 797.8,
+          "tree_max": 2980.1,
+          "samples": 435
         }
-      },
-      "verdict_counts": {
-        "FAIL": 10
       },
       "environment": {
         "hostname": "Rpi5",
         "model": "Raspberry Pi 5 Model B Rev 1.1",
-        "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+        "platform": "Linux-6.18.60+rpt-rpi-2712-aarch64-with-glibc2.41",
         "machine": "aarch64",
         "python": "3.13.5",
         "cpu_governor": "ondemand",
@@ -1854,15 +1835,18 @@
           "torch": "2.15.0+cpu",
           "torchvision": "0.29.2+cpu",
           "ultralytics": "8.4.216",
+          "onnxruntime": "1.32.0",
           "numpy": "2.5.4",
           "executorch": "1.6.0",
           "transformers": "5.24.0",
-          "opencv": "5.1.0.95"
+          "opencv": "5.1.0.95",
+          "psutil": "7.2.2"
         },
-        "memory_total_mb": 8058.3,
-        "measured_at": "2026-11-23T00:18:16"
+        "memory_total_mb": 8062.2,
+        "measured_at": "2026-11-24T15:37:29"
       },
-      "evidence": "reports/tables/pi_resident_steady.json"
+      "evidence": "reports/tables/pi_resident_steady.json",
+      "campaign": "Raspberry Pi 5, ONNX Runtime CPU"
     },
     "evaluation_commutator_parity": {
       "verdict_counts_equal": true,
@@ -1877,24 +1861,365 @@
         "REVIEW": 1,
         "FAIL": 20
       },
-      "host_known_pixel_ap": 0.8048,
+      "host_known_pixel_ap": 0.8047,
       "pi_known_pixel_ap": 0.8047,
       "host_known_pixel_auroc": 0.95,
       "pi_known_pixel_auroc": 0.95,
       "host_known_au_pro": 0.8879,
       "pi_known_au_pro": 0.8879,
-      "host_latency_ms_median": 21.72,
-      "pi_latency_ms_median": 1312.73,
+      "host_latency_ms_median": 221.12,
+      "pi_latency_ms_median": 701.33,
+      "campaign": "Raspberry Pi 5, ONNX Runtime CPU",
       "evidence": "reports/tables/pi_evaluation_commutator.json"
     }
   },
+  "pi_vision_profiles": {
+    "steel_surface": {
+      "backend": "onnx",
+      "images": 40,
+      "threads": 4,
+      "total_ms": {
+        "median": 132.75,
+        "p95": 139.39,
+        "p99": 145.72,
+        "min": 131.67,
+        "max": 148.13
+      },
+      "throughput_images_per_second": 7.443,
+      "temperature_c": {
+        "start": 41.9,
+        "median": 47.5,
+        "max": 50.7,
+        "end": 50.7,
+        "samples": 6
+      },
+      "power_w": {
+        "core_median": 3.71,
+        "core_max": 5.28,
+        "sys_3v3_median": 0.18,
+        "samples": 6
+      },
+      "throttle": {
+        "before": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "after": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "occurred_flags": []
+      },
+      "rss_mb": {
+        "parent_max": 203.4,
+        "tree_max": 203.4,
+        "samples": 6
+      },
+      "evidence": "reports/tables/pi_vision_steel_surface.json"
+    },
+    "commutator": {
+      "backend": "onnx",
+      "images": 40,
+      "threads": 4,
+      "total_ms": {
+        "median": 729.58,
+        "p95": 735.05,
+        "p99": 738.39,
+        "min": 722.27,
+        "max": 740.2
+      },
+      "throughput_images_per_second": 1.372,
+      "temperature_c": {
+        "start": 54.0,
+        "median": 60.0,
+        "max": 64.5,
+        "end": 63.9,
+        "samples": 28
+      },
+      "power_w": {
+        "core_median": 5.97,
+        "core_max": 7.1,
+        "sys_3v3_median": 0.18,
+        "samples": 28
+      },
+      "throttle": {
+        "before": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "after": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "occurred_flags": []
+      },
+      "rss_mb": {
+        "parent_max": 478.8,
+        "tree_max": 478.8,
+        "samples": 28
+      },
+      "evidence": "reports/tables/pi_vision_commutator.json",
+      "environment": {
+        "hostname": "Rpi5",
+        "model": "Raspberry Pi 5 Model B Rev 1.1",
+        "platform": "Linux-6.18.60+rpt-rpi-2712-aarch64-with-glibc2.41",
+        "machine": "aarch64",
+        "python": "3.13.5",
+        "cpu_governor": "ondemand",
+        "packages": {
+          "torch": "2.15.0+cpu",
+          "torchvision": "0.29.2+cpu",
+          "ultralytics": "8.4.216",
+          "onnxruntime": "1.32.0",
+          "numpy": "2.5.4",
+          "executorch": "1.6.0",
+          "transformers": "5.24.0",
+          "opencv": "5.1.0.95",
+          "psutil": "7.2.2"
+        },
+        "memory_total_mb": 8062.2,
+        "measured_at": "2026-11-24T15:23:49"
+      }
+    },
+    "textile_carpet": {
+      "backend": "onnx",
+      "images": 40,
+      "threads": 4,
+      "total_ms": {
+        "median": 363.19,
+        "p95": 377.17,
+        "p99": 401.35,
+        "min": 348.18,
+        "max": 414.85
+      },
+      "throughput_images_per_second": 2.741,
+      "temperature_c": {
+        "start": 57.9,
+        "median": 59.0,
+        "max": 60.0,
+        "end": 58.4,
+        "samples": 14
+      },
+      "power_w": {
+        "core_median": 4.82,
+        "core_max": 6.73,
+        "sys_3v3_median": 0.18,
+        "samples": 14
+      },
+      "throttle": {
+        "before": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "after": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "occurred_flags": []
+      },
+      "rss_mb": {
+        "parent_max": 424.4,
+        "tree_max": 424.4,
+        "samples": 14
+      },
+      "evidence": "reports/tables/pi_vision_textile_carpet.json"
+    },
+    "packaging_bottle": {
+      "backend": "onnx",
+      "images": 40,
+      "threads": 4,
+      "total_ms": {
+        "median": 350.96,
+        "p95": 369.16,
+        "p99": 371.3,
+        "min": 340.36,
+        "max": 371.32
+      },
+      "throughput_images_per_second": 2.838,
+      "temperature_c": {
+        "start": 55.6,
+        "median": 57.3,
+        "max": 59.0,
+        "end": 59.0,
+        "samples": 14
+      },
+      "power_w": {
+        "core_median": 3.09,
+        "core_max": 7.07,
+        "sys_3v3_median": 0.19,
+        "samples": 14
+      },
+      "throttle": {
+        "before": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "after": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "occurred_flags": []
+      },
+      "rss_mb": {
+        "parent_max": 390.2,
+        "tree_max": 390.2,
+        "samples": 14
+      },
+      "evidence": "reports/tables/pi_vision_packaging_bottle.json"
+    },
+    "pharma_capsule": {
+      "backend": "onnx",
+      "images": 40,
+      "threads": 4,
+      "total_ms": {
+        "median": 358.92,
+        "p95": 374.46,
+        "p99": 378.18,
+        "min": 335.47,
+        "max": 380.23
+      },
+      "throughput_images_per_second": 2.795,
+      "temperature_c": {
+        "start": 54.5,
+        "median": 57.6,
+        "max": 58.4,
+        "end": 57.3,
+        "samples": 14
+      },
+      "power_w": {
+        "core_median": 3.13,
+        "core_max": 7.07,
+        "sys_3v3_median": 0.18,
+        "samples": 14
+      },
+      "throttle": {
+        "before": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "after": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "occurred_flags": []
+      },
+      "rss_mb": {
+        "parent_max": 425.7,
+        "tree_max": 425.7,
+        "samples": 14
+      },
+      "evidence": "reports/tables/pi_vision_pharma_capsule.json"
+    },
+    "automotive_metal_nut": {
+      "backend": "onnx",
+      "images": 40,
+      "threads": 4,
+      "total_ms": {
+        "median": 351.55,
+        "p95": 364.81,
+        "p99": 378.09,
+        "min": 340.98,
+        "max": 385.2
+      },
+      "throughput_images_per_second": 2.827,
+      "temperature_c": {
+        "start": 55.6,
+        "median": 57.9,
+        "max": 59.5,
+        "end": 57.9,
+        "samples": 14
+      },
+      "power_w": {
+        "core_median": 2.59,
+        "core_max": 7.2,
+        "sys_3v3_median": 0.18,
+        "samples": 14
+      },
+      "throttle": {
+        "before": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "after": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "occurred_flags": []
+      },
+      "rss_mb": {
+        "parent_max": 338.6,
+        "tree_max": 338.6,
+        "samples": 14
+      },
+      "evidence": "reports/tables/pi_vision_automotive_metal_nut.json"
+    },
+    "electronics_transistor": {
+      "backend": "onnx",
+      "images": 40,
+      "threads": 4,
+      "total_ms": {
+        "median": 352.15,
+        "p95": 381.19,
+        "p99": 386.17,
+        "min": 336.28,
+        "max": 387.23
+      },
+      "throughput_images_per_second": 2.823,
+      "temperature_c": {
+        "start": 55.6,
+        "median": 57.9,
+        "max": 59.5,
+        "end": 59.5,
+        "samples": 14
+      },
+      "power_w": {
+        "core_median": 2.71,
+        "core_max": 6.89,
+        "sys_3v3_median": 0.18,
+        "samples": 14
+      },
+      "throttle": {
+        "before": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "after": {
+          "raw": "0x0",
+          "flags": []
+        },
+        "occurred_flags": []
+      },
+      "rss_mb": {
+        "parent_max": 416.1,
+        "tree_max": 416.1,
+        "samples": 14
+      },
+      "evidence": "reports/tables/pi_vision_electronics_transistor.json"
+    }
+  },
   "pi_station_smoke": {
-    "startup_seconds": 17.0,
+    "backend": "onnx",
+    "input": "upload",
+    "startup_seconds": 17.5,
     "verdict": "FAIL",
-    "vision_latency_ms": 1337.32,
+    "vision_latency_ms": 725.75,
+    "acquisition": {
+      "hash_basis": "decoded_rgb_pixels",
+      "qc_flags": [],
+      "qc_ok": true,
+      "statistics": {
+        "blur_ratio": 0.049535,
+        "clipped_fraction": 0.007146,
+        "grey_variance": 525.51,
+        "height": 1260,
+        "pixels": 630000,
+        "width": 500
+      }
+    },
+    "reasons": [],
     "advisory_status": "accepted",
     "advisory_accepted": true,
-    "advisory_latency_ms": 27913.6,
+    "advisory_latency_ms": 17563.6,
     "overlay_http": 200,
     "csv_http": 200,
     "chain_ok": true,
@@ -1904,11 +2229,66 @@
       "advisory_tokenizer_bundle",
       "calibration",
       "cards",
-      "known_weights",
+      "known_runtime",
+      "known_runtime_data",
       "profile",
       "severity"
     ],
-    "evidence": "reports/tables/pi_station_smoke.json"
+    "evidence": "reports/tables/pi_station_smoke.json",
+    "campaign": "Raspberry Pi 5, ONNX Runtime CPU"
+  },
+  "pi_camera_smoke": {
+    "backend": "onnx",
+    "profile": "textile_carpet",
+    "input": "camera",
+    "source": {
+      "type": "camera",
+      "camera": {
+        "kind": "usb",
+        "index": 0,
+        "width": 640,
+        "height": 480,
+        "fps": 30
+      }
+    },
+    "startup_seconds": 17.0,
+    "verdict": "FAIL",
+    "vision_latency_ms": 322.31,
+    "acquisition": {
+      "hash_basis": "decoded_rgb_pixels",
+      "qc_flags": [],
+      "qc_ok": true,
+      "statistics": {
+        "blur_ratio": 0.041458,
+        "clipped_fraction": 0.0,
+        "grey_variance": 5019.9,
+        "height": 480,
+        "pixels": 307200,
+        "width": 640
+      }
+    },
+    "reasons": [],
+    "advisory_status": "accepted",
+    "advisory_accepted": true,
+    "advisory_latency_ms": 17617.3,
+    "overlay_http": 200,
+    "csv_http": 200,
+    "chain_ok": true,
+    "evidence": "reports/tables/pi_camera_smoke.json",
+    "campaign": "Raspberry Pi 5, ONNX Runtime CPU",
+    "note": "Live USB-camera acceptance check; the verdict describes the captured scene and is not an accuracy measurement."
+  },
+  "pi_offline_check": {
+    "ok": true,
+    "profile_id": "commutator",
+    "backend": "onnx",
+    "image": "/home/vit/VeriQC/data/kolektor/kos02/Part0.jpg",
+    "verdict": "PASS",
+    "latency_ms": 755.42,
+    "external_dashboard_assets": [],
+    "network_blocked": true,
+    "measured_at": "2026-11-24T15:50:38",
+    "evidence": "reports/tables/pi_offline_check.json"
   },
   "artifact_manifests": [
     "reports/models/advisory.json",
@@ -1922,13 +2302,25 @@
   ],
   "runtime_artifact_manifest": "configs/artifacts.json",
   "export_parity": {
-    "segmenter_max_abs_logit_difference": 7.927417755126953e-06,
-    "anomaly_max_abs_feature_difference": 4.06801700592041e-06,
+    "segmenter_max_abs_logit_difference": 7.62939453125e-06,
+    "anomaly_max_abs_feature_difference": 4.1425228118896484e-06,
     "detector_max_box_difference_px": 0.0009918212890625,
     "detector_max_confidence_difference": 1.5497207641601562e-06,
     "detector_images": 8,
     "evidence": "reports/tables/export_parity.json",
-    "note": "ONNX Runtime CPUExecutionProvider compared with PyTorch CPU on local inputs; the reference station executes PyTorch."
+    "note": "ONNX Runtime CPUExecutionProvider compared with PyTorch CPU on local inputs; the production station executes ONNX Runtime."
+  },
+  "offline_check": {
+    "ok": true,
+    "profile_id": "commutator",
+    "backend": "onnx",
+    "image": "/home/mathesh/Documents/VeriQC/data/kolektor/kos02/Part0.jpg",
+    "verdict": "PASS",
+    "latency_ms": 159.75,
+    "external_dashboard_assets": [],
+    "network_blocked": true,
+    "measured_at": "2026-11-24T13:58:51",
+    "evidence": "reports/tables/offline_check.json"
   },
   "not_measured": [
     "Human advisory usefulness rating",

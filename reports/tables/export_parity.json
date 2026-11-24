@@ -1,6 +1,6 @@
 {
   "runtime": "ONNX Runtime CPUExecutionProvider vs PyTorch CPU",
-  "note": "These exports are deployment artifacts; the reference station executes PyTorch.",
+  "note": "These exports are the production CPU runtime; PyTorch remains the training/reference path.",
   "profiles": [
     {
       "artifact": "models/profiles/automotive_metal_nut/export/anomaly_backbone.onnx",
@@ -10,10 +10,10 @@
         448,
         448
       ],
-      "max_abs_feature_difference": 3.427267074584961e-06,
+      "max_abs_feature_difference": 3.725290298461914e-06,
       "per_layer": {
-        "layer2": 3.427267074584961e-06,
-        "layer3": 2.3692846298217773e-06
+        "layer2": 3.725290298461914e-06,
+        "layer3": 2.8014183044433594e-06
       },
       "profile_id": "automotive_metal_nut"
     },
@@ -25,7 +25,7 @@
         1024,
         384
       ],
-      "max_abs_logit_difference": 7.927417755126953e-06,
+      "max_abs_logit_difference": 7.62939453125e-06,
       "profile_id": "commutator"
     },
     {
@@ -36,10 +36,10 @@
         448,
         448
       ],
-      "max_abs_feature_difference": 3.0994415283203125e-06,
+      "max_abs_feature_difference": 3.5762786865234375e-06,
       "per_layer": {
-        "layer2": 3.0994415283203125e-06,
-        "layer3": 2.2202730178833008e-06
+        "layer2": 3.5762786865234375e-06,
+        "layer3": 2.041459083557129e-06
       },
       "profile_id": "electronics_transistor"
     },
@@ -51,10 +51,10 @@
         448,
         448
       ],
-      "max_abs_feature_difference": 4.06801700592041e-06,
+      "max_abs_feature_difference": 4.1425228118896484e-06,
       "per_layer": {
-        "layer2": 4.06801700592041e-06,
-        "layer3": 1.9669532775878906e-06
+        "layer2": 4.1425228118896484e-06,
+        "layer3": 2.4139881134033203e-06
       },
       "profile_id": "packaging_bottle"
     },
@@ -66,10 +66,10 @@
         448,
         448
       ],
-      "max_abs_feature_difference": 3.606081008911133e-06,
+      "max_abs_feature_difference": 3.2186508178710938e-06,
       "per_layer": {
-        "layer2": 3.606081008911133e-06,
-        "layer3": 2.384185791015625e-06
+        "layer2": 3.2186508178710938e-06,
+        "layer3": 2.1457672119140625e-06
       },
       "profile_id": "pharma_capsule"
     },
@@ -89,10 +89,10 @@
         448,
         448
       ],
-      "max_abs_feature_difference": 3.337860107421875e-06,
+      "max_abs_feature_difference": 3.1739473342895508e-06,
       "per_layer": {
-        "layer2": 3.337860107421875e-06,
-        "layer3": 1.8477439880371094e-06
+        "layer2": 3.1739473342895508e-06,
+        "layer3": 1.8775463104248047e-06
       },
       "profile_id": "textile_carpet"
     }

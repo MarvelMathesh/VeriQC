@@ -1,0 +1,57 @@
+{
+  "schema": "veriqc.station-smoke/1",
+  "measured_at": "2026-11-23T23:12:25",
+  "profile": "commutator",
+  "backend": "onnx",
+  "startup_seconds": 44.1,
+  "health": {
+    "ok": true,
+    "error": null,
+    "profile": "commutator",
+    "capture": null
+  },
+  "advisory_available": true,
+  "inspection_id": "07b1062bfa8d4b0f80338eb8457a8266",
+  "verdict": "FAIL",
+  "findings": 1,
+  "vision_latency_ms": 759.39,
+  "artifact_hashes": [
+    "advisory_model",
+    "advisory_tokenizer",
+    "advisory_tokenizer_bundle",
+    "calibration",
+    "cards",
+    "known_runtime",
+    "known_runtime_data",
+    "profile",
+    "severity"
+  ],
+  "advisory_status": "accepted",
+  "advisory_accepted": true,
+  "advisory_latency_ms": 17722.3,
+  "advisory_model": {
+    "decode_ms": 11822.0,
+    "error": null,
+    "generated_tokens": 16,
+    "inference_ms": 17714.0,
+    "ok": true,
+    "path": "llm",
+    "prefill_tokens_per_second": 34.62,
+    "prompt_tokens": 204,
+    "resident_mb": 2346.1,
+    "tokens_per_second": 1.35,
+    "ttft_ms": 5892.0
+  },
+  "advisory_text": "Crack: a break in the commutator body, running with or across the turning marks. Probable cause: handling or assembly damage. Do now: quarantine the part and photograph the marked region. check fixture before next part. Escalate if: if the break appears on another part from the same batch, escalate to the quality engineer and hold the batch.",
+  "overlay_http": 200,
+  "overlay_bytes": 685876,
+  "csv_http": 200,
+  "csv_bytes": 343,
+  "audit_chain": {
+    "ok": true,
+    "rows": 2,
+    "first_bad": null,
+    "anchor_ok": true
+  },
+  "chain_ok": true
+}

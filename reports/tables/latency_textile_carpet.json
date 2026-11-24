@@ -1,23 +1,26 @@
 {
   "profile_id": "textile_carpet",
+  "backend": "onnx",
   "device": "cpu",
   "threads": 4,
   "warmup_images": 5,
   "images": 50,
   "total_ms": {
-    "median": 119.51,
-    "p95": 123.66,
-    "p99": 125.73,
-    "min": 111.88,
-    "max": 125.9
+    "median": 160.8,
+    "p95": 219.4,
+    "p99": 228.25,
+    "min": 133.44,
+    "max": 232.8
   },
-  "peak_rss_mb": 886.3,
+  "peak_rss_mb": 281.6,
   "artifact_sizes_bytes": {
-    "profile": 508,
-    "calibration": 1419,
+    "profile": 533,
+    "calibration": 1697,
     "severity": 223,
     "cards": 605,
-    "anomaly_weights": 17324371
+    "anomaly_backbone": 12674,
+    "anomaly_backbone_data": 11120896,
+    "anomaly_banks": 6145342
   },
-  "measured_at": "2026-11-22T03:12:10"
+  "measured_at": "2026-11-23T21:42:55"
 }

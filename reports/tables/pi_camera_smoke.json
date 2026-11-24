@@ -1,0 +1,115 @@
+{
+  "schema": "veriqc.station-smoke/1",
+  "measured_at": "2026-11-24T16:01:45",
+  "profile": "textile_carpet",
+  "backend": "onnx",
+  "input": "camera",
+  "source": {
+    "type": "camera",
+    "camera": {
+      "kind": "usb",
+      "index": 0,
+      "width": 640,
+      "height": 480,
+      "fps": 30
+    }
+  },
+  "capture": {
+    "running": true,
+    "source": {
+      "type": "camera",
+      "camera": {
+        "kind": "usb",
+        "index": 0,
+        "width": 640,
+        "height": 480,
+        "fps": 30
+      }
+    },
+    "frames_captured": 1,
+    "fps": 1.03,
+    "error": null
+  },
+  "startup_seconds": 17.0,
+  "health": {
+    "ok": true,
+    "error": null,
+    "profile": "textile_carpet",
+    "capture": {
+      "running": true,
+      "source": {
+        "type": "camera",
+        "camera": {
+          "kind": "usb",
+          "index": 0,
+          "width": 640,
+          "height": 480,
+          "fps": 30
+        }
+      },
+      "frames_captured": 0,
+      "fps": 0.0,
+      "error": null
+    }
+  },
+  "advisory_available": true,
+  "inspection_id": "fd1d3c5c479c4721b8386581dd66533a",
+  "verdict": "FAIL",
+  "findings": 1,
+  "acquisition": {
+    "hash_basis": "decoded_rgb_pixels",
+    "qc_flags": [],
+    "qc_ok": true,
+    "statistics": {
+      "blur_ratio": 0.041458,
+      "clipped_fraction": 0.0,
+      "grey_variance": 5019.9,
+      "height": 480,
+      "pixels": 307200,
+      "width": 640
+    }
+  },
+  "reasons": [],
+  "vision_latency_ms": 322.31,
+  "artifact_hashes": [
+    "advisory_model",
+    "advisory_tokenizer",
+    "advisory_tokenizer_bundle",
+    "anomaly_backbone",
+    "anomaly_backbone_data",
+    "anomaly_banks",
+    "calibration",
+    "cards",
+    "profile",
+    "severity"
+  ],
+  "advisory_status": "accepted",
+  "advisory_accepted": true,
+  "advisory_latency_ms": 17617.3,
+  "advisory_model": {
+    "decode_ms": 11785.0,
+    "error": null,
+    "generated_tokens": 16,
+    "inference_ms": 17610.0,
+    "ok": true,
+    "path": "llm",
+    "prefill_tokens_per_second": 34.51,
+    "prompt_tokens": 201,
+    "resident_mb": 2342.9,
+    "tokens_per_second": 1.36,
+    "ttft_ms": 5825.0
+  },
+  "advisory_text": "Unknown anomaly: a surface anomaly on the carpet that does not match a trained defect class. Probable cause: yarn or needle damage. Do now: quarantine the roll section. check yarn quality before cutting. Escalate if: if the anomaly repeats along the roll, stop the line and escalate to the process engineer.",
+  "overlay_http": 200,
+  "overlay_bytes": 411489,
+  "csv_http": 200,
+  "csv_bytes": 630,
+  "audit_chain": {
+    "ok": true,
+    "chain_ok": true,
+    "anchor_ok": true,
+    "rows": 4,
+    "first_bad": null
+  },
+  "chain_ok": true
+}

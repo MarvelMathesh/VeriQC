@@ -1,23 +1,24 @@
 {
   "profile_id": "steel_surface",
+  "backend": "onnx",
   "device": "cpu",
   "threads": 4,
   "warmup_images": 5,
   "images": 50,
   "total_ms": {
-    "median": 23.49,
-    "p95": 24.52,
-    "p99": 24.76,
-    "min": 21.54,
-    "max": 24.77
+    "median": 26.05,
+    "p95": 27.4,
+    "p99": 28.08,
+    "min": 24.3,
+    "max": 28.48
   },
-  "peak_rss_mb": 956.6,
+  "peak_rss_mb": 203.9,
   "artifact_sizes_bytes": {
-    "profile": 617,
-    "calibration": 506,
+    "profile": 642,
+    "calibration": 1012,
     "severity": 307,
     "cards": 3433,
-    "known_weights": 5467269
+    "known_runtime": 9857298
   },
-  "measured_at": "2026-11-22T03:12:16"
+  "measured_at": "2026-11-23T21:42:31"
 }

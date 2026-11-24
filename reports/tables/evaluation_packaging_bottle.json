@@ -30,12 +30,15 @@
   "review_rate": 0.0,
   "qc_review_count": 0,
   "qc_review_rate": 0.0,
-  "latency_ms_median": 12.77,
-  "latency_ms_p95": 13.25,
+  "latency_ms_median": 161.91,
+  "latency_ms_p95": 201.88,
   "anomaly_pixel_auroc": 0.9838,
   "anomaly_pixel_ap": 0.7373,
   "anomaly_au_pro": 0.9102,
   "profile_id": "packaging_bottle",
-  "device": "cuda",
+  "task": "anomaly",
+  "source": "mvtec-ad:bottle",
+  "backend": "onnx",
+  "device": "cpu",
   "calibration": "configs/calibration/packaging_bottle.json"
 }

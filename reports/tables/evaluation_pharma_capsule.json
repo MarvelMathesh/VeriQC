@@ -22,7 +22,7 @@
     }
   },
   "known_score_auroc": null,
-  "anomaly_score_auroc": 0.9705,
+  "anomaly_score_auroc": 0.9709,
   "detection_rate_non_pass": 0.8257,
   "detection_rate_fail": 0.6697,
   "false_alarm_rate_non_pass": 0.0435,
@@ -30,12 +30,15 @@
   "review_rate": 0.1288,
   "qc_review_count": 0,
   "qc_review_rate": 0.0,
-  "latency_ms_median": 13.25,
-  "latency_ms_p95": 13.5,
+  "latency_ms_median": 149.18,
+  "latency_ms_p95": 186.68,
   "anomaly_pixel_auroc": 0.9844,
-  "anomaly_pixel_ap": 0.3999,
+  "anomaly_pixel_ap": 0.3998,
   "anomaly_au_pro": 0.879,
   "profile_id": "pharma_capsule",
-  "device": "cuda",
+  "task": "anomaly",
+  "source": "mvtec-ad:capsule",
+  "backend": "onnx",
+  "device": "cpu",
   "calibration": "configs/calibration/pharma_capsule.json"
 }

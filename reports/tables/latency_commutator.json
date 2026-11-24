@@ -1,23 +1,25 @@
 {
   "profile_id": "commutator",
+  "backend": "onnx",
   "device": "cpu",
   "threads": 4,
   "warmup_images": 5,
   "images": 50,
   "total_ms": {
-    "median": 223.64,
-    "p95": 235.42,
-    "p99": 241.77,
-    "min": 213.41,
-    "max": 246.44
+    "median": 203.21,
+    "p95": 207.61,
+    "p99": 210.83,
+    "min": 199.22,
+    "max": 211.47
   },
-  "peak_rss_mb": 1075.1,
+  "peak_rss_mb": 407.4,
   "artifact_sizes_bytes": {
-    "profile": 576,
-    "calibration": 1167,
+    "profile": 601,
+    "calibration": 1748,
     "severity": 214,
     "cards": 1173,
-    "known_weights": 57076177
+    "known_runtime": 27495,
+    "known_runtime_data": 56939264
   },
-  "measured_at": "2026-11-22T03:12:00"
+  "measured_at": "2026-11-23T21:42:43"
 }

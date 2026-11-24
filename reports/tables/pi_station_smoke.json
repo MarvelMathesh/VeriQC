@@ -1,54 +1,75 @@
 {
   "schema": "veriqc.station-smoke/1",
-  "measured_at": "2026-11-23T00:09:37",
+  "measured_at": "2026-11-24T15:49:59",
   "profile": "commutator",
-  "startup_seconds": 17.0,
+  "backend": "onnx",
+  "input": "upload",
+  "source": null,
+  "capture": null,
+  "startup_seconds": 17.5,
   "health": {
     "ok": true,
     "error": null,
-    "profile": "commutator"
+    "profile": "commutator",
+    "capture": null
   },
   "advisory_available": true,
-  "inspection_id": "cb3979a5f89b4cbe8aadc0a485cf0ec6",
+  "inspection_id": "169f7402ea2a4402a36b06db8443dd77",
   "verdict": "FAIL",
   "findings": 1,
-  "vision_latency_ms": 1337.32,
+  "acquisition": {
+    "hash_basis": "decoded_rgb_pixels",
+    "qc_flags": [],
+    "qc_ok": true,
+    "statistics": {
+      "blur_ratio": 0.049535,
+      "clipped_fraction": 0.007146,
+      "grey_variance": 525.51,
+      "height": 1260,
+      "pixels": 630000,
+      "width": 500
+    }
+  },
+  "reasons": [],
+  "vision_latency_ms": 725.75,
   "artifact_hashes": [
     "advisory_model",
     "advisory_tokenizer",
     "advisory_tokenizer_bundle",
     "calibration",
     "cards",
-    "known_weights",
+    "known_runtime",
+    "known_runtime_data",
     "profile",
     "severity"
   ],
   "advisory_status": "accepted",
   "advisory_accepted": true,
-  "advisory_latency_ms": 27913.6,
+  "advisory_latency_ms": 17563.6,
   "advisory_model": {
-    "decode_ms": 17084.0,
+    "decode_ms": 11640.0,
     "error": null,
-    "generated_tokens": 23,
-    "inference_ms": 24409.0,
+    "generated_tokens": 16,
+    "inference_ms": 17556.0,
     "ok": true,
     "path": "llm",
-    "prefill_tokens_per_second": 35.49,
-    "prompt_tokens": 260,
-    "resident_mb": 2342.9,
-    "tokens_per_second": 1.35,
-    "ttft_ms": 7325.0
+    "prefill_tokens_per_second": 35.16,
+    "prompt_tokens": 208,
+    "resident_mb": 2346.8,
+    "tokens_per_second": 1.37,
+    "ttft_ms": 5916.0
   },
-  "advisory_text": "Crack: a break in the commutator body, running with or across the turning marks. Probable cause: stress concentration at a machined step. Do now: quarantine the part and photograph the marked region. Inspect the fixture for any signs of damage. Escalate if: if the break appears on another part from the same batch, escalate to the quality engineer and hold the batch.",
+  "advisory_text": "Crack: a break in the commutator body, running with or across the turning marks. Probable cause: handling or assembly damage. Do now: quarantine the part and photograph the marked region. check fixture before next part. Escalate if: if the break appears on another part from the same batch, escalate to the quality engineer and hold the batch.",
   "overlay_http": 200,
   "overlay_bytes": 685876,
   "csv_http": 200,
-  "csv_bytes": 343,
+  "csv_bytes": 1206,
   "audit_chain": {
     "ok": true,
-    "rows": 2,
-    "first_bad": null,
-    "anchor_ok": true
+    "chain_ok": true,
+    "anchor_ok": true,
+    "rows": 8,
+    "first_bad": null
   },
   "chain_ok": true
 }

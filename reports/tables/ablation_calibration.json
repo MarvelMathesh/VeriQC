@@ -9,7 +9,7 @@
         "false_alarm_rate": 0.0714
       },
       "calibrated": {
-        "threshold": 0.529939,
+        "threshold": 0.529912,
         "recall": 0.8427,
         "false_alarm_rate": 0.0357
       }

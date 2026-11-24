@@ -3,14 +3,14 @@
   "defect_images": 360,
   "normal_images": 0,
   "verdict_counts": {
-    "PASS": 31,
-    "REVIEW": 5,
+    "PASS": 17,
+    "REVIEW": 19,
     "FAIL": 324
   },
   "confusion": {
     "non_pass": {
-      "detected": 329,
-      "missed": 31,
+      "detected": 343,
+      "missed": 17,
       "false_alarms": 0,
       "true_negatives": 0
     },
@@ -23,16 +23,19 @@
   },
   "known_score_auroc": null,
   "anomaly_score_auroc": null,
-  "detection_rate_non_pass": 0.9139,
+  "detection_rate_non_pass": 0.9528,
   "detection_rate_fail": 0.9,
   "false_alarm_rate_non_pass": null,
   "false_alarm_rate_fail": null,
-  "review_rate": 0.0139,
+  "review_rate": 0.0528,
   "qc_review_count": 5,
   "qc_review_rate": 0.0139,
-  "latency_ms_median": 4.86,
-  "latency_ms_p95": 5.82,
+  "latency_ms_median": 27.68,
+  "latency_ms_p95": 28.76,
   "profile_id": "steel_surface",
-  "device": "cuda",
+  "task": "detect",
+  "source": "neu-det",
+  "backend": "onnx",
+  "device": "cpu",
   "calibration": "configs/calibration/steel_surface.json"
 }

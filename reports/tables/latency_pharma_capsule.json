@@ -1,23 +1,26 @@
 {
   "profile_id": "pharma_capsule",
+  "backend": "onnx",
   "device": "cpu",
   "threads": 4,
   "warmup_images": 5,
   "images": 50,
   "total_ms": {
-    "median": 112.25,
-    "p95": 117.16,
-    "p99": 123.99,
-    "min": 106.69,
-    "max": 126.85
+    "median": 163.85,
+    "p95": 219.01,
+    "p99": 239.67,
+    "min": 130.46,
+    "max": 242.75
   },
-  "peak_rss_mb": 886.5,
+  "peak_rss_mb": 293.2,
   "artifact_sizes_bytes": {
-    "profile": 508,
-    "calibration": 1206,
+    "profile": 533,
+    "calibration": 1484,
     "severity": 223,
     "cards": 542,
-    "anomaly_weights": 17324371
+    "anomaly_backbone": 12674,
+    "anomaly_backbone_data": 11120896,
+    "anomaly_banks": 6145342
   },
-  "measured_at": "2026-11-22T03:21:41"
+  "measured_at": "2026-11-23T21:43:20"
 }
