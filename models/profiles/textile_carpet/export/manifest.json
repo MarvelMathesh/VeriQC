@@ -1,0 +1,17 @@
+{
+  "profile_id": "textile_carpet",
+  "artifacts": {
+    "anomaly": {
+      "backbone": "models/profiles/textile_carpet/export/anomaly_backbone.onnx",
+      "backbone_sha256": "93596c2fec46a1fe8df9acbe74215e79f523004e905fbb814115dd5288060f73",
+      "banks": "models/profiles/textile_carpet/export/anomaly_banks.npz",
+      "banks_sha256": "94749e143c75991a8a3da832cc6020552723097b29e3a4f2c76226148a3264b3",
+      "bank_size": 4000,
+      "external_data": {
+        "path": "models/profiles/textile_carpet/export/anomaly_backbone.onnx.data",
+        "sha256": "4bfc5475f59408c2883a138f1c54f735dcb5c2e0d7531003863b51bf66ff1385",
+        "bytes": 11120896
+      }
+    }
+  }
+}

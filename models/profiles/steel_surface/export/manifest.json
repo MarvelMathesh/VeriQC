@@ -1,0 +1,10 @@
+{
+  "profile_id": "steel_surface",
+  "artifacts": {
+    "known": {
+      "path": "models/profiles/steel_surface/export/detector.onnx",
+      "sha256": "2003437ef252c7bb3e5db7a4ba449c0d24bb868bf816410f7ddfe15f3e7e7102",
+      "bytes": 9857298
+    }
+  }
+}

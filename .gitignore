@@ -16,19 +16,13 @@ __pycache__/
 *.tar.gz
 *.zip
 
-# --- model artefacts (weights, exports, onnx, hef, pte) ---
-# The model tree is local.  Export manifests without the binaries are
-# published under reports/models/ as evidence.
-/models/
-runs/
-*.pt
-*.onnx
-*.hef
+# --- model artefacts ---
+# Everything under models/ is tracked: vision runtime exports, advisory
+# tokenizer and manifests, configs, hash manifests and training checkpoints.
+# Only the 2.1 GB advisory PTE stays local because it exceeds GitHub's
+# per-file limit; publish it via an external host instead.
 *.pte
-*.pte.tokenizer.json
-*.pth
-*.engine
-*.tflite
+runs/
 
 # --- logs / scratch ---
 *.log

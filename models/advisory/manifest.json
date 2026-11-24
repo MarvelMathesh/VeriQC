@@ -1,0 +1,20 @@
+{
+  "artefact": "models/advisory/llama32_1b_int8.pte",
+  "bytes": 2290541568,
+  "sha256": "3fdc3db98e7b0f33c480c9ea92cdc48f68c09e0eb809ba31ae846c50bab513b4",
+  "quant": "int8 linears, fp32 embedding",
+  "dtype_override": "fp32",
+  "max_seq_length": 1024,
+  "tokenizer": "models/advisory/tokenizer/tokenizer.json",
+  "tokenizer_sha256": "6b9e4e7fb171f92fd137b777cc2714bf87d11576700a1dcd7a399e7bbe39537b",
+  "source_checkpoint": "meta-llama/Llama-3.2-1B-Instruct",
+  "runtime": "ExecuTorch 1.6.0 + XNNPACK",
+  "note": "Development export. The advisory runs in a child process and cannot change the inspection verdict.",
+  "tokenizer_files": {
+    "config.json": "dfb67fd8afe73a1c75245824ef9d64a6ba8983025447e3bf76aa1ea57ee46152",
+    "special_tokens_map.json": "94e708c3f5e64acf85bbe5ad01467a1248faadb73e83b41793087ecced586e8f",
+    "tokenizer.json": "6b9e4e7fb171f92fd137b777cc2714bf87d11576700a1dcd7a399e7bbe39537b",
+    "tokenizer_config.json": "9ddd255c19fe319c8d4e891163540382e9fbda99f394674f2a929efc47d57458"
+  },
+  "tokenizer_bundle_sha256": "eda224f03d112cb7fd5f24cd880af908c8da140d2a2c4895d3264700e54cffa2"
+}
