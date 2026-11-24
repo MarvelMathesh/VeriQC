@@ -1,10 +1,13 @@
 """Profile configuration and artifact integrity.
 
-A profile is one inspection problem: a source, a known-defect model, an
-optional normal-only anomaly model, one calibration file, one severity policy
-and one advisory card set.  Paths are repository-relative.  When
-``configs/artifacts.json`` is present, every runtime artifact is checked
-against its recorded SHA-256 before the profile is accepted.
+A profile is one inspection problem: a source, exactly one vision channel, one
+calibration file, one severity policy and one advisory card set.  The
+production runtime is ONNX Runtime on CPU; the ``.pt`` paths are training and
+reference inputs used by the export and calibration commands.
+
+Paths are repository-relative.  When ``configs/artifacts.json`` is present,
+every runtime artifact is checked against its recorded SHA-256 before the
+profile is accepted.
 """
 
 from __future__ import annotations
@@ -19,12 +22,10 @@ import yaml
 from veriqc import REPO_ROOT, repo_path, sha256_file
 from veriqc.quality import QualitySpec
 
-__all__ = ["Profile", "load_profile", "list_profiles", "ARTIFACTS_MANIFEST"]
+__all__ = ["Profile", "load_profile", "list_profiles", "profile_by_source"]
 
 ARTIFACTS_MANIFEST = REPO_ROOT / "configs" / "artifacts.json"
-_TASKS = ("detect", "segment", "anomaly", "segment+anomaly")
-_KNOWN_TASKS = ("detect", "segment", "segment+anomaly")
-_ANOMALY_TASKS = ("anomaly", "segment+anomaly")
+_TASKS = ("detect", "segment", "anomaly")
 
 
 @dataclass(frozen=True)
@@ -46,8 +47,7 @@ class ModelSpec:
 
 @dataclass(frozen=True)
 class AnomalySpec:
-    enabled: bool
-    weights: str | None
+    weights: str
     input_size: int = 448
     backbone: str = "resnet18"
     image_layer: str = "layer2"
@@ -55,8 +55,8 @@ class AnomalySpec:
     bank_size: int = 4000
 
     @property
-    def path(self) -> Path | None:
-        return repo_path(self.weights) if self.weights else None
+    def path(self) -> Path:
+        return repo_path(self.weights)
 
 
 @dataclass(frozen=True)
@@ -66,7 +66,7 @@ class Profile:
     source: str
     task: str
     known: ModelSpec | None
-    anomaly: AnomalySpec
+    anomaly: AnomalySpec | None
     calibration: str
     severity: str
     cards: str
@@ -87,6 +87,28 @@ class Profile:
     def cards_path(self) -> Path:
         return repo_path(self.cards)
 
+    @property
+    def export_dir(self) -> Path:
+        return REPO_ROOT / "models" / "profiles" / self.profile_id / "export"
+
+    def runtime_artifact_paths(self) -> dict[str, Path]:
+        """Files required by the deployed ONNX runtime."""
+
+        paths: dict[str, Path] = {}
+        if self.known is not None:
+            name = "detector.onnx" if self.known.kind == "detector" else "segmenter.onnx"
+            paths["known_runtime"] = self.export_dir / name
+            external = self.export_dir / f"{name}.data"
+            if external.exists():
+                paths["known_runtime_data"] = external
+        if self.anomaly is not None:
+            paths["anomaly_backbone"] = self.export_dir / "anomaly_backbone.onnx"
+            external = self.export_dir / "anomaly_backbone.onnx.data"
+            if external.exists():
+                paths["anomaly_backbone_data"] = external
+            paths["anomaly_banks"] = self.export_dir / "anomaly_banks.npz"
+        return paths
+
     def artifact_paths(self) -> dict[str, Path]:
         paths: dict[str, Path] = {
             "profile": Path(self.config_path),
@@ -94,10 +116,7 @@ class Profile:
             "severity": self.severity_path,
             "cards": self.cards_path,
         }
-        if self.known is not None:
-            paths["known_weights"] = self.known.path
-        if self.anomaly.enabled and self.anomaly.path is not None:
-            paths["anomaly_weights"] = self.anomaly.path
+        paths.update(self.runtime_artifact_paths())
         return paths
 
     def artifact_hashes(self) -> dict[str, str]:
@@ -106,22 +125,39 @@ class Profile:
     def validate(self) -> None:
         if self.task not in _TASKS:
             raise ValueError(f"unsupported task: {self.task!r}")
-        if self.task in _KNOWN_TASKS and self.known is None:
-            raise ValueError(f"profile {self.profile_id!r} has no known-channel model")
-        if self.task in _ANOMALY_TASKS and not self.anomaly.enabled:
-            raise ValueError(f"profile {self.profile_id!r} requires the anomaly channel")
-        if self.task not in _ANOMALY_TASKS and self.anomaly.enabled:
-            raise ValueError(f"profile {self.profile_id!r} enables anomaly outside a dual task")
-        if self.task == "anomaly" and self.known is not None:
-            raise ValueError(f"profile {self.profile_id!r} has a known model but an anomaly-only task")
+        if self.task in ("detect", "segment"):
+            if self.known is None:
+                raise ValueError(f"profile {self.profile_id!r} has no known-channel model")
+            if self.anomaly is not None:
+                raise ValueError(
+                    f"profile {self.profile_id!r} cannot enable the anomaly channel "
+                    f"for task {self.task!r}"
+                )
+            expected_kind = "detector" if self.task == "detect" else "segmenter"
+            if self.known.kind != expected_kind:
+                raise ValueError(
+                    f"profile {self.profile_id!r} task {self.task!r} requires a "
+                    f"{expected_kind} model, not {self.known.kind!r}"
+                )
+            if not self.known.classes:
+                raise ValueError(f"profile {self.profile_id!r} has no known classes")
+        else:
+            if self.anomaly is None:
+                raise ValueError(f"profile {self.profile_id!r} requires the anomaly channel")
+            if self.known is not None:
+                raise ValueError(
+                    f"profile {self.profile_id!r} cannot combine a known model with "
+                    "the anomaly-only task"
+                )
         if self.known is not None and self.known.kind not in ("detector", "segmenter"):
             raise ValueError(f"unsupported known-channel type: {self.known.kind!r}")
-        if self.anomaly.backbone != "resnet18":
-            raise ValueError(f"unsupported anomaly backbone: {self.anomaly.backbone!r}")
-        if self.anomaly.image_layer not in ("layer2", "layer3"):
-            raise ValueError(f"unsupported anomaly layer: {self.anomaly.image_layer!r}")
-        if self.anomaly.pixel_layer not in ("layer2", "layer3"):
-            raise ValueError(f"unsupported anomaly layer: {self.anomaly.pixel_layer!r}")
+        if self.anomaly is not None:
+            if self.anomaly.backbone != "resnet18":
+                raise ValueError(f"unsupported anomaly backbone: {self.anomaly.backbone!r}")
+            if self.anomaly.image_layer not in ("layer2", "layer3"):
+                raise ValueError(f"unsupported anomaly layer: {self.anomaly.image_layer!r}")
+            if self.anomaly.pixel_layer not in ("layer2", "layer3"):
+                raise ValueError(f"unsupported anomaly layer: {self.anomaly.pixel_layer!r}")
 
         paths = self.artifact_paths()
         for name, path in paths.items():
@@ -160,9 +196,25 @@ def _known_spec(raw: dict[str, Any] | None) -> ModelSpec | None:
         classes=tuple(str(v) for v in raw.get("classes", ())),
         conf_threshold=float(raw.get("conf_threshold", 0.01)),
         iou_threshold=float(raw.get("iou_threshold", 0.5)),
-        score_threshold=(float(raw["score_threshold"]) if raw.get("score_threshold") is not None else None),
+        score_threshold=(
+            float(raw["score_threshold"]) if raw.get("score_threshold") is not None else None
+        ),
         report_threshold=float(raw.get("report_threshold", 0.25)),
         min_area_px=int(raw.get("min_area_px", 8)),
+    )
+
+
+def _anomaly_spec(raw: dict[str, Any] | None) -> AnomalySpec | None:
+    if not raw or not bool(raw.get("enabled", True)):
+        return None
+    layers = [str(value) for value in (raw.get("layers") or ["layer2", "layer3"])]
+    return AnomalySpec(
+        weights=str(raw["weights"]),
+        input_size=int(raw.get("input_size", 448)),
+        backbone=str(raw.get("backbone", "resnet18")),
+        image_layer=layers[0],
+        pixel_layer=layers[1] if len(layers) > 1 else layers[0],
+        bank_size=int(raw.get("bank_size", 4000)),
     )
 
 
@@ -177,8 +229,6 @@ def _expected_hashes(profile_id: str) -> dict[str, str]:
 def load_profile(path: str | Path, *, validate: bool = True) -> Profile:
     config_path = Path(path).resolve()
     data = yaml.safe_load(config_path.read_text()) or {}
-    anomaly = data.get("anomaly") or {}
-    anomaly_layers = [str(value) for value in (anomaly.get("layers") or ["layer2", "layer3"])]
     quality = data.get("quality") or {}
     profile_id = str(data["id"])
     profile = Profile(
@@ -187,15 +237,7 @@ def load_profile(path: str | Path, *, validate: bool = True) -> Profile:
         source=str(data["source"]),
         task=str(data["task"]),
         known=_known_spec(data.get("known")),
-        anomaly=AnomalySpec(
-            enabled=bool(anomaly.get("enabled", False)),
-            weights=(str(anomaly["weights"]) if anomaly.get("weights") else None),
-            input_size=int(anomaly.get("input_size", 448)),
-            backbone=str(anomaly.get("backbone", "resnet18")),
-            image_layer=anomaly_layers[0],
-            pixel_layer=anomaly_layers[1] if len(anomaly_layers) > 1 else anomaly_layers[0],
-            bank_size=int(anomaly.get("bank_size", 4000)),
-        ),
+        anomaly=_anomaly_spec(data.get("anomaly")),
         calibration=str(data["calibration"]),
         severity=str(data["severity"]),
         cards=str(data["cards"]),
@@ -217,3 +259,13 @@ def load_profile(path: str | Path, *, validate: bool = True) -> Profile:
 
 def list_profiles(directory: str | Path = REPO_ROOT / "configs" / "profiles") -> list[Path]:
     return sorted(Path(directory).glob("*.yaml"))
+
+
+def profile_by_source(source: str) -> Profile:
+    """Resolve a profile by its declared source, without runtime validation."""
+
+    for path in list_profiles():
+        data = yaml.safe_load(path.read_text()) or {}
+        if str(data.get("source")) == source:
+            return load_profile(path, validate=False)
+    raise KeyError(f"no profile declares source {source!r}")

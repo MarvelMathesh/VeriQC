@@ -1,56 +1,67 @@
 {
   "schema": "veriqc.artifacts/1",
-  "generated_at": "2026-11-22T23:39:32+05:30",
+  "generated_at": "2026-11-24T13:37:58+05:30",
   "note": "Runtime artifact hashes. Re-run scripts/freeze_artifacts.py after a deliberate update.",
   "profiles": {
     "automotive_metal_nut": {
-      "profile": "f402077243e8c587711e2afbbb70d754a98c90153be8ee208beaaa32c661ea06",
-      "calibration": "e180960d1594870de22470fd5a62b24664d373ff22d88f20b9fc0d4316005f61",
+      "profile": "f8f89ab0647a2344a3fbb4f468fb103dc55a736652856e56db13a6840160c5d6",
+      "calibration": "16837597de9655b4f1ce8a7e89e0eb5c929b6ccf10138b8a67b187e18a70bd00",
       "severity": "c9a597c4a6c5765754ea33eba2d6d18911d6fd07cc93b3567ee53db82b687295",
       "cards": "2e5096e3b64ca4cc75129e4e3ef4714b09276b14d9cd4f717a12026a669155fc",
-      "anomaly_weights": "13e2a73b34208a8ab73dc4925c86ee381f6a97ac8594f473e2d56928950ab121"
+      "anomaly_backbone": "93596c2fec46a1fe8df9acbe74215e79f523004e905fbb814115dd5288060f73",
+      "anomaly_backbone_data": "4bfc5475f59408c2883a138f1c54f735dcb5c2e0d7531003863b51bf66ff1385",
+      "anomaly_banks": "d74e658b20800a0b40ccaf910328a8a13852ed798648e0ac0c46effa7e0c47ac"
     },
     "commutator": {
-      "profile": "0de41ca2c4b0288f758cf950194b32b46e63ab732f30611ff169b41709bf323d",
-      "calibration": "77cbecd357f5847fb356ebbcb36996ec39ed52166b0d90f22537699a9f5a4aab",
+      "profile": "e07333f0f7848b6895c8c91a861f8f2eae8280df12ae2f8c5c270459ae366d60",
+      "calibration": "d0bd1c0a20216ebaad2e7c7bfd3cc75105978ced3d445c3f7e036218e4714720",
       "severity": "500102c3be8d2cfc9ea1a636913552d05f4c7c05b0288a69135ebb531b827d53",
       "cards": "bd716663a713f97b739b5fb539a117a942d82434b85abb22c92d262814bf031f",
-      "known_weights": "9b4fcd97020fc8c271ebecff86a4a07a73da92eb807a81d26be9541cf26193fc"
+      "known_runtime": "9e83042b55ba21461d9a696c9411eec70d9904bff9ab784557d45405266f7853",
+      "known_runtime_data": "6704658adc22d03279718b50749b93db9a251396a04fb889cc27642ec7626697"
     },
     "electronics_transistor": {
-      "profile": "47fe56cdf00eaf1085f347d55508069f7c21d5c2e9fa7c05b7b52c6f7a79a5b4",
-      "calibration": "06a16806b07ad45895d98985f715d9b9ba68171c42e8ae1c473f5322ad60c940",
+      "profile": "b26a201c9d9eaf970e67bbaf78c0047f97fe95cd6dd0231aa292e389bc84ae57",
+      "calibration": "13b17cc11f904c72ef083818b07094604548f820874da6072fb998780103f989",
       "severity": "c9a597c4a6c5765754ea33eba2d6d18911d6fd07cc93b3567ee53db82b687295",
       "cards": "08744c65463eb518f0cee5468ffdf84fea8cfd9163125796e0579a2f595307a0",
-      "anomaly_weights": "8b3add658582937e64a1fe842e4dd2cde26ae938be6e74c757495d776d2ff517"
+      "anomaly_backbone": "93596c2fec46a1fe8df9acbe74215e79f523004e905fbb814115dd5288060f73",
+      "anomaly_backbone_data": "4bfc5475f59408c2883a138f1c54f735dcb5c2e0d7531003863b51bf66ff1385",
+      "anomaly_banks": "e761247c104db154b6567e366c938837a58a9c2fd51e89c28d5dde76e8ffb053"
     },
     "packaging_bottle": {
-      "profile": "14e0ec9dbf5fae4c61453826c50be08091693535efce8c831b90f58ff1c98c35",
-      "calibration": "063c66cef5d0ad4b6eff65986de43115406478f070b40c852774cf1c50c93788",
+      "profile": "e4cb020514fd04ef27cee72a218ae328506b42057612c616d5e260fbd36b5a31",
+      "calibration": "c3202c85348bbc24767aa36760fba41faa994e162abca5aecabf0a861c39605f",
       "severity": "1e9668bc704b0ce523195ee79d48dfb7244c83cb570dff8aa812644be93269cb",
       "cards": "345d6aff51a0243d53d18f1592abd23f2939804c58854481e88c74462f4f65a6",
-      "anomaly_weights": "51e5cb9319285c7ec1fb68d62efc68dc04955dddbeba376aee59e3cd3e1a933f"
+      "anomaly_backbone": "93596c2fec46a1fe8df9acbe74215e79f523004e905fbb814115dd5288060f73",
+      "anomaly_backbone_data": "4bfc5475f59408c2883a138f1c54f735dcb5c2e0d7531003863b51bf66ff1385",
+      "anomaly_banks": "89030a7ceddd968da3997a11fb6ae4157f3ac55918cbf91c5640d451babba46a"
     },
     "pharma_capsule": {
-      "profile": "d21b56211035c7f637094f4aaad483ccf137dda78fcb889892d5b17d8ce44968",
-      "calibration": "4fe1f26443509125813501a119c433f52b74cbb9c959d5cb1c2c046a445abb10",
+      "profile": "f8c37c687905f8833ef6e8122ea152376d998d8fa85e0081594f68f2e3f5adfb",
+      "calibration": "80759049259633f501f6934304a740accbfdebafd629707c67d25c31a8daada8",
       "severity": "c9a597c4a6c5765754ea33eba2d6d18911d6fd07cc93b3567ee53db82b687295",
       "cards": "93fe73b10f292ddd4ede39c78d9efdba99144372e6fee17bfdb1b52755dbbb32",
-      "anomaly_weights": "959f61c09939c7fe0e8569a6b7e28063e69c79320f3d1994e1bb40f44bc33ca3"
+      "anomaly_backbone": "93596c2fec46a1fe8df9acbe74215e79f523004e905fbb814115dd5288060f73",
+      "anomaly_backbone_data": "4bfc5475f59408c2883a138f1c54f735dcb5c2e0d7531003863b51bf66ff1385",
+      "anomaly_banks": "3c96546046c4baa8df47b69d5fd05a8157f47b7859a45db079d2ed04df53ab1e"
     },
     "steel_surface": {
-      "profile": "11379a9f12025cc9592d369630c206123da89f76117b39d60cd2fd0b19b7904f",
-      "calibration": "66461f57a8d277cf56f7f05e00eb0ec5660d224a4f00474151d35849f83a5fa6",
+      "profile": "4ea1bd0f5561de15d60a0dfeef06b8d4aa142f11c396ec3a82fcaf3b8194b7ef",
+      "calibration": "179f25e67b0d166e24e16d5cfad9e0fea16ab0d2b496ecf7217fc753f8498dda",
       "severity": "c772a9312070d2913885718f99e927de3296ee09f71841709bad6e558bbd84a8",
       "cards": "189c637b9f25ef12b3764c7940711be51ab62e1e601060fa20b92bea4c069092",
-      "known_weights": "6a79318213b38aef0cd65c65ef5f22f200afc60d9203f3b10bed801bc85c230c"
+      "known_runtime": "2003437ef252c7bb3e5db7a4ba449c0d24bb868bf816410f7ddfe15f3e7e7102"
     },
     "textile_carpet": {
-      "profile": "6a0b1e618f3cad49ab8182055be99d2003b96addd8a82d31856569379a1e866b",
-      "calibration": "8a197184c39ccfd31ca17f32f9055cac5f42cd9e5e19d3d5f677bd9dbb2051a0",
+      "profile": "3e5bf7786a32bd2e1c9de3540608e55712822dd35190a0459bb7008bec55ac1d",
+      "calibration": "1dd39cb62ca33543ddde7dc9469bb42a5c4c5bc6aa91b68487c4d03f6fb3e7ce",
       "severity": "1e9668bc704b0ce523195ee79d48dfb7244c83cb570dff8aa812644be93269cb",
       "cards": "7b06959ab512fa36d912931ae136daf13b7089313a5d2e750dd3e32087dd9e52",
-      "anomaly_weights": "290613663ae76b76a1207baed872b1df80a7fbcc9bec1681725d2af843bd2e88"
+      "anomaly_backbone": "93596c2fec46a1fe8df9acbe74215e79f523004e905fbb814115dd5288060f73",
+      "anomaly_backbone_data": "4bfc5475f59408c2883a138f1c54f735dcb5c2e0d7531003863b51bf66ff1385",
+      "anomaly_banks": "94749e143c75991a8a3da832cc6020552723097b29e3a4f2c76226148a3264b3"
     }
   }
 }

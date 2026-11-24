@@ -1,7 +1,8 @@
-"""Vision models: supervised known-defect heads and a normal-only anomaly bank."""
+"""Vision model implementations.
 
-from veriqc.models.patchcore import PatchCore
-from veriqc.models.detector import Detector
-from veriqc.models.segmenter import Segmenter
+The production runtime uses :mod:`veriqc.models.onnx_runtime`.  The
+``torch_*`` modules are the training, calibration and parity reference and are
+imported explicitly by the commands that need them.
+"""
 
-__all__ = ["Detector", "Segmenter", "PatchCore"]
+from __future__ import annotations

@@ -1,15 +1,16 @@
 id: pharma_capsule
 domain: pharmaceutical
-source: mvtec:capsule
+source: mvtec-ad:capsule
 task: anomaly
 description: Capsule surface inspection (MVTec AD capsule).
 known: null
 anomaly:
-  enabled: true
   weights: models/profiles/pharma_capsule/patchcore.pt
   input_size: 448
   backbone: resnet18
-  layers: [layer2, layer3]
+  layers:
+  - layer2
+  - layer3
   bank_size: 4000
 calibration: configs/calibration/pharma_capsule.json
 severity: configs/severity/pharma_capsule.yaml

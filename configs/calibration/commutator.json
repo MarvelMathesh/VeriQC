@@ -46,10 +46,29 @@
     "mode": "scores"
   },
   "fused": null,
+  "region": {
+    "scores": [
+      0.97765207,
+      0.59551442,
+      0.69326872,
+      0.63294673,
+      0.77132636,
+      0.69319689,
+      0.72169793,
+      0.81471211,
+      0.52671981
+    ],
+    "threshold": 0.5,
+    "min_area_px": 8,
+    "false_regions_per_image": 0.257143,
+    "method": "normal_region_false_positive"
+  },
+  "class_thresholds": {},
   "screening_fail": 0.9776520729064941,
   "screening_review": 0.7946842312812805,
   "sample_sizes": {
-    "known_cal": 35
+    "known_cal": 35,
+    "region_cal": 9
   },
-  "note": "Kolektor fold 0, portrait 384x1024 segmenter. The 15% physical-part holdout is used for early stopping and calibration; this shared split is a disclosed selection limitation. The anomaly channel added no recall at the 5% operating point and increased false alarms."
+  "note": "Kolektor fold 0, portrait 384x1024 segmenter. The 15% physical-part holdout is used for early stopping and calibration; this shared split is a disclosed selection limitation. The anomaly channel added no recall at the 5% operating point and increased false alarms. Localisation uses a normal-region calibrated threshold rather than the image-level screening threshold."
 }

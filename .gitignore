@@ -6,6 +6,7 @@ __pycache__/
 *.egg-info/
 /build/
 /dist/
+/competitive_architecture/
 .pytest_cache/
 .mypy_cache/
 

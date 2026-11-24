@@ -28,6 +28,7 @@ class Finding:
     bbox: tuple[float, float, float, float] | None = None
     area_px: float | None = None
     area_ratio: float | None = None
+    region_p_value: float | None = None
     zone: str | None = None
     severity: Severity | None = None
     severity_status: Literal["none", "policy"] = "none"
@@ -53,6 +54,7 @@ class Finding:
             bbox=tuple(float(v) for v in bbox) if bbox else None,
             area_px=data.get("area_px"),
             area_ratio=data.get("area_ratio"),
+            region_p_value=data.get("region_p_value"),
             zone=data.get("zone"),
             severity=data.get("severity"),
             severity_status=data.get("severity_status", "none"),
@@ -71,6 +73,7 @@ class InspectionResult:
     findings: list[Finding] = field(default_factory=list)
     anomaly_score: float | None = None
     anomaly_p_value: float | None = None
+    # Reserved for the rejected dual-channel ablation; deployed profiles leave it None.
     fused_p_value: float | None = None
     known_score: float | None = None
     known_p_value: float | None = None
@@ -79,6 +82,7 @@ class InspectionResult:
     acquisition: dict[str, Any] = field(default_factory=dict)
     latency_ms: dict[str, float] = field(default_factory=dict)
     artifact_hashes: dict[str, str] = field(default_factory=dict)
+    backend: str = ""
     device: str = ""
     image_sha256: str = ""
     overlay: str | None = None
@@ -117,6 +121,7 @@ class InspectionResult:
             acquisition=dict(data.get("acquisition", {})),
             latency_ms={str(k): float(v) for k, v in data.get("latency_ms", {}).items()},
             artifact_hashes={str(k): str(v) for k, v in data.get("artifact_hashes", {}).items()},
+            backend=str(data.get("backend", "")),
             device=str(data.get("device", "")),
             image_sha256=str(data.get("image_sha256", "")),
             overlay=data.get("overlay"),

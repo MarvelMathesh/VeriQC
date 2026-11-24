@@ -15,11 +15,15 @@ sys.path.insert(0, str(REPO))
 
 from veriqc import sha256_file  # noqa: E402
 from veriqc.config import list_profiles, load_profile  # noqa: E402
-from veriqc.models import Detector, PatchCore, Segmenter  # noqa: E402
+from veriqc.models.torch_detector import Detector  # noqa: E402
+from veriqc.models.torch_patchcore import PatchCore  # noqa: E402
+from veriqc.models.torch_segmenter import Segmenter  # noqa: E402
 
 
 def export_profile(path: Path, device: str) -> None:
-    profile = load_profile(path)
+    # Export creates the runtime artifacts, so it must not require them to
+    # already exist.
+    profile = load_profile(path, validate=False)
     out = REPO / "models" / "profiles" / profile.profile_id / "export"
     out.mkdir(parents=True, exist_ok=True)
     manifest = {"profile_id": profile.profile_id, "artifacts": {}}
@@ -49,7 +53,7 @@ def export_profile(path: Path, device: str) -> None:
                 "sha256": sha256_file(data_file),
                 "bytes": data_file.stat().st_size,
             }
-    if profile.anomaly.enabled and profile.anomaly.path is not None:
+    if profile.anomaly is not None:
         model = PatchCore.load(profile.anomaly.path, device=device)
         backbone = out / "anomaly_backbone.onnx"
         model.export_backbone_onnx(backbone)

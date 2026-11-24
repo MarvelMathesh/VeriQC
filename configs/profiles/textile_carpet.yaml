@@ -1,19 +1,20 @@
 id: textile_carpet
 domain: textile
-source: mvtec:carpet
+source: mvtec-ad:carpet
 task: anomaly
 description: Unseen-defect inspection of carpet texture (MVTec AD).
 known: null
 anomaly:
-  enabled: true
   weights: models/profiles/textile_carpet/patchcore.pt
   input_size: 448
   backbone: resnet18
-  layers: [layer2, layer3]
+  layers:
+  - layer2
+  - layer3
   bank_size: 4000
 calibration: configs/calibration/textile_carpet.json
 severity: configs/severity/textile_carpet.yaml
 cards: configs/cards/textile_carpet.yaml
 quality:
   blur_ratio_min: 0.004
-  clipped_max: 0.30
+  clipped_max: 0.3

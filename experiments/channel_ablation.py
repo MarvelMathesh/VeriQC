@@ -21,7 +21,8 @@ sys.path.insert(0, str(REPO))
 
 from veriqc.calibration import ChannelCalibration  # noqa: E402
 from veriqc.datasets import load_manifest, split_by_part  # noqa: E402
-from veriqc.models import PatchCore, Segmenter  # noqa: E402
+from veriqc.models.torch_patchcore import PatchCore  # noqa: E402
+from veriqc.models.torch_segmenter import Segmenter  # noqa: E402
 
 
 def scores(segmenter: Segmenter, anomaly: PatchCore, items: list[dict]) -> tuple[np.ndarray, np.ndarray]:

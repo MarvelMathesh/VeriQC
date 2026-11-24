@@ -7,10 +7,19 @@
   "anomaly": null,
   "known": null,
   "fused": null,
+  "region": null,
+  "class_thresholds": {
+    "crazing": 0.25,
+    "inclusion": 0.54891944,
+    "patches": 0.46646631,
+    "pitted_surface": 0.3509078,
+    "rolled-in_scale": 0.57864201,
+    "scratches": 0.46009347
+  },
   "screening_fail": 0.36058669388294223,
-  "screening_review": 0.5780285060405731,
+  "screening_review": 0.31914222240448,
   "sample_sizes": {
     "known_cal": 144
   },
-  "note": "Known-class screening on NEU-DET. The 10% development split is also used for early stopping, so this threshold is a development estimate; the shared split is a disclosed limitation. The source has no normal steel population, so no false-alarm claim is made."
+  "note": "Known-class screening on NEU-DET. FAIL is the 10th percentile of the development scores; REVIEW is the highest lower threshold that keeps non-PASS recall at or above 95% with a review rate at or below 10%. Per-class report thresholds are calibrated on matched development boxes. The 10% development split is also used for early stopping, so the thresholds are development estimates; the source has no normal steel population, so no false-alarm claim is made."
 }

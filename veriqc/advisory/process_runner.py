@@ -25,6 +25,7 @@ import atexit
 import importlib
 import multiprocessing
 import threading
+import time
 import traceback
 import uuid
 from dataclasses import dataclass, field
@@ -101,10 +102,17 @@ def _runtime_main(
     advisor = None
     try:
         advisor = spec.create()
+        warmup_started = time.perf_counter()
+        try:
+            advisor.generate("Hello", max_new_tokens=2)
+        except Exception:
+            pass
+        warmup_seconds = time.perf_counter() - warmup_started
         ready = {
             "pid": multiprocessing.current_process().pid,
             "path": str(getattr(advisor, "path", getattr(advisor, "pte_path", ""))),
             "load_seconds": float(getattr(advisor, "load_seconds", 0.0)),
+            "warmup_seconds": round(warmup_seconds, 3),
             "resident_bytes": int(getattr(advisor, "resident_bytes", 0) or 0),
         }
         connection.send(("ready", ready))
@@ -212,6 +220,7 @@ class ProcessAdvisorRunner:
         self.tokenizer = _load_parent_tokenizer(tokenizer_path)
         self.path = str(spec.kwargs.get("pte_path", ""))
         self.load_seconds = 0.0
+        self.warmup_seconds = 0.0
         self.resident_bytes = 0
         self.process_id: int | None = None
         self._closed = True
@@ -297,12 +306,14 @@ class ProcessAdvisorRunner:
         self.process_id = int(payload.get("pid") or process.pid or 0)
         self.path = str(payload.get("path") or self.path)
         self.load_seconds = float(payload.get("load_seconds") or 0.0)
+        self.warmup_seconds = float(payload.get("warmup_seconds") or 0.0)
         self.resident_bytes = int(payload.get("resident_bytes") or 0)
 
     def generate(
         self,
         prompt: str,
         max_new_tokens: int | None = None,
+        timeout_s: float | None = None,
     ) -> AdvisorResult:
         """Send one prompt to the child and wait for its untrusted prose."""
 
@@ -316,6 +327,7 @@ class ProcessAdvisorRunner:
             )
         request_id = uuid.uuid4().hex
         connection = self._connection
+        deadline = None if timeout_s is None else time.monotonic() + max(0.1, float(timeout_s))
         try:
             if connection is None:
                 raise ProcessAdvisorError("the isolated advisory runtime has no pipe")
@@ -328,6 +340,15 @@ class ProcessAdvisorRunner:
                 )
             )
             while True:
+                if deadline is not None:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise ProcessAdvisorError("advisory generation timed out")
+                    if not connection.poll(min(remaining, 0.5)):
+                        continue
+                else:
+                    if not connection.poll(0.5):
+                        continue
                 try:
                     message = connection.recv()
                 except EOFError as exc:
@@ -349,6 +370,12 @@ class ProcessAdvisorRunner:
                     raise ProcessAdvisorError(str(message[2]))
         finally:
             self._request_lock.release()
+
+    def restart(self) -> None:
+        """Replace a wedged child without destroying the proxy."""
+
+        self.close(timeout=2.0)
+        self.start()
 
     def close(self, timeout: float = 5.0) -> None:
         """Stop the child, terminating it if a generation will not yield."""

@@ -55,10 +55,19 @@
   },
   "known": null,
   "fused": null,
+  "region": {
+    "scores": [],
+    "threshold": 0.61185706,
+    "min_area_px": 8,
+    "false_regions_per_image": 0.0,
+    "method": "normal_region_false_positive"
+  },
+  "class_thresholds": {},
   "screening_fail": null,
   "screening_review": null,
   "sample_sizes": {
-    "anomaly_cal": 44
+    "anomaly_cal": 44,
+    "region_cal": 0
   },
-  "note": "MVTec AD metal_nut: calibration on a disjoint 20% of train/good."
+  "note": "MVTec AD metal_nut: image calibration on a disjoint 20% of train/good; localisation uses a normal-region calibrated threshold."
 }

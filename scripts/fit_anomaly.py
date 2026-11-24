@@ -17,17 +17,10 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from veriqc import sha256_file  # noqa: E402
+from veriqc.config import profile_by_source  # noqa: E402
 from veriqc.datasets import load_manifest, split_by_part  # noqa: E402
 from veriqc.metrics import au_pro, average_precision, image_auroc, pixel_auroc  # noqa: E402
-from veriqc.models.patchcore import PatchCore, PatchCoreConfig  # noqa: E402
-
-MVTEC_PROFILES = {
-    "carpet": "textile_carpet",
-    "bottle": "packaging_bottle",
-    "capsule": "pharma_capsule",
-    "metal_nut": "automotive_metal_nut",
-    "transistor": "electronics_transistor",
-}
+from veriqc.models.torch_patchcore import PatchCore, PatchCoreConfig  # noqa: E402
 
 
 def evaluate(model: PatchCore, items: list[dict], metric_size: tuple[int, int] = (512, 512)) -> dict:
@@ -84,7 +77,8 @@ def fit_mvtec(categories: list[str], device: str) -> list[dict]:
         if payload is None:
             print(f"skip {category}: not in manifest")
             continue
-        profile_id = MVTEC_PROFILES.get(category, category)
+        profile = profile_by_source(f"mvtec-ad:{category}")
+        profile_id = profile.profile_id
         out = REPO / "models" / "profiles" / profile_id / "patchcore.pt"
         fit_items = [item for item in payload["items"] if item["split"] == "fit"]
         cal_items = [item for item in payload["items"] if item["split"] == "cal"]
@@ -97,7 +91,7 @@ def fit_mvtec(categories: list[str], device: str) -> list[dict]:
         cal_scores = normal_scores(model, cal_items)
         report = {
             "profile_id": profile_id,
-            "source": f"mvtec:{category}",
+            "source": profile.source,
             "fit_images": len(fit_items),
             "cal_images": len(cal_items),
             "weights": str(out.relative_to(REPO)),
@@ -114,14 +108,21 @@ def fit_mvtec(categories: list[str], device: str) -> list[dict]:
 
 def fit_kolektor(folds: list[int], device: str) -> list[dict]:
     manifest = load_manifest(REPO / "data" / "prepared" / "kolektor" / "manifest.json")
+    profile = profile_by_source("kolektor-sdd")
     reports = []
     for fold_index in folds:
         fold = manifest["folds"][fold_index]
         train_normals = [item for item in fold["train"] if not item["is_defect"]]
         fit_normals, cal_normals = split_by_part(train_normals, 20261121 + fold_index)
-        out = REPO / "models" / "profiles" / "commutator" / f"patchcore_fold{fold_index}.pt"
+        out = (
+            REPO
+            / "models"
+            / "profiles"
+            / profile.profile_id
+            / f"patchcore_fold{fold_index}.pt"
+        )
         if fold_index == 0:
-            out = REPO / "models" / "profiles" / "commutator" / "patchcore.pt"
+            out = REPO / "models" / "profiles" / profile.profile_id / "patchcore.pt"
         started = time.time()
         model = PatchCore(PatchCoreConfig(bank_size=4000, coreset_pool=20000), device=device)
         model.fit([item["image"] for item in fit_normals])
@@ -129,8 +130,8 @@ def fit_kolektor(folds: list[int], device: str) -> list[dict]:
         test = evaluate(model, fold["test"], metric_size=(512, 1408))
         cal_scores = normal_scores(model, cal_normals)
         report = {
-            "profile_id": "commutator",
-            "source": "kolektor-sdd",
+            "profile_id": profile.profile_id,
+            "source": profile.source,
             "fold": fold_index,
             "fit_images": len(fit_normals),
             "cal_images": len(cal_scores),

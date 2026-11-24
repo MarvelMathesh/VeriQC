@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
-import threading
 import time
 from dataclasses import dataclass, field
 from typing import Any
 
 from veriqc.advisory.cards import CardLibrary
+from veriqc.advisory.constants import ADVISORY_DEADLINE_S, ADVISORY_MAX_NEW_TOKENS
 from veriqc.advisory.guidance import (
+    Selection,
     build_prompt,
     compose,
     parse_selection,
+    primary_finding,
     verify_selection,
 )
 from veriqc.inspection import InspectionResult
@@ -29,6 +31,7 @@ class AdvisoryOutcome:
     cause: str | None = None
     action: str | None = None
     note: str | None = None
+    timed_out: bool = False
     verification: dict[str, Any] = field(default_factory=dict)
     model: dict[str, Any] = field(default_factory=dict)
 
@@ -43,6 +46,7 @@ class AdvisoryOutcome:
             "cause": self.cause,
             "action": self.action,
             "note": self.note,
+            "timed_out": self.timed_out,
             "verification": dict(self.verification),
             "model": dict(self.model),
         }
@@ -54,21 +58,22 @@ class AdvisoryWorker:
         cards: CardLibrary,
         runner=None,
         *,
-        max_new_tokens: int = 48,
-        deadline_s: float = 60.0,
+        max_new_tokens: int = ADVISORY_MAX_NEW_TOKENS,
+        deadline_s: float = ADVISORY_DEADLINE_S,
+        context_provider=None,
     ) -> None:
         self.cards = cards
         self.runner = runner
         self.max_new_tokens = int(max_new_tokens)
         self.deadline_s = float(deadline_s)
-        self._lock = threading.Lock()
+        self.context_provider = context_provider
 
     @property
     def available(self) -> bool:
         return self.runner is not None
 
     def template_for(self, result: InspectionResult) -> tuple[str, str | None, str | None, str | None]:
-        finding = result.findings[0] if result.findings else None
+        finding = primary_finding(result)
         defect_class = finding.defect_class if finding else "generic"
         severity = finding.severity if finding else None
         card = self.cards.primary(defect_class, severity)
@@ -102,7 +107,7 @@ class AdvisoryWorker:
                 latency_ms=(time.perf_counter() - started) * 1000.0,
                 verification={"ok": False, "violations": ["advisory runtime unavailable"]},
             )
-        finding = result.findings[0] if result.findings else None
+        finding = primary_finding(result)
         card = self.cards.primary(finding.defect_class if finding else "generic", finding.severity if finding else None)
         if card is None or not card.probable_causes or not card.immediate_actions:
             return AdvisoryOutcome(
@@ -116,7 +121,13 @@ class AdvisoryWorker:
                 verification={"ok": False, "violations": ["no card options"]},
             )
         try:
-            prompt = build_prompt(result, card, tokenizer=getattr(self.runner, "tokenizer", None))
+            context = self.context_provider() if self.context_provider is not None else None
+            prompt = build_prompt(
+                result,
+                card,
+                tokenizer=getattr(self.runner, "tokenizer", None),
+                context=context,
+            )
         except Exception as exc:
             return AdvisoryOutcome(
                 text=template,
@@ -139,6 +150,7 @@ class AdvisoryWorker:
                 cause=default_cause,
                 action=default_action,
                 latency_ms=(time.perf_counter() - started) * 1000.0,
+                timed_out=True,
                 verification={"ok": False, "violations": ["generation timeout or busy"]},
             )
         selection = parse_selection(generated.text, card)
@@ -153,7 +165,7 @@ class AdvisoryWorker:
                 latency_ms=(time.perf_counter() - started) * 1000.0,
                 verification={
                     "ok": False,
-                    "violations": ["the model did not return a valid three-line selection"],
+                    "violations": ["the model did not return a valid selection"],
                     "raw": generated.text[:500],
                 },
                 model=generated.to_dict(),
@@ -171,6 +183,12 @@ class AdvisoryWorker:
                 verification={"ok": False, "violations": verification.violations},
                 model=generated.to_dict(),
             )
+        if not selection.note:
+            selection = Selection(
+                selection.cause_index,
+                selection.action_index,
+                self._default_note(result),
+            )
         text = compose(selection, result, card)
         return AdvisoryOutcome(
             text=text,
@@ -185,24 +203,29 @@ class AdvisoryWorker:
             model=generated.to_dict(),
         )
 
+    @staticmethod
+    def _default_note(result: InspectionResult) -> str:
+        finding = primary_finding(result)
+        if finding is None:
+            return "check the process before the next part"
+        if finding.severity == "critical":
+            return "isolate the part and inspect the fixture"
+        if finding.zone in ("edge", "corner"):
+            return "check the fixture alignment before the next part"
+        return "check the process before the next part"
+
     def _generate(self, prompt: str):
-        holder: dict[str, Any] = {}
-
-        def run() -> None:
-            try:
-                holder["result"] = self.runner.generate(prompt, max_new_tokens=self.max_new_tokens)
-            except Exception as exc:
-                holder["error"] = exc
-            finally:
-                self._lock.release()
-
-        if not self._lock.acquire(blocking=False):
+        try:
+            return self.runner.generate(
+                prompt,
+                max_new_tokens=self.max_new_tokens,
+                timeout_s=self.deadline_s,
+            )
+        except Exception:
+            restart = getattr(self.runner, "restart", None)
+            if restart is not None:
+                try:
+                    restart()
+                except Exception:
+                    pass
             return None
-        thread = threading.Thread(target=run, daemon=True, name="VeriQC-Advisory")
-        thread.start()
-        thread.join(self.deadline_s)
-        if thread.is_alive():
-            return None
-        if "error" in holder:
-            return None
-        return holder.get("result")

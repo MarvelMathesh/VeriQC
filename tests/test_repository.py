@@ -4,10 +4,10 @@ import json
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-EXCLUDED = {".git", "venv", ".venv", "data", "models", "__pycache__", ".pytest_cache", "artifacts"}
+EXCLUDED = {".git", "venv", ".venv", "data", "models", "__pycache__", ".pytest_cache", "artifacts", "competitive_architecture"}
 
 
-def test_exactly_two_markdown_documents() -> None:
+def test_document_layout_is_intentional() -> None:
     documents = sorted(
         path.relative_to(REPO)
         for path in REPO.rglob("*.md")
@@ -31,8 +31,12 @@ def test_results_evidence_paths_exist() -> None:
 
 
 def test_pi_benchmarks_are_labeled_as_pi() -> None:
-    for mode in ("vision", "advisory", "resident"):
-        path = REPO / "reports" / "tables" / f"pi_{mode}.json"
+    for mode, filename in (
+        ("vision", "pi_vision_commutator.json"),
+        ("advisory", "pi_advisory.json"),
+        ("resident", "pi_resident.json"),
+    ):
+        path = REPO / "reports" / "tables" / filename
         if not path.exists():
             continue
         payload = json.loads(path.read_text())

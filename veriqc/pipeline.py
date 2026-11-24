@@ -1,8 +1,9 @@
-"""The single inspection pipeline used by the station and the evaluators."""
+"""The single ONNX inspection pipeline used by the station and evaluators."""
 
 from __future__ import annotations
 
 import hashlib
+import os
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,8 +19,9 @@ from veriqc.calibration import ProfileCalibration
 from veriqc.config import Profile
 from veriqc.decision import decide
 from veriqc.inspection import Finding, InspectionResult, new_inspection_id
-from veriqc.models import Detector, PatchCore, Segmenter
+from veriqc.models.loader import load_models
 from veriqc.quality import QualityReport, assess_quality
+from veriqc.rendering import save_overlay
 from veriqc.severity import SeverityPolicy, zone_for_bbox
 
 __all__ = ["Analysis", "Pipeline"]
@@ -28,7 +30,6 @@ _RULE_FOR_TASK = {
     "detect": "known_only",
     "segment": "known_only",
     "anomaly": "anomaly_only",
-    "segment+anomaly": "dual",
 }
 
 
@@ -40,14 +41,25 @@ class Analysis:
 
 
 class Pipeline:
-    def __init__(self, profile: Profile, device: str = "cpu", overlay_root: Path | None = None) -> None:
+    def __init__(
+        self,
+        profile: Profile,
+        device: str = "cpu",
+        overlay_root: Path | None = None,
+    ) -> None:
+        if device != "cpu":
+            raise ValueError("the ONNX Runtime inspection path is CPU-only")
         self.profile = profile
-        self.device = device
-        self.overlay_root = Path(overlay_root) if overlay_root is not None else REPO_ROOT / "artifacts"
+        self.device = "cpu"
+        self.backend = "onnx"
+        self.overlay_root = (
+            Path(overlay_root) if overlay_root is not None else REPO_ROOT / "artifacts"
+        )
         self.calibration = ProfileCalibration.load(profile.calibration_path)
         if self.calibration.profile_id != profile.profile_id:
             raise ValueError(
-                f"calibration belongs to {self.calibration.profile_id!r}, not {profile.profile_id!r}"
+                f"calibration belongs to {self.calibration.profile_id!r}, "
+                f"not {profile.profile_id!r}"
             )
         expected_rule = _RULE_FOR_TASK[profile.task]
         if self.calibration.rule != expected_rule:
@@ -62,53 +74,11 @@ class Pipeline:
                 f"cards belong to {self.cards.profile_id!r}, not {profile.profile_id!r}"
             )
 
-        self.detector: Detector | None = None
-        self.segmenter: Segmenter | None = None
-        self.anomaly: PatchCore | None = None
-        if profile.known is not None:
-            if profile.known.kind == "detector":
-                self.detector = Detector.from_weights(
-                    profile.known.path,
-                    profile.known.classes,
-                    input_size=int(profile.known.input_size or 640),
-                    conf_threshold=profile.known.conf_threshold,
-                    device=device,
-                )
-            elif profile.known.kind == "segmenter":
-                self.segmenter = Segmenter.from_checkpoint(profile.known.path, device=device)
-                self._validate_segmenter_geometry()
-            else:
-                raise ValueError(f"unsupported known-channel type: {profile.known.kind!r}")
-        if profile.anomaly.enabled and profile.anomaly.path is not None:
-            self.anomaly = PatchCore.load(profile.anomaly.path, device=device)
-            self._validate_anomaly_geometry()
-        self.artifact_hashes = profile.artifact_hashes()
-
-    def _validate_segmenter_geometry(self) -> None:
-        assert self.segmenter is not None
-        expected = self.profile.known.input_size if self.profile.known is not None else None
-        if expected is None:
-            return
-        expected_pair = tuple(expected) if isinstance(expected, tuple) else (int(expected), int(expected))
-        actual = (self.segmenter.config.input_width, self.segmenter.config.input_height)
-        if actual != expected_pair:
-            raise ValueError(
-                f"segmenter checkpoint geometry {actual} does not match profile {expected_pair}"
-            )
-
-    def _validate_anomaly_geometry(self) -> None:
-        assert self.anomaly is not None
-        spec = self.profile.anomaly
-        actual = (
-            self.anomaly.config.input_size,
-            self.anomaly.config.backbone,
-            self.anomaly.config.image_layer,
-            self.anomaly.config.pixel_layer,
-            self.anomaly.bank_size,
+        self.threads = int(os.environ.get("VERIQC_THREADS", "0") or 0)
+        self.detector, self.segmenter, self.anomaly = load_models(
+            profile, num_threads=self.threads
         )
-        expected = (spec.input_size, spec.backbone, spec.image_layer, spec.pixel_layer, spec.bank_size)
-        if actual != expected:
-            raise ValueError(f"PatchCore checkpoint {actual} does not match profile {expected}")
+        self.artifact_hashes = profile.artifact_hashes()
 
     # -- channels ----------------------------------------------------------
     def _known(
@@ -135,7 +105,11 @@ class Pipeline:
             return findings, score, latency, None
         if self.segmenter is not None:
             probability, latency = self.segmenter.predict_proba(image)
-            threshold = float(self.profile.known.score_threshold or 0.5)
+            threshold = (
+                float(self.calibration.region.threshold)
+                if self.calibration.region is not None
+                else float(self.profile.known.score_threshold or 0.5)
+            )
             mask = (probability >= threshold).astype(np.uint8)
             count, labels, stats, _ = cv2.connectedComponentsWithStats(mask, connectivity=8)
             findings = []
@@ -154,6 +128,11 @@ class Pipeline:
                         "confidence": confidence,
                         "bbox": (x, y, x + w, y + h),
                         "area": area,
+                        "region_p_value": (
+                            self.calibration.region.p_value(confidence)
+                            if self.calibration.region is not None
+                            else None
+                        ),
                     }
                 )
             score = float(probability.max())
@@ -186,14 +165,29 @@ class Pipeline:
         }
         if not quality.ok:
             return self._quality_review(
-                image, part_id, inspection_id, timestamp, image_hash, acquisition, quality, quality_ms, started
+                image,
+                part_id,
+                inspection_id,
+                timestamp,
+                image_hash,
+                acquisition,
+                quality,
+                quality_ms,
+                started,
             )
 
         latency: dict[str, float] = {"quality_ms": quality_ms}
-        known_findings, known_score, known_latency, known_mask = self._known(image)
-        latency["known_ms"] = known_latency
-        anomaly_score, heatmap, anomaly_latency = self._anomaly(image)
-        latency["anomaly_ms"] = anomaly_latency
+        known_findings: list[dict[str, Any]] = []
+        known_score: float | None = None
+        known_mask: np.ndarray | None = None
+        anomaly_score: float | None = None
+        heatmap: np.ndarray | None = None
+        if self.detector is not None or self.segmenter is not None:
+            known_findings, known_score, known_latency, known_mask = self._known(image)
+            latency["known_ms"] = known_latency
+        else:
+            anomaly_score, heatmap, anomaly_latency = self._anomaly(image)
+            latency["anomaly_ms"] = anomaly_latency
 
         decision = decide(
             self.calibration,
@@ -230,9 +224,20 @@ class Pipeline:
                     }
                 ]
             if self.profile.known is not None:
-                for index, item in enumerate(known_findings):
-                    if float(item["confidence"]) < float(self.profile.known.report_threshold):
-                        continue
+                report_items = [
+                    item
+                    for item in known_findings
+                    if float(item["confidence"])
+                    >= float(
+                        self.calibration.class_thresholds.get(
+                            str(item["class"]),
+                            self.profile.known.report_threshold,
+                        )
+                    )
+                ]
+                if not report_items and known_findings and decision.verdict != "PASS":
+                    report_items = [max(known_findings, key=lambda item: item["confidence"])]
+                for index, item in enumerate(report_items):
                     bbox = tuple(float(value) for value in item["bbox"])
                     area = float(item["area"])
                     area_ratio = area / max(1.0, float(image.width * image.height))
@@ -248,6 +253,7 @@ class Pipeline:
                             bbox=bbox,
                             area_px=area,
                             area_ratio=area_ratio,
+                            region_p_value=item.get("region_p_value"),
                             zone=zone,
                             severity=grade.severity,
                             severity_status="policy",
@@ -255,11 +261,21 @@ class Pipeline:
                             provenance={"channel": "known", "model": self.profile.known.kind},
                         )
                     )
-            if heatmap is not None and anomaly_score is not None and decision.anomaly_p_value is not None:
+            if (
+                heatmap is not None
+                and anomaly_score is not None
+                and decision.anomaly_p_value is not None
+            ):
                 threshold = (
-                    self.calibration.anomaly.threshold_for_alpha(self.calibration.alpha_review)
-                    if self.calibration.anomaly is not None
-                    else float(np.max(heatmap))
+                    float(self.calibration.region.threshold)
+                    if self.calibration.region is not None
+                    else (
+                        self.calibration.anomaly.threshold_for_alpha(
+                            self.calibration.alpha_review
+                        )
+                        if self.calibration.anomaly is not None
+                        else float(np.max(heatmap))
+                    )
                 )
                 hot = (heatmap >= threshold).astype(np.uint8)
                 count, labels, stats, _ = cv2.connectedComponentsWithStats(hot, connectivity=8)
@@ -268,7 +284,9 @@ class Pipeline:
                     # a non-PASS anomaly must still carry a localised region.
                     cut = float(np.quantile(heatmap, 0.995))
                     hot = (heatmap >= cut).astype(np.uint8)
-                    count, labels, stats, _ = cv2.connectedComponentsWithStats(hot, connectivity=8)
+                    count, labels, stats, _ = cv2.connectedComponentsWithStats(
+                        hot, connectivity=8
+                    )
                 if count > 1:
                     index = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
                     area = float(stats[index, cv2.CC_STAT_AREA])
@@ -277,6 +295,7 @@ class Pipeline:
                     w = float(stats[index, cv2.CC_STAT_WIDTH])
                     h = float(stats[index, cv2.CC_STAT_HEIGHT])
                     bbox = (x, y, x + w, y + h)
+                    region_max = float(heatmap[labels == index].max())
                     area_ratio = area / max(1.0, float(image.width * image.height))
                     zone = zone_for_bbox(bbox, image.size)
                     grade = self.severity.grade("unknown_anomaly", area_ratio, zone)
@@ -289,11 +308,21 @@ class Pipeline:
                             bbox=bbox,
                             area_px=area,
                             area_ratio=area_ratio,
+                            region_p_value=(
+                                self.calibration.region.p_value(region_max)
+                                if self.calibration.region is not None
+                                else None
+                            ),
                             zone=zone,
                             severity=grade.severity,
                             severity_status="policy",
                             severity_basis=grade.basis,
-                            provenance={"channel": "anomaly", "model": self.profile.anomaly.backbone},
+                            provenance={
+                                "channel": "anomaly",
+                                "model": self.profile.anomaly.backbone
+                                if self.profile.anomaly is not None
+                                else "unknown",
+                            },
                         )
                     )
 
@@ -307,7 +336,6 @@ class Pipeline:
             findings=findings,
             anomaly_score=anomaly_score,
             anomaly_p_value=decision.anomaly_p_value,
-            fused_p_value=decision.fused_p_value,
             known_score=known_score,
             known_p_value=decision.known_p_value,
             decision_rule=decision.rule,
@@ -315,6 +343,7 @@ class Pipeline:
             acquisition=acquisition,
             latency_ms=latency,
             artifact_hashes=self.artifact_hashes,
+            backend=self.backend,
             device=self.device,
             image_sha256=image_hash,
             reasons=list(decision.reasons),
@@ -345,6 +374,7 @@ class Pipeline:
                 "total_ms": round((time.perf_counter() - started) * 1000.0, 2),
             },
             artifact_hashes=self.artifact_hashes,
+            backend=self.backend,
             device=self.device,
             image_sha256=image_hash,
             reasons=[f"quality gate: {', '.join(quality.flags)}"],
@@ -354,68 +384,19 @@ class Pipeline:
     def inspect(self, image: Image.Image, part_id: str, *, overlay: bool = True) -> InspectionResult:
         analysis = self.analyze(image, part_id)
         if overlay:
-            analysis.result.overlay = self._save_overlay(
-                image.convert("RGB"), analysis.result, analysis.heatmap, analysis.known_mask
+            known_threshold = (
+                float(self.calibration.region.threshold)
+                if self.calibration.region is not None
+                else float(self.profile.known.score_threshold or 0.5)
+                if self.profile.known is not None
+                else 0.5
+            )
+            analysis.result.overlay = save_overlay(
+                image.convert("RGB"),
+                analysis.result,
+                analysis.heatmap,
+                analysis.known_mask,
+                overlay_root=self.overlay_root,
+                known_threshold=known_threshold,
             )
         return analysis.result
-
-    # -- rendering ---------------------------------------------------------
-    def _save_overlay(
-        self,
-        image: Image.Image,
-        result: InspectionResult,
-        heatmap: np.ndarray | None,
-        known_mask: np.ndarray | None,
-    ) -> str | None:
-        canvas = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
-        if heatmap is not None and result.verdict != "PASS":
-            normalized = heatmap.astype(np.float32)
-            high = float(normalized.max())
-            if high > 0:
-                normalized = normalized / high
-            colored = cv2.applyColorMap((normalized * 255).astype(np.uint8), cv2.COLORMAP_JET)
-            canvas = cv2.addWeighted(canvas, 0.65, colored, 0.35, 0)
-        if known_mask is not None and result.verdict != "PASS" and self.profile.known is not None:
-            threshold = float(self.profile.known.score_threshold or 0.5)
-            binary = (known_mask >= threshold).astype(np.uint8)
-            contours, _ = cv2.findContours(
-                binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-            )
-            cv2.drawContours(canvas, contours, -1, (0, 255, 0), 2)
-        for finding in result.findings:
-            if finding.bbox is None:
-                continue
-            x1, y1, x2, y2 = (int(round(v)) for v in finding.bbox)
-            color = (0, 200, 255) if finding.source == "known" else (0, 0, 255)
-            cv2.rectangle(canvas, (x1, y1), (x2, y2), color, 2)
-            label = f"{finding.defect_class} {finding.severity or ''}".strip()
-            cv2.putText(
-                canvas,
-                label,
-                (x1, max(14, y1 - 6)),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.5,
-                color,
-                1,
-                cv2.LINE_AA,
-            )
-        verdict = result.verdict
-        color = (0, 200, 0) if verdict == "PASS" else (0, 0, 255) if verdict == "FAIL" else (0, 200, 255)
-        cv2.rectangle(canvas, (0, 0), (canvas.shape[1] - 1, 36), (20, 20, 20), -1)
-        cv2.putText(
-            canvas,
-            f"{verdict} | {result.profile_id} | {result.part_id}",
-            (10, 25),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            color,
-            2,
-            cv2.LINE_AA,
-        )
-        target = self.overlay_root / "overlays" / f"{result.inspection_id}.png"
-        target.parent.mkdir(parents=True, exist_ok=True)
-        cv2.imwrite(str(target), canvas)
-        try:
-            return str(target.relative_to(REPO_ROOT))
-        except ValueError:
-            return str(target)

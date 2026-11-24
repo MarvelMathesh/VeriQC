@@ -18,7 +18,7 @@ sys.path.insert(0, str(REPO))
 from veriqc import sha256_file  # noqa: E402
 from veriqc.datasets import load_manifest  # noqa: E402
 from veriqc.metrics import au_pro, average_precision, best_f1, image_auroc, pixel_auroc  # noqa: E402
-from veriqc.models.segmenter import Segmenter  # noqa: E402
+from veriqc.models.torch_segmenter import Segmenter  # noqa: E402
 
 METRIC_SIZE = (512, 1408)
 

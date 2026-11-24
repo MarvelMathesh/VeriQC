@@ -17,7 +17,7 @@ sys.path.insert(0, str(REPO))
 
 from veriqc.datasets import load_manifest  # noqa: E402
 from veriqc.metrics import au_pro, image_auroc, pixel_auroc  # noqa: E402
-from veriqc.models.patchcore import PatchCore, PatchCoreConfig  # noqa: E402
+from veriqc.models.torch_patchcore import PatchCore, PatchCoreConfig  # noqa: E402
 
 
 def evaluate(model: PatchCore, items: list[dict]) -> dict:

@@ -5,15 +5,17 @@ from __future__ import annotations
 import asyncio
 import hmac
 import io
+import json
 import os
 import re
 import threading
+import time
 from contextlib import asynccontextmanager
 from typing import Any
 
 import yaml
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 from PIL import Image
 from starlette.concurrency import run_in_threadpool
 
@@ -21,7 +23,7 @@ from veriqc import REPO_ROOT, __version__
 from veriqc.advisory.worker import AdvisoryOutcome
 from veriqc.inspection import InspectionResult
 from veriqc.station.dashboard import DASHBOARD_HTML
-from veriqc.station.engine import Station
+from veriqc.station.service import Station
 
 __all__ = ["app"]
 
@@ -30,7 +32,6 @@ MAX_IMAGE_PIXELS = 25_000_000
 PART_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 PROFILE_ID_RE = re.compile(r"^[a-z0-9_]{1,64}$")
 DEFAULT_PROFILE = os.environ.get("VERIQC_PROFILE", "commutator")
-DEVICE = os.environ.get("VERIQC_DEVICE", "cpu")
 DISABLE_ADVISORY = os.environ.get("VERIQC_DISABLE_ADVISORY", "0") == "1"
 
 
@@ -51,7 +52,6 @@ class Manager:
             try:
                 self.station = Station(
                     profile_id,
-                    device=DEVICE,
                     enable_advisory=not DISABLE_ADVISORY,
                     on_advisory=self.broadcast_advisory,
                 )
@@ -64,7 +64,11 @@ class Manager:
         if self.loop is None:
             return
         message = {"type": "advisory", "result": result.to_dict()}
-        asyncio.run_coroutine_threadsafe(self.broadcast(message), self.loop)
+        try:
+            asyncio.run_coroutine_threadsafe(self.broadcast(message), self.loop)
+        except RuntimeError:
+            # The event loop can close while the advisory worker is finishing.
+            self.loop = None
 
     async def broadcast(self, message: dict[str, Any]) -> None:
         for connection in list(self.connections):
@@ -106,6 +110,12 @@ async def lifespan(_: FastAPI):
         await run_in_threadpool(manager.activate, DEFAULT_PROFILE)
     except Exception as exc:
         manager.error = repr(exc)
+    source_config = os.environ.get("VERIQC_SOURCE_CONFIG")
+    if source_config and manager.station is not None:
+        try:
+            await run_in_threadpool(manager.station.start_capture, json.loads(source_config))
+        except Exception as exc:
+            manager.error = f"source startup failed: {exc!r}"
     yield
     manager.close()
 
@@ -126,10 +136,12 @@ def index() -> str:
 
 @app.get("/health")
 def health() -> dict[str, Any]:
+    station = manager.station
     return {
-        "ok": manager.station is not None,
+        "ok": station is not None,
         "error": manager.error,
-        "profile": manager.station.profile_id if manager.station is not None else None,
+        "profile": station.profile_id if station is not None else None,
+        "capture": station.capture_status() if station is not None else None,
     }
 
 
@@ -188,6 +200,76 @@ async def inspect(
     result = await run_in_threadpool(station.inspect, image, part_id)
     await manager.broadcast({"type": "verdict", "result": result.to_dict()})
     return JSONResponse(result.to_dict())
+
+
+@app.post("/source/start")
+async def start_source(payload: dict[str, Any], _: None = Depends(_require_token)) -> dict[str, Any]:
+    station = _station()
+    source_type = str(payload.get("type", "")).lower()
+    if source_type in ("", "none", "off"):
+        return await run_in_threadpool(station.stop_capture) or {"running": False}
+    if source_type not in ("folder", "video", "camera", "usb", "csi"):
+        raise HTTPException(status_code=422, detail="unsupported source type")
+    source_config = dict(payload)
+    source_config["type"] = source_type
+    try:
+        status = await run_in_threadpool(station.start_capture, source_config)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=repr(exc)) from exc
+    return status
+
+
+@app.post("/source/stop")
+async def stop_source(_: None = Depends(_require_token)) -> dict[str, Any]:
+    station = _station()
+    return await run_in_threadpool(station.stop_capture) or {"running": False}
+
+
+@app.get("/source/status")
+def source_status(_: None = Depends(_require_token)) -> dict[str, Any] | None:
+    return _station().capture_status()
+
+
+@app.post("/capture")
+async def capture(part_id: str = Form("PART-0001"), _: None = Depends(_require_token)) -> JSONResponse:
+    if not PART_ID_RE.fullmatch(part_id):
+        raise HTTPException(status_code=422, detail="part_id must be 1-64 letters, digits, _ or -")
+    station = _station()
+    try:
+        result = await run_in_threadpool(station.capture_inspect, part_id)
+    except Exception as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    await manager.broadcast({"type": "verdict", "result": result.to_dict()})
+    return JSONResponse(result.to_dict())
+
+
+def _mjpeg_frames(station: Station):
+    while station.capture is not None:
+        frame = station.latest_jpeg()
+        if frame is not None:
+            yield (
+                b"--frame\r\nContent-Type: image/jpeg\r\nContent-Length: "
+                + str(len(frame)).encode("ascii")
+                + b"\r\n\r\n"
+                + frame
+                + b"\r\n"
+            )
+        else:
+            time.sleep(0.1)
+        time.sleep(0.05)
+
+
+@app.get("/stream.mjpg")
+def stream_mjpeg(token: str | None = None, x_veriqc_token: str | None = Header(default=None)):
+    if not (_token_ok(token) or _token_ok(x_veriqc_token)):
+        raise HTTPException(status_code=401, detail="invalid station token")
+    station = _station()
+    if station.capture is None:
+        raise HTTPException(status_code=409, detail="no capture source is active")
+    return StreamingResponse(
+        _mjpeg_frames(station),
+        media_type="multipart/x-mixed-replace; boundary=frame",
+    )
 
 
 @app.get("/result/{inspection_id}")

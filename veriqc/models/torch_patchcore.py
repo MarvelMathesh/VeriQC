@@ -18,7 +18,9 @@ import torch
 import torch.nn.functional as F
 from PIL import Image
 
-__all__ = ["PatchCore", "PatchCoreConfig", "AnomalyScore"]
+from veriqc.models.types import AnomalyResult
+
+__all__ = ["PatchCore", "PatchCoreConfig"]
 
 _MEAN = (0.485, 0.456, 0.406)
 _STD = (0.229, 0.224, 0.225)
@@ -35,13 +37,6 @@ class PatchCoreConfig:
     aggr_kernel: int = 3
     batch_size: int = 8
     seed: int = 20261121
-
-
-@dataclass(frozen=True)
-class AnomalyScore:
-    image_score: float
-    heatmap: np.ndarray
-    latency_ms: float
 
 
 class _ResNetFeatures(torch.nn.Module):
@@ -171,7 +166,7 @@ class PatchCore:
         return self
 
     @torch.no_grad()
-    def score(self, image: str | Path | Image.Image | np.ndarray) -> AnomalyScore:
+    def score(self, image: str | Path | Image.Image | np.ndarray) -> AnomalyResult:
         if not self.is_fitted:
             raise RuntimeError("the anomaly model is not fitted")
         started = time.perf_counter()
@@ -198,7 +193,7 @@ class PatchCore:
         )[0, 0].cpu().numpy()
         heatmap = self._to_native(upsampled, content, image.size)
         elapsed = (time.perf_counter() - started) * 1000.0
-        return AnomalyScore(image_score=image_score, heatmap=heatmap, latency_ms=elapsed)
+        return AnomalyResult(image_score=image_score, heatmap=heatmap, latency_ms=elapsed)
 
     @staticmethod
     def _to_native(

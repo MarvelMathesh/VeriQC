@@ -14,7 +14,7 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from veriqc.config import load_profile  # noqa: E402
-from veriqc.datasets import load_manifest  # noqa: E402
+from veriqc.datasets import test_items  # noqa: E402
 from veriqc.pipeline import Pipeline  # noqa: E402
 
 
@@ -39,26 +39,19 @@ def rates(values: np.ndarray, labels: np.ndarray, threshold: float) -> dict:
 
 
 def main() -> None:
-    import argparse
-    import torch
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
-    args = parser.parse_args()
     rows = []
-    for profile_id, channel, items in (
-        ("textile_carpet", "anomaly", None),
-        ("commutator", "known", None),
+    for profile_id, channel in (
+        ("textile_carpet", "anomaly"),
+        ("commutator", "known"),
     ):
         profile = load_profile(REPO / "configs" / "profiles" / f"{profile_id}.yaml")
-        pipeline = Pipeline(profile, device=args.device)
+        pipeline = Pipeline(profile)
+        items = test_items(profile)
         if profile_id == "textile_carpet":
-            manifest = load_manifest(REPO / "data" / "prepared" / "mvtec" / "manifest.json")
-            items = [item for item in manifest["categories"]["carpet"]["items"] if item["split"] == "test"]
-            calibrated = pipeline.calibration.anomaly.threshold_for_alpha(pipeline.calibration.alpha_fail)
+            calibrated = pipeline.calibration.anomaly.threshold_for_alpha(
+                pipeline.calibration.alpha_fail
+            )
         else:
-            manifest = load_manifest(REPO / "data" / "prepared" / "kolektor" / "manifest.json")
-            items = manifest["folds"][0]["test"]
             calibrated = pipeline.calibration.screening_fail
         values, labels = scores(pipeline, items, channel)
         rows.append(

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -16,17 +17,9 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from veriqc.config import load_profile  # noqa: E402
-from veriqc.datasets import load_manifest  # noqa: E402
+from veriqc.datasets import test_items  # noqa: E402
 from veriqc.metrics import au_pro, average_precision, image_auroc, pixel_auroc  # noqa: E402
 from veriqc.pipeline import Pipeline  # noqa: E402
-
-MVTEC_PROFILES = {
-    "textile_carpet": "carpet",
-    "packaging_bottle": "bottle",
-    "pharma_capsule": "capsule",
-    "automotive_metal_nut": "metal_nut",
-    "electronics_transistor": "transistor",
-}
 
 
 def _rate(count: int, total: int) -> float | None:
@@ -49,7 +42,7 @@ def evaluate_items(
     masks: list[np.ndarray] = []
     latencies: list[float] = []
     qc_review = 0
-    want_anomaly_maps = need_masks and pipeline.profile.anomaly.enabled
+    want_anomaly_maps = need_masks and pipeline.profile.anomaly is not None
     want_known_maps = need_masks and pipeline.segmenter is not None
 
     for item in items:
@@ -61,9 +54,12 @@ def evaluate_items(
         verdicts.append(result.verdict)
         labels.append(bool(item["is_defect"]))
         known_scores.append(float(result.known_score) if result.known_score is not None else 0.0)
-        anomaly_scores.append(float(result.anomaly_score) if result.anomaly_score is not None else 0.0)
+        anomaly_scores.append(
+            float(result.anomaly_score) if result.anomaly_score is not None else 0.0
+        )
         latencies.append(
-            result.latency_ms.get("known_ms", 0.0) + result.latency_ms.get("anomaly_ms", 0.0)
+            result.latency_ms.get("known_ms", 0.0)
+            + result.latency_ms.get("anomaly_ms", 0.0)
         )
         if not result.acquisition.get("qc_ok", True):
             qc_review += 1
@@ -75,7 +71,10 @@ def evaluate_items(
             else:
                 native_mask = np.zeros((size[1], size[0]), dtype=bool)
             masks.append(
-                cv2.resize(native_mask.astype(np.uint8), metric_size, interpolation=cv2.INTER_NEAREST) > 0
+                cv2.resize(
+                    native_mask.astype(np.uint8), metric_size, interpolation=cv2.INTER_NEAREST
+                )
+                > 0
             )
             if want_anomaly_maps:
                 heatmap = analysis.heatmap
@@ -137,12 +136,16 @@ def evaluate_items(
         },
         "known_score_auroc": (
             round(image_auroc(known_array, labels_array), 4)
-            if pipeline.profile.known is not None and labels_array.any() and (~labels_array).any()
+            if pipeline.profile.known is not None
+            and labels_array.any()
+            and (~labels_array).any()
             else None
         ),
         "anomaly_score_auroc": (
             round(image_auroc(anomaly_array, labels_array), 4)
-            if pipeline.profile.anomaly.enabled and labels_array.any() and (~labels_array).any()
+            if pipeline.profile.anomaly is not None
+            and labels_array.any()
+            and (~labels_array).any()
             else None
         ),
         "detection_rate_non_pass": _rate(detected_non_pass, defect_count),
@@ -178,47 +181,33 @@ def evaluate_items(
     return result
 
 
-def steel(pipeline: Pipeline) -> dict:
-    manifest = load_manifest(REPO / "data" / "prepared" / "neu" / "manifest.json")
-    return evaluate_items(pipeline, manifest["items"]["test"])
-
-
-def kolektor(pipeline: Pipeline) -> dict:
-    manifest = load_manifest(REPO / "data" / "prepared" / "kolektor" / "manifest.json")
-    return evaluate_items(
-        pipeline,
-        manifest["folds"][0]["test"],
-        need_masks=True,
-        metric_size=(512, 1408),
-    )
-
-
-def mvtec(pipeline: Pipeline) -> dict:
-    category = MVTEC_PROFILES[pipeline.profile.profile_id]
-    manifest = load_manifest(REPO / "data" / "prepared" / "mvtec" / "manifest.json")
-    items = [item for item in manifest["categories"][category]["items"] if item["split"] == "test"]
-    return evaluate_items(pipeline, items, need_masks=True)
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--profile", required=True)
-    parser.add_argument("--device", default="cuda" if __import__("torch").cuda.is_available() else "cpu")
+    parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
     path = REPO / "configs" / "profiles" / f"{args.profile}.yaml"
-    pipeline = Pipeline(load_profile(path), device=args.device)
-    if args.profile == "steel_surface":
-        result = steel(pipeline)
-    elif args.profile == "commutator":
-        result = kolektor(pipeline)
-    elif args.profile in MVTEC_PROFILES:
-        result = mvtec(pipeline)
-    else:
-        raise SystemExit(f"no evaluator for {args.profile}")
+    os.environ["VERIQC_THREADS"] = str(max(1, args.threads))
+    profile = load_profile(path)
+    pipeline = Pipeline(profile)
+    items = test_items(profile)
+    if not items:
+        raise SystemExit(f"no test items for profile {args.profile}")
+    need_masks = profile.task in ("segment", "anomaly")
+    metric_size = (512, 1408) if profile.task == "segment" else (512, 512)
+    result = evaluate_items(
+        pipeline,
+        items,
+        need_masks=need_masks,
+        metric_size=metric_size,
+    )
     result["profile_id"] = args.profile
-    result["device"] = args.device
-    result["calibration"] = str(pipeline.profile.calibration_path.relative_to(REPO))
+    result["task"] = profile.task
+    result["source"] = profile.source
+    result["backend"] = pipeline.backend
+    result["device"] = pipeline.device
+    result["calibration"] = str(profile.calibration_path.relative_to(REPO))
     output = REPO / (args.out or f"reports/tables/evaluation_{args.profile}.json")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, indent=2) + "\n")

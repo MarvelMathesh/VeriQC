@@ -1,10 +1,10 @@
-"""VeriQC: risk-calibrated edge inspection with a verified on-device advisory."""
+"""VeriQC: empirically calibrated edge inspection with a verified on-device advisory."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-__version__ = "2.0.0"
+__version__ = "1.0.0"
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 

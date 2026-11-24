@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "veriqc"
-version = "2.0.0"
-description = "Risk-calibrated edge inspection with a verified on-device Llama advisory"
+version = "1.0.0"
+description = "Empirically calibrated edge inspection with a verified on-device Llama advisory"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "AGPL-3.0-only"
@@ -18,9 +18,7 @@ dependencies = [
     "Pillow>=10.0",
     "PyYAML>=6.0",
     "opencv-python>=4.10",
-    "torch>=2.4",
-    "torchvision>=0.19",
-    "ultralytics>=8.4",
+    "onnxruntime>=1.20",
     "fastapi>=0.115",
     "uvicorn>=0.30",
     "python-multipart>=0.0.9",
@@ -29,18 +27,24 @@ dependencies = [
 
 [project.optional-dependencies]
 advisory = ["executorch>=1.6.0", "transformers>=4.45"]
+train = [
+    "torch>=2.4",
+    "torchvision>=0.19",
+    "ultralytics>=8.4",
+]
 research = [
     "pytest>=8.0",
     "httpx>=0.27",
     "matplotlib>=3.9",
-    "onnx>=1.17",
-    "onnxscript>=0.3",
-    "onnxruntime>=1.20",
+    "psutil>=6.0",
 ]
 
 [tool.setuptools.packages.find]
 include = ["veriqc*"]
 exclude = ["tests*", "scripts*", "experiments*"]
+
+[tool.setuptools.package-data]
+veriqc = ["station/dashboard.html"]
 
 [tool.pytest.ini_options]
 addopts = "-ra"

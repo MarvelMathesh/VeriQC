@@ -21,38 +21,23 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from veriqc import sha256_file  # noqa: E402
+from veriqc.advisory.constants import (  # noqa: E402
+    ADVISORY_DEADLINE_S,
+    ADVISORY_MAX_NEW_TOKENS,
+)
 from veriqc.advisory.process_runner import AdvisorRuntimeSpec, ProcessAdvisorRunner  # noqa: E402
 from veriqc.advisory.worker import AdvisoryWorker  # noqa: E402
+from veriqc.advisory.guidance import primary_finding  # noqa: E402
 from veriqc.config import load_profile  # noqa: E402
-from veriqc.datasets import load_manifest  # noqa: E402
+from veriqc.datasets import test_items  # noqa: E402
 from veriqc.pipeline import Pipeline  # noqa: E402
 
-MVTEC_PROFILES = {
-    "textile_carpet": "carpet",
-    "packaging_bottle": "bottle",
-    "pharma_capsule": "capsule",
-    "automotive_metal_nut": "metal_nut",
-}
-
-
-def sample_items(profile: str, n: int) -> list[dict]:
-    if profile == "steel_surface":
-        manifest = load_manifest(REPO / "data" / "prepared" / "neu" / "manifest.json")
-        return manifest["items"]["test"][:n]
-    if profile == "commutator":
-        manifest = load_manifest(REPO / "data" / "prepared" / "kolektor" / "manifest.json")
-        defects = [item for item in manifest["folds"][0]["test"] if item["is_defect"]]
-        return defects[:n]
-    category = MVTEC_PROFILES[profile]
-    manifest = load_manifest(REPO / "data" / "prepared" / "mvtec" / "manifest.json")
-    defects = [item for item in manifest["categories"][category]["items"] if item["split"] == "test" and item["is_defect"]]
-    return defects[:n]
+AUDIT_PROFILES = ("commutator", "steel_surface", "textile_carpet", "packaging_bottle")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--cases", type=int, default=10, help="cases per profile")
-    parser.add_argument("--device", default="cpu")
     parser.add_argument("--out", default="reports/tables/advisory_audit.json")
     args = parser.parse_args()
     pte = REPO / "models" / "advisory" / "llama32_1b_int8.pte"
@@ -64,7 +49,7 @@ def main() -> None:
             kwargs={
                 "pte_path": str(pte),
                 "tokenizer_path": str(tokenizer / "tokenizer.json"),
-                "max_new_tokens": 48,
+                "max_new_tokens": ADVISORY_MAX_NEW_TOKENS,
             },
         ),
         tokenizer_path=tokenizer / "tokenizer.json",
@@ -72,11 +57,16 @@ def main() -> None:
     rows = []
     started = time.time()
     try:
-        for profile_id in ("commutator", "steel_surface", "textile_carpet", "packaging_bottle"):
+        for profile_id in AUDIT_PROFILES:
             profile = load_profile(REPO / "configs" / "profiles" / f"{profile_id}.yaml")
-            pipeline = Pipeline(profile, device=args.device)
-            worker = AdvisoryWorker(pipeline.cards, runner, max_new_tokens=48)
-            items = sample_items(profile_id, args.cases)
+            pipeline = Pipeline(profile)
+            worker = AdvisoryWorker(
+                pipeline.cards,
+                runner,
+                max_new_tokens=ADVISORY_MAX_NEW_TOKENS,
+                deadline_s=ADVISORY_DEADLINE_S,
+            )
+            items = test_items(profile, limit=args.cases, defects_only=True)
             for item in items:
                 with Image.open(item["image"]) as image:
                     result = pipeline.inspect(image.convert("RGB"), item["part"], overlay=False)
@@ -88,10 +78,11 @@ def main() -> None:
                         "profile_id": profile_id,
                         "part_id": item["part"],
                         "verdict": result.verdict,
-                        "defect_class": result.findings[0].defect_class if result.findings else None,
-                        "severity": result.findings[0].severity if result.findings else None,
+                        "defect_class": primary_finding(result).defect_class if result.findings else None,
+                        "severity": primary_finding(result).severity if result.findings else None,
                         "path": outcome.path,
                         "accepted": outcome.accepted,
+                        "timed_out": outcome.timed_out,
                         "violations": outcome.verification.get("violations", []),
                         "verification": outcome.verification,
                         "model": outcome.model,
@@ -110,7 +101,7 @@ def main() -> None:
     rejected = [row for row in rows if not row["accepted"]]
     format_rejected = [
         row for row in rejected
-        if any("valid three-line" in violation for violation in row["violations"])
+        if any("valid selection" in violation for violation in row["violations"])
     ]
     accepted_with_violation = [row for row in accepted if row["violations"]]
     latencies = [row["latency_ms"] for row in rows if row.get("latency_ms") is not None]
@@ -142,6 +133,7 @@ def main() -> None:
         "acceptance_rate": round(len(accepted) / max(1, len(rows)), 4),
         "rejected": len(rejected),
         "rejected_format": len(format_rejected),
+        "timed_out": sum(1 for row in rows if row.get("timed_out")),
         "accepted_grounding_violations": len(accepted_with_violation),
         "rejection_reasons": dict(sorted(rejection_reasons.items())),
         "latency_ms_median": round(statistics.median(latencies), 1) if latencies else None,

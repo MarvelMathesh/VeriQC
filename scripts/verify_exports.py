@@ -16,7 +16,8 @@ sys.path.insert(0, str(REPO))
 
 from veriqc.config import list_profiles, load_profile  # noqa: E402
 from veriqc.datasets import load_manifest  # noqa: E402
-from veriqc.models import PatchCore, Segmenter  # noqa: E402
+from veriqc.models.torch_patchcore import PatchCore  # noqa: E402
+from veriqc.models.torch_segmenter import Segmenter  # noqa: E402
 
 
 def _session(path: Path):
@@ -132,7 +133,7 @@ def main() -> None:
                 row = detector_parity(profile, manifest)
             else:
                 row = segmenter_parity(profile, manifest)
-        elif profile.anomaly.enabled:
+        elif profile.anomaly is not None:
             row = anomaly_parity(profile, manifest)
         else:
             continue
@@ -142,7 +143,7 @@ def main() -> None:
 
     payload = {
         "runtime": "ONNX Runtime CPUExecutionProvider vs PyTorch CPU",
-        "note": "These exports are deployment artifacts; the reference station executes PyTorch.",
+        "note": "These exports are the production CPU runtime; PyTorch remains the training/reference path.",
         "profiles": rows,
     }
     output = REPO / args.out

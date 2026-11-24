@@ -14,8 +14,8 @@ next one's resident memory:
     fixed arrival interval.  Reports vision percentiles, process-tree memory,
     queue high-water mark, queue drops and generation timeouts.
 
-Temperature and throttle flags are sampled once a second.  The script never
-claims a result it did not measure: missing sensors stay null.
+Temperature, throttle flags and the PMIC core rail are sampled once a second.
+The script never claims a result it did not measure: missing sensors stay null.
 """
 
 from __future__ import annotations
@@ -41,20 +41,18 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from veriqc.advisory.cards import load_cards  # noqa: E402
+from veriqc.advisory.constants import (  # noqa: E402
+    ADVISORY_DEADLINE_S,
+    ADVISORY_MAX_NEW_TOKENS,
+)
+from veriqc.advisory.guidance import primary_finding  # noqa: E402
 from veriqc.advisory.process_runner import AdvisorRuntimeSpec, ProcessAdvisorRunner  # noqa: E402
 from veriqc.advisory.worker import AdvisoryWorker  # noqa: E402
 from veriqc.config import load_profile  # noqa: E402
-from veriqc.datasets import load_manifest  # noqa: E402
+from veriqc.datasets import test_items  # noqa: E402
 from veriqc.pipeline import Pipeline  # noqa: E402
-from veriqc.station.engine import Station  # noqa: E402
+from veriqc.station.service import Station  # noqa: E402
 
-MVTEC_PROFILES = {
-    "textile_carpet": "carpet",
-    "packaging_bottle": "bottle",
-    "pharma_capsule": "capsule",
-    "automotive_metal_nut": "metal_nut",
-    "electronics_transistor": "transistor",
-}
 CASE_PROFILES = ("commutator", "steel_surface", "textile_carpet", "packaging_bottle")
 THROTTLE_BITS = {
     0: "under_voltage_now",
@@ -89,6 +87,49 @@ def read_temperature() -> float | None:
         return None
 
 
+def read_power() -> dict[str, Any] | None:
+    """Read the PMIC rails available on a Raspberry Pi 5.
+
+    The core rail is the useful compute signal; the 3.3 V rail covers board
+    peripherals.  Both are measured, not inferred from a power-supply rating.
+    """
+
+    try:
+        output = subprocess.run(
+            ["vcgencmd", "pmic_read_adc"], check=True, capture_output=True, text=True
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+    values: dict[str, float] = {}
+    for line in output.splitlines():
+        try:
+            name, raw = line.split("=", 1)
+            key = name.split()[0]
+            values[key] = float(raw.strip().rstrip("AV"))
+        except (ValueError, IndexError):
+            continue
+    core_v = values.get("VDD_CORE_V")
+    core_a = values.get("VDD_CORE_A")
+    sys_v = values.get("3V3_SYS_V")
+    sys_a = values.get("3V3_SYS_A")
+    if core_v is None or core_a is None:
+        return None
+    payload = {
+        "core_v": round(core_v, 3),
+        "core_a": round(core_a, 3),
+        "core_w": round(core_v * core_a, 2),
+    }
+    if sys_v is not None and sys_a is not None:
+        payload.update(
+            {
+                "sys_3v3_v": round(sys_v, 3),
+                "sys_3v3_a": round(sys_a, 3),
+                "sys_3v3_w": round(sys_v * sys_a, 2),
+            }
+        )
+    return payload
+
+
 def read_throttled() -> dict[str, Any] | None:
     try:
         output = subprocess.run(
@@ -110,6 +151,7 @@ class Monitor(threading.Thread):
         self._stop = threading.Event()
         self.temperature: list[float] = []
         self.throttle: list[dict[str, Any]] = []
+        self.power: list[dict[str, Any]] = []
         self.parent_rss_mb: list[float] = []
         self.tree_rss_mb: list[float] = []
 
@@ -124,6 +166,9 @@ class Monitor(threading.Thread):
             throttle = read_throttled()
             if throttle is not None:
                 self.throttle.append(throttle)
+            power = read_power()
+            if power is not None:
+                self.power.append(power)
             try:
                 processes = [root, *root.children(recursive=True)]
                 parent_mb = root.memory_info().rss / (1024.0 * 1024.0)
@@ -149,6 +194,8 @@ class Monitor(threading.Thread):
             for flag in sample["flags"]:
                 if flag.endswith("_occurred") and flag not in flags:
                     flags.append(flag)
+        core_w = [sample["core_w"] for sample in self.power]
+        sys_w = [sample["sys_3v3_w"] for sample in self.power if "sys_3v3_w" in sample]
         return {
             "temperature_c": {
                 "start": temperatures[0] if temperatures else None,
@@ -156,6 +203,12 @@ class Monitor(threading.Thread):
                 "max": max(temperatures) if temperatures else None,
                 "end": temperatures[-1] if temperatures else None,
                 "samples": len(temperatures),
+            },
+            "power_w": {
+                "core_median": round(statistics.median(core_w), 2) if core_w else None,
+                "core_max": max(core_w) if core_w else None,
+                "sys_3v3_median": round(statistics.median(sys_w), 2) if sys_w else None,
+                "samples": len(core_w),
             },
             "throttle": {
                 "before": self.throttle[0] if self.throttle else None,
@@ -192,10 +245,12 @@ def environment() -> dict[str, Any]:
             "torch": package("torch"),
             "torchvision": package("torchvision"),
             "ultralytics": package("ultralytics"),
+            "onnxruntime": package("onnxruntime"),
             "numpy": package("numpy"),
             "executorch": package("executorch"),
             "transformers": package("transformers"),
             "opencv": package("opencv-python"),
+            "psutil": package("psutil"),
         },
         "memory_total_mb": round(
             os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / (1024.0 * 1024.0), 1
@@ -215,27 +270,6 @@ def percentiles(values: list[float]) -> dict[str, float]:
     }
 
 
-def sample_items(profile: str, n: int, *, defects_only: bool = False) -> list[dict]:
-    if profile == "steel_surface":
-        manifest = load_manifest(REPO / "data" / "prepared" / "neu" / "manifest.json")
-        items = manifest["items"]["test"]
-        return [item for item in items if item["is_defect"]][:n] if defects_only else items[:n]
-    if profile == "commutator":
-        manifest = load_manifest(REPO / "data" / "prepared" / "kolektor" / "manifest.json")
-        items = manifest["folds"][0]["test"]
-    else:
-        category = MVTEC_PROFILES[profile]
-        manifest = load_manifest(REPO / "data" / "prepared" / "mvtec" / "manifest.json")
-        items = [
-            item
-            for item in manifest["categories"][category]["items"]
-            if item["split"] == "test"
-        ]
-    if defects_only:
-        items = [item for item in items if item["is_defect"]]
-    return items[:n]
-
-
 def load_images(items: list[dict]) -> list[Image.Image]:
     images = []
     for item in items:
@@ -245,12 +279,10 @@ def load_images(items: list[dict]) -> list[Image.Image]:
 
 
 def run_vision(args: argparse.Namespace) -> dict[str, Any]:
-    import torch
-
-    torch.set_num_threads(args.threads)
     profile = load_profile(REPO / "configs" / "profiles" / f"{args.profile}.yaml")
+    os.environ["VERIQC_THREADS"] = str(max(1, args.threads))
     pipeline = Pipeline(profile, device="cpu", overlay_root=Path(args.overlay_root))
-    items = sample_items(args.profile, args.n + args.warmup)
+    items = test_items(profile, limit=args.n + args.warmup)
     if not items:
         raise SystemExit("no images for the requested profile")
     images = load_images(items)
@@ -275,6 +307,7 @@ def run_vision(args: argparse.Namespace) -> dict[str, Any]:
     return {
         "mode": "vision",
         "profile": args.profile,
+        "backend": pipeline.backend,
         "device": "cpu",
         "threads": args.threads,
         "images": len(latencies),
@@ -292,7 +325,7 @@ def build_advisory_cases(args: argparse.Namespace) -> list[tuple[str, Any]]:
     for profile_id in CASE_PROFILES:
         profile = load_profile(REPO / "configs" / "profiles" / f"{profile_id}.yaml")
         pipeline = Pipeline(profile, device="cpu", overlay_root=Path(args.overlay_root))
-        items = sample_items(profile_id, args.advisory_cases, defects_only=True)
+        items = test_items(profile, limit=args.advisory_cases, defects_only=True)
         for item in items:
             with Image.open(item["image"]) as opened:
                 result = pipeline.inspect(
@@ -308,6 +341,7 @@ def build_advisory_cases(args: argparse.Namespace) -> list[tuple[str, Any]]:
 def run_advisory(args: argparse.Namespace) -> dict[str, Any]:
     started = time.perf_counter()
     cases = build_advisory_cases(args)
+    vision_backend = "onnx"
     build_seconds = time.perf_counter() - started
     pte = REPO / "models" / "advisory" / "llama32_1b_int8.pte"
     tokenizer = REPO / "models" / "advisory" / "tokenizer"
@@ -321,7 +355,7 @@ def run_advisory(args: argparse.Namespace) -> dict[str, Any]:
             kwargs={
                 "pte_path": str(pte),
                 "tokenizer_path": str(tokenizer / "tokenizer.json"),
-                "max_new_tokens": 48,
+                "max_new_tokens": ADVISORY_MAX_NEW_TOKENS,
             },
         ),
         tokenizer_path=tokenizer / "tokenizer.json",
@@ -331,7 +365,12 @@ def run_advisory(args: argparse.Namespace) -> dict[str, Any]:
     workers = {}
     for profile_id in CASE_PROFILES:
         profile = load_profile(REPO / "configs" / "profiles" / f"{profile_id}.yaml")
-        workers[profile_id] = AdvisoryWorker(load_cards(profile.cards_path), runner)
+        workers[profile_id] = AdvisoryWorker(
+            load_cards(profile.cards_path),
+            runner,
+            max_new_tokens=ADVISORY_MAX_NEW_TOKENS,
+            deadline_s=ADVISORY_DEADLINE_S,
+        )
     rows = []
     try:
         for profile_id, result in cases:
@@ -340,7 +379,9 @@ def run_advisory(args: argparse.Namespace) -> dict[str, Any]:
                 {
                     "profile_id": profile_id,
                     "verdict": result.verdict,
-                    "defect_class": result.findings[0].defect_class if result.findings else None,
+                    "defect_class": (
+                        primary_finding(result).defect_class if result.findings else None
+                    ),
                     "accepted": outcome.accepted,
                     "path": outcome.path,
                     "latency_ms": round(outcome.latency_ms, 1),
@@ -371,6 +412,7 @@ def run_advisory(args: argparse.Namespace) -> dict[str, Any]:
     resident = [row["resident_mb"] for row in rows if row["resident_mb"]]
     return {
         "mode": "advisory",
+        "vision_backend": vision_backend,
         "device": "cpu",
         "cases": len(rows),
         "accepted": sum(1 for row in rows if row["accepted"]),
@@ -390,16 +432,25 @@ def run_advisory(args: argparse.Namespace) -> dict[str, Any]:
 
 def run_resident(args: argparse.Namespace) -> dict[str, Any]:
     started = time.perf_counter()
+    os.environ["VERIQC_THREADS"] = str(max(1, args.threads))
+    audit_path = Path(args.audit_path)
+    for stale in (
+        audit_path,
+        Path(f"{audit_path}-wal"),
+        Path(f"{audit_path}-shm"),
+        audit_path.with_suffix(".head.json"),
+    ):
+        stale.unlink(missing_ok=True)
     station = Station(
         args.profile,
         device="cpu",
         enable_advisory=True,
-        audit_path=Path(args.audit_path),
+        audit_path=audit_path,
     )
     startup_seconds = time.perf_counter() - started
     if station.runner is None:
         raise SystemExit(f"advisory runtime unavailable: {station.runner_error}")
-    items = sample_items(args.profile, args.defects, defects_only=True)
+    items = test_items(station.profile, limit=args.defects, defects_only=True)
     if not items:
         raise SystemExit("no non-PASS source images for the resident run")
     images = load_images(items)
@@ -408,7 +459,6 @@ def run_resident(args: argparse.Namespace) -> dict[str, Any]:
     latencies = []
     walls = []
     queue_sizes = []
-    drops = 0
     began = time.perf_counter()
     try:
         for index in range(args.n):
@@ -418,23 +468,31 @@ def run_resident(args: argparse.Namespace) -> dict[str, Any]:
             wall = (time.perf_counter() - call_started) * 1000.0
             walls.append(round(wall, 2))
             latencies.append(float(result.latency_ms["total_ms"]))
-            if result.advisory and result.advisory.get("note") == "advisory queue full":
-                drops += 1
-            queue_sizes.append(station._queue.qsize())
+            queue_sizes.append(station.queue_depth())
             remaining = args.interval - (time.perf_counter() - call_started)
             if remaining > 0:
                 time.sleep(remaining)
         submit_seconds = time.perf_counter() - began
         drain_started = time.perf_counter()
-        while (
-            station._queue.qsize() > 0
-            and time.perf_counter() - drain_started < args.drain
-        ):
-            time.sleep(1.0)
-        remaining = station._queue.qsize()
-        drained = remaining == 0
-        drain_seconds = time.perf_counter() - drain_started
+        while time.perf_counter() - drain_started < args.drain:
+            snapshot = station.metrics()["stats"]
+            terminal = (
+                snapshot["advisories_completed"]
+                + snapshot["advisories_failed"]
+                + snapshot["advisories_dropped"]
+            )
+            if station.queue_depth() == 0 and terminal >= len(latencies):
+                break
+            time.sleep(0.5)
+        remaining = station.queue_depth()
         metrics = station.metrics()
+        terminal = (
+            metrics["stats"]["advisories_completed"]
+            + metrics["stats"]["advisories_failed"]
+            + metrics["stats"]["advisories_dropped"]
+        )
+        drained = remaining == 0 and terminal >= len(latencies)
+        drain_seconds = time.perf_counter() - drain_started
         outcomes = station.store.advisory_outcomes()
         verdict_counts = station.store.verdict_counts()
         chain = station.store.verify()
@@ -444,6 +502,7 @@ def run_resident(args: argparse.Namespace) -> dict[str, Any]:
     return {
         "mode": "resident",
         "profile": args.profile,
+        "backend": station.pipeline.backend,
         "device": "cpu",
         "startup_seconds": round(startup_seconds, 1),
         "inspections": len(latencies),
@@ -454,7 +513,7 @@ def run_resident(args: argparse.Namespace) -> dict[str, Any]:
         "vision_ms": percentiles(latencies),
         "wall_ms": percentiles(walls),
         "qsize_max_observed": max(queue_sizes) if queue_sizes else 0,
-        "queue_drops_reported": drops,
+        "queue_drops_reported": metrics["stats"]["advisories_dropped"],
         "stats": metrics["stats"],
         "advisory_outcomes": outcomes,
         "verdict_counts": verdict_counts,
@@ -491,7 +550,12 @@ def main() -> None:
         "environment": environment(),
         **mode(args),
     }
-    output = REPO / (args.out or f"reports/tables/pi_{args.mode}.json")
+    if args.out:
+        output = REPO / args.out
+    elif args.mode == "vision":
+        output = REPO / "reports" / "tables" / f"pi_vision_{args.profile}.json"
+    else:
+        output = REPO / "reports" / "tables" / f"pi_{args.mode}.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(payload, indent=2) + "\n")
     print(json.dumps({key: value for key, value in payload.items() if key != "rows"}, indent=2))

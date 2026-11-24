@@ -26,7 +26,7 @@ from veriqc.datasets import (  # noqa: E402
     split_kolektor_fixed,
     split_kolektor_parts,
 )
-from veriqc.models.segmenter import Segmenter, SegmenterConfig, UNet  # noqa: E402
+from veriqc.models.torch_segmenter import Segmenter, SegmenterConfig, UNet  # noqa: E402
 
 _MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 _STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)

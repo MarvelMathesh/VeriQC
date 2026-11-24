@@ -99,13 +99,15 @@ def main() -> None:
     sheet_path = Path(args.sheet)
     sheet_path.parent.mkdir(parents=True, exist_ok=True)
     with sheet_path.open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=COLUMNS)
+        writer = csv.DictWriter(handle, fieldnames=COLUMNS, lineterminator="\n")
         writer.writeheader()
         writer.writerows(sheet_rows)
     key_path = Path(args.key)
     with key_path.open("w", newline="") as handle:
         writer = csv.DictWriter(
-            handle, fieldnames=["case_id", "option_a_source", "option_b_source"]
+            handle,
+            fieldnames=["case_id", "option_a_source", "option_b_source"],
+            lineterminator="\n",
         )
         writer.writeheader()
         writer.writerows(key_rows)

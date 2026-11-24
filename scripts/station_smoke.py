@@ -3,7 +3,8 @@
 
 This is an acceptance check, not a benchmark.  It measures time-to-health,
 verifies artifact hashes are attached, waits for the asynchronous advisory,
-and checks overlay authentication, CSV export and the audit chain.
+and checks overlay authentication, CSV export and the audit chain.  Pass
+``--camera`` to exercise a live USB camera through the same HTTP path.
 """
 
 from __future__ import annotations
@@ -35,10 +36,28 @@ def wait_for(client: httpx.Client, url: str, timeout: float) -> float:
     raise RuntimeError(f"station did not become healthy within {timeout:.0f}s")
 
 
+def wait_for_camera(
+    client: httpx.Client, base: str, headers: dict[str, str], timeout: float
+) -> dict:
+    started = time.perf_counter()
+    while time.perf_counter() - started < timeout:
+        status = client.get(f"{base}/source/status", headers=headers).json()
+        if status and status.get("frames_captured", 0) > 0:
+            return status
+        if status and status.get("error"):
+            raise RuntimeError(f"camera capture failed: {status['error']}")
+        time.sleep(0.25)
+    raise RuntimeError(f"camera did not produce a frame within {timeout:.0f}s")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--profile", default="commutator")
     parser.add_argument("--image", default="data/kolektor/kos02/Part6.jpg")
+    parser.add_argument("--camera", type=int, default=None, help="USB camera index")
+    parser.add_argument("--camera-width", type=int, default=1280)
+    parser.add_argument("--camera-height", type=int, default=720)
+    parser.add_argument("--camera-fps", type=int, default=30)
     parser.add_argument("--part-id", default="PI-SMOKE")
     parser.add_argument("--port", type=int, default=8199)
     parser.add_argument("--token", default="pi-smoke")
@@ -55,7 +74,20 @@ def main() -> None:
             "PYTHONUNBUFFERED": "1",
         }
     )
-    log = REPO / "reports" / "tables" / "pi_station_smoke.log"
+    source = None
+    if args.camera is not None:
+        source = {
+            "type": "camera",
+            "camera": {
+                "kind": "usb",
+                "index": args.camera,
+                "width": args.camera_width,
+                "height": args.camera_height,
+                "fps": args.camera_fps,
+            },
+        }
+        environment["VERIQC_SOURCE_CONFIG"] = json.dumps(source)
+    log = REPO / "reports" / "tables" / f"{Path(args.out).stem}.log"
     log.parent.mkdir(parents=True, exist_ok=True)
     process = subprocess.Popen(
         [
@@ -77,13 +109,22 @@ def main() -> None:
             startup_seconds = wait_for(client, f"{base}/health", args.timeout)
             health = client.get(f"{base}/health").json()
             metrics = client.get(f"{base}/metrics", headers=headers).json()
-            with open(REPO / args.image, "rb") as handle:
+            capture_status = None
+            if args.camera is not None:
+                capture_status = wait_for_camera(client, base, headers, 30.0)
                 response = client.post(
-                    f"{base}/inspect",
+                    f"{base}/capture",
                     headers=headers,
-                    files={"file": (Path(args.image).name, handle, "image/jpeg")},
                     data={"part_id": args.part_id},
                 )
+            else:
+                with open(REPO / args.image, "rb") as handle:
+                    response = client.post(
+                        f"{base}/inspect",
+                        headers=headers,
+                        files={"file": (Path(args.image).name, handle, "image/jpeg")},
+                        data={"part_id": args.part_id},
+                    )
             response.raise_for_status()
             submitted = response.json()
             inspection_id = submitted["inspection_id"]
@@ -105,12 +146,18 @@ def main() -> None:
                 "schema": "veriqc.station-smoke/1",
                 "measured_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
                 "profile": args.profile,
+                "backend": metrics.get("backend"),
+                "input": "camera" if args.camera is not None else "upload",
+                "source": source,
+                "capture": capture_status,
                 "startup_seconds": round(startup_seconds, 1),
                 "health": health,
                 "advisory_available": metrics["advisory"]["available"],
                 "inspection_id": inspection_id,
                 "verdict": result["verdict"],
                 "findings": len(result.get("findings", [])),
+                "acquisition": result.get("acquisition"),
+                "reasons": result.get("reasons"),
                 "vision_latency_ms": result["latency_ms"].get("total_ms"),
                 "artifact_hashes": sorted(result.get("artifact_hashes", {})),
                 "advisory_status": advisory.get("status"),

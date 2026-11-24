@@ -25,12 +25,15 @@ from pathlib import Path
 from typing import Iterable
 
 from veriqc import REPO_ROOT, sha256_file
+from veriqc.config import Profile
 
 __all__ = [
     "prepare_neu",
     "prepare_kolektor",
     "prepare_mvtec",
     "load_manifest",
+    "dataset_of",
+    "test_items",
     "split_by_part",
     "split_kolektor_parts",
     "split_kolektor_fixed",
@@ -82,7 +85,7 @@ def _link_or_copy(source: Path, target: Path) -> None:
         shutil.copy2(source, target)
 
 
-def _neu_boxes(xml_path: Path) -> list[tuple[int, float, float, float, float]]:
+def neu_boxes(xml_path: Path) -> list[tuple[int, float, float, float, float]]:
     root = ET.parse(xml_path).getroot()
     boxes: list[tuple[int, float, float, float, float]] = []
     for obj in root.findall("object"):
@@ -128,7 +131,7 @@ def prepare_neu(out_dir: Path = PREPARED / "neu", seed: int = 20261121) -> dict:
             xml = NEU_SOURCE / official_split / "annotations" / f"{image.stem}.xml"
             if not xml.exists():
                 continue
-            boxes = _neu_boxes(xml)
+            boxes = neu_boxes(xml)
             if not boxes:
                 continue
             width, height = _image_size(image)
@@ -226,14 +229,6 @@ def _image_size(path: Path) -> tuple[int, int]:
 
     with Image.open(path) as image:
         return image.size
-
-
-def _kolektor_parts() -> list[str]:
-    return sorted(
-        path.name
-        for path in KOLEKTOR_SOURCE.iterdir()
-        if path.is_dir() and path.name.startswith("kos")
-    )
 
 
 def _kolektor_folds() -> list[list[str]]:
@@ -419,6 +414,40 @@ def prepare_mvtec(
 
 def load_manifest(path: str | Path) -> dict:
     return json.loads(Path(path).read_text())
+
+
+def dataset_of(profile: Profile) -> tuple[str, str | None]:
+    """Return ``(dataset, category)`` for a profile's declared source."""
+
+    source = profile.source
+    if source == "neu-det":
+        return "neu", None
+    if source == "kolektor-sdd":
+        return "kolektor", None
+    if source.startswith("mvtec-ad:"):
+        return "mvtec", source.split(":", 1)[1]
+    raise ValueError(f"profile {profile.profile_id!r} has an unknown source {source!r}")
+
+
+def test_items(
+    profile: Profile,
+    *,
+    limit: int | None = None,
+    defects_only: bool = False,
+) -> list[dict]:
+    """Load the reported test items for a profile from the prepared manifests."""
+
+    dataset, category = dataset_of(profile)
+    if dataset == "neu":
+        items = load_manifest(PREPARED / "neu" / "manifest.json")["items"]["test"]
+    elif dataset == "kolektor":
+        items = load_manifest(PREPARED / "kolektor" / "manifest.json")["folds"][0]["test"]
+    else:
+        payload = load_manifest(PREPARED / "mvtec" / "manifest.json")["categories"][category]
+        items = [item for item in payload["items"] if item["split"] == "test"]
+    if defects_only:
+        items = [item for item in items if item["is_defect"]]
+    return items if limit is None else items[:limit]
 
 
 def split_by_part(items: list[dict], seed: int, val_fraction: float = 0.15) -> tuple[list[dict], list[dict]]:

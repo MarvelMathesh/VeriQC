@@ -80,7 +80,7 @@ def main() -> None:
     fig.text(
         0.01,
         0.01,
-        "Measured on the development host (i7-13700HX, 4 CPU threads). No Raspberry Pi measurement is claimed.",
+        "Host measurements only (i7-13700HX, 4 CPU threads); Raspberry Pi results are reported separately.",
         fontsize=8,
         color="#555555",
     )

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import resource
 import statistics
 import sys
@@ -13,60 +14,34 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-import torch
 from PIL import Image
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from veriqc.config import load_profile  # noqa: E402
-from veriqc.datasets import load_manifest  # noqa: E402
+from veriqc.datasets import test_items  # noqa: E402
 from veriqc.pipeline import Pipeline  # noqa: E402
-
-MVTEC_PROFILES = {
-    "textile_carpet": "carpet",
-    "packaging_bottle": "bottle",
-    "pharma_capsule": "capsule",
-    "automotive_metal_nut": "metal_nut",
-    "electronics_transistor": "transistor",
-}
 
 
 def rss_mb() -> float:
     return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
 
 
-def sample(profile: str, n: int) -> list[str]:
-    if profile == "steel_surface":
-        manifest = load_manifest(REPO / "data" / "prepared" / "neu" / "manifest.json")
-        return [item["image"] for item in manifest["items"]["test"][:n]]
-    if profile == "commutator":
-        manifest = load_manifest(REPO / "data" / "prepared" / "kolektor" / "manifest.json")
-        return [item["image"] for item in manifest["folds"][0]["test"][:n]]
-    category = MVTEC_PROFILES[profile]
-    manifest = load_manifest(REPO / "data" / "prepared" / "mvtec" / "manifest.json")
-    return [
-        item["image"]
-        for item in manifest["categories"][category]["items"]
-        if item["split"] == "test"
-    ][:n]
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--profile", required=True)
-    parser.add_argument("--device", default="cpu")
     parser.add_argument("--n", type=int, default=50)
     parser.add_argument("--warmup", type=int, default=5)
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
 
-    torch.set_num_threads(max(1, args.threads))
-    cv2.setNumThreads(max(1, args.threads))
     profile = load_profile(REPO / "configs" / "profiles" / f"{args.profile}.yaml")
-    pipeline = Pipeline(profile, device=args.device)
-    paths = sample(args.profile, args.n + args.warmup)
+    os.environ["VERIQC_THREADS"] = str(max(1, args.threads))
+    cv2.setNumThreads(max(1, args.threads))
+    pipeline = Pipeline(profile)
+    paths = [item["image"] for item in test_items(profile, limit=args.n + args.warmup)]
     if len(paths) <= args.warmup:
         raise SystemExit("not enough test images for the requested warmup")
     warmup, measured = paths[: args.warmup], paths[args.warmup :]
@@ -83,7 +58,8 @@ def main() -> None:
 
     payload = {
         "profile_id": args.profile,
-        "device": args.device,
+        "backend": pipeline.backend,
+        "device": pipeline.device,
         "threads": args.threads,
         "warmup_images": len(warmup),
         "images": len(measured),

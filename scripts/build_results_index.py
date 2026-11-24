@@ -115,7 +115,7 @@ def profile_record(profile_id: str) -> dict:
     normal_n = int(evaluation["normal_images"])
     confusion = evaluation["confusion"]
 
-    if profile_id == "steel_surface":
+    if config["task"] == "detect":
         detector = load("detector_neu.json")
         model_metrics = {
             "architecture": detector["architecture"],
@@ -125,7 +125,7 @@ def profile_record(profile_id: str) -> dict:
             "test": detector["test"],
             "weights_sha256": detector["weights_sha256"],
         }
-    elif profile_id == "commutator":
+    elif config["task"] == "segment":
         segmenter = load("segmenter_kolektor.json")
         model_metrics = {
             "architecture": "ResNet-18 U-Net",
@@ -164,9 +164,10 @@ def profile_record(profile_id: str) -> dict:
         }
 
     latency = {
-        "cuda_evaluation_ms": {
+        "evaluation_ms": {
             "median": evaluation.get("latency_ms_median"),
             "p95": evaluation.get("latency_ms_p95"),
+            "device": evaluation.get("device"),
         }
     }
     cpu_path = TABLES / f"latency_{profile_id}.json"
@@ -177,14 +178,15 @@ def profile_record(profile_id: str) -> dict:
             "p95": cpu["total_ms"]["p95"],
             "p99": cpu["total_ms"]["p99"],
             "peak_rss_mb": cpu["peak_rss_mb"],
+            "backend": cpu.get("backend", "onnx"),
             "device": cpu["device"],
             "threads": cpu["threads"],
         }
 
     evidence = [f"reports/tables/evaluation_{profile_id}.json"]
-    if profile_id == "steel_surface":
+    if config["task"] == "detect":
         evidence.append("reports/tables/detector_neu.json")
-    elif profile_id == "commutator":
+    elif config["task"] == "segment":
         evidence.extend(
             [
                 "reports/tables/segmenter_kolektor.json",
@@ -201,6 +203,12 @@ def profile_record(profile_id: str) -> dict:
         "domain": config["domain"],
         "source": config["source"],
         "task": config["task"],
+        "backend": evaluation.get("backend")
+        or (
+            json.loads(cpu_path.read_text()).get("backend")
+            if cpu_path.exists()
+            else None
+        ),
         "protocol": PROTOCOL[profile_id],
         "calibration": {
             "path": str(config["calibration"]),
@@ -259,7 +267,7 @@ def usefulness_summary() -> dict:
 
 
 def pi_environment() -> dict | None:
-    path = TABLES / "pi_vision.json"
+    path = TABLES / "pi_vision_commutator.json"
     if not path.exists():
         return None
     environment = json.loads(path.read_text()).get("environment", {})
@@ -276,7 +284,7 @@ def pi_environment() -> dict | None:
 
 def pi_summary() -> dict | None:
     summary = {}
-    for mode in ("vision", "advisory", "resident", "resident_steady"):
+    for mode in ("advisory", "resident", "resident_steady"):
         path = TABLES / f"pi_{mode}.json"
         if path.exists():
             payload = json.loads(path.read_text())
@@ -287,15 +295,18 @@ def pi_summary() -> dict | None:
             }
             summary[mode]["environment"] = payload.get("environment")
             summary[mode]["evidence"] = str(path.relative_to(REPO))
-            if mode == "resident":
-                outcomes_path = TABLES / "pi_resident_outcomes.json"
-                if outcomes_path.exists():
-                    summary[mode]["advisory_outcomes"] = json.loads(
-                        outcomes_path.read_text()
-                    )
-                    summary[mode]["advisory_outcomes_evidence"] = str(
-                        outcomes_path.relative_to(REPO)
-                    )
+            on_onnx = payload.get("backend") == "onnx" or payload.get(
+                "vision_backend"
+            ) == "onnx"
+            summary[mode]["campaign"] = (
+                "Raspberry Pi 5, ONNX Runtime CPU"
+                if on_onnx
+                else "Raspberry Pi 5, PyTorch reference"
+            )
+            if not on_onnx:
+                summary[mode]["current_runtime_note"] = (
+                    "Historical PyTorch campaign; the production path is ONNX Runtime."
+                )
     parity_path = TABLES / "pi_evaluation_commutator.json"
     host_path = TABLES / "evaluation_commutator.json"
     if parity_path.exists() and host_path.exists():
@@ -314,8 +325,38 @@ def pi_summary() -> dict | None:
             "pi_known_au_pro": pi.get("known_au_pro"),
             "host_latency_ms_median": host.get("latency_ms_median"),
             "pi_latency_ms_median": pi.get("latency_ms_median"),
+            "campaign": (
+                "Raspberry Pi 5, ONNX Runtime CPU"
+                if pi.get("backend") == "onnx"
+                else "Raspberry Pi 5, PyTorch reference"
+            ),
             "evidence": str(parity_path.relative_to(REPO)),
         }
+    return summary or None
+
+
+def pi_vision_profiles_summary() -> dict | None:
+    summary = {}
+    for profile_id in PROFILES:
+        path = TABLES / f"pi_vision_{profile_id}.json"
+        if not path.exists():
+            continue
+        payload = json.loads(path.read_text())
+        monitor = payload.get("monitor") or {}
+        summary[profile_id] = {
+            "backend": payload.get("backend"),
+            "images": payload.get("images"),
+            "threads": payload.get("threads"),
+            "total_ms": payload.get("total_ms"),
+            "throughput_images_per_second": payload.get("throughput_images_per_second"),
+            "temperature_c": monitor.get("temperature_c"),
+            "power_w": monitor.get("power_w"),
+            "throttle": monitor.get("throttle"),
+            "rss_mb": monitor.get("rss_mb"),
+            "evidence": str(path.relative_to(REPO)),
+        }
+        if profile_id == "commutator":
+            summary[profile_id]["environment"] = payload.get("environment")
     return summary or None
 
 
@@ -325,9 +366,13 @@ def pi_smoke_summary() -> dict | None:
         return None
     payload = json.loads(path.read_text())
     keys = (
+        "backend",
+        "input",
         "startup_seconds",
         "verdict",
         "vision_latency_ms",
+        "acquisition",
+        "reasons",
         "advisory_status",
         "advisory_accepted",
         "advisory_latency_ms",
@@ -338,7 +383,53 @@ def pi_smoke_summary() -> dict | None:
     )
     summary = {key: payload.get(key) for key in keys}
     summary["evidence"] = str(path.relative_to(REPO))
+    summary["campaign"] = (
+        "Raspberry Pi 5, ONNX Runtime CPU"
+        if payload.get("backend") == "onnx"
+        else "Raspberry Pi 5, PyTorch reference"
+    )
     return summary
+
+
+def pi_camera_smoke_summary() -> dict | None:
+    path = TABLES / "pi_camera_smoke.json"
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text())
+    keys = (
+        "backend",
+        "profile",
+        "input",
+        "source",
+        "startup_seconds",
+        "verdict",
+        "vision_latency_ms",
+        "acquisition",
+        "reasons",
+        "advisory_status",
+        "advisory_accepted",
+        "advisory_latency_ms",
+        "overlay_http",
+        "csv_http",
+        "chain_ok",
+    )
+    summary = {key: payload.get(key) for key in keys}
+    summary["evidence"] = str(path.relative_to(REPO))
+    summary["campaign"] = "Raspberry Pi 5, ONNX Runtime CPU"
+    summary["note"] = (
+        "Live USB-camera acceptance check; the verdict describes the captured "
+        "scene and is not an accuracy measurement."
+    )
+    return summary
+
+
+def pi_offline_summary() -> dict | None:
+    path = TABLES / "pi_offline_check.json"
+    if not path.exists():
+        return None
+    payload = dict(json.loads(path.read_text()))
+    payload["evidence"] = str(path.relative_to(REPO))
+    return payload
 
 
 def export_parity_summary() -> dict:
@@ -365,19 +456,31 @@ def export_parity_summary() -> dict:
         ),
         "detector_images": detector[0]["images"] if detector else None,
         "evidence": "reports/tables/export_parity.json",
-        "note": "ONNX Runtime CPUExecutionProvider compared with PyTorch CPU on local inputs; the reference station executes PyTorch.",
+        "note": "ONNX Runtime CPUExecutionProvider compared with PyTorch CPU on local inputs; the production station executes ONNX Runtime.",
     }
+
+
+def offline_summary() -> dict:
+    path = TABLES / "offline_check.json"
+    if not path.exists():
+        return {"status": "not_measured"}
+    payload = dict(json.loads(path.read_text()))
+    payload["evidence"] = str(path.relative_to(REPO))
+    return payload
 
 
 def not_measured() -> list[str]:
     pi = pi_summary()
-    pi_complete = bool(pi) and {"vision", "advisory", "resident"} <= set(pi)
+    pi_vision = pi_vision_profiles_summary() or {}
+    pi_complete = bool(pi) and {"advisory", "resident"} <= set(pi) and len(pi_vision) == 7
     usefulness = usefulness_summary()
     items = []
     if not pi_complete:
         items.append(
             "Raspberry Pi 5 latency, memory, thermal and co-resident advisory scheduling"
         )
+    if len(pi_vision) < 7:
+        items.append("ONNX Runtime Raspberry Pi vision campaign (all profiles)")
     if usefulness.get("status") != "measured":
         items.append("Human advisory usefulness rating")
     items.extend(
@@ -422,10 +525,15 @@ def main() -> None:
                 "the decision. A failed gate returns REVIEW and never executes the models."
             ),
             "decision": (
-                "Anomaly and dual profiles use split-conformal tail p-values; FAIL "
-                "at alpha 0.05, REVIEW at alpha 0.10, with a missing or non-finite "
-                "channel failing closed. The steel profile uses a recall-targeted "
-                "screening threshold and makes no false-alarm claim."
+                "Anomaly profiles use split-conformal tail p-values; FAIL at alpha "
+                "0.05, REVIEW at alpha 0.10, with a missing or non-finite channel "
+                "failing closed. The steel profile uses a recall-targeted screening "
+                "rule with a review threshold below FAIL and makes no false-alarm "
+                "claim. A dual known-plus-anomaly rule was evaluated in the channel "
+                "ablation and rejected; deployed profiles use one channel. "
+                "Localisation thresholds are fitted on normal calibration maps, and "
+                "steel class report thresholds are fitted on matched development "
+                "boxes."
             ),
         },
         "profiles": {profile_id: profile_record(profile_id) for profile_id in PROFILES},
@@ -439,7 +547,10 @@ def main() -> None:
         "advisory": advisory_summary(),
         "advisory_usefulness": usefulness_summary(),
         "pi_benchmark": pi_summary(),
+        "pi_vision_profiles": pi_vision_profiles_summary(),
         "pi_station_smoke": pi_smoke_summary(),
+        "pi_camera_smoke": pi_camera_smoke_summary(),
+        "pi_offline_check": pi_offline_summary(),
         "artifact_manifests": sorted(
             str(path.relative_to(REPO)) for path in (REPO / "reports" / "models").glob("*.json")
         ),
@@ -447,6 +558,7 @@ def main() -> None:
             "configs/artifacts.json" if (REPO / "configs" / "artifacts.json").exists() else None
         ),
         "export_parity": export_parity_summary(),
+        "offline_check": offline_summary(),
         "not_measured": not_measured(),
     }
     output = REPO / "reports" / "results.json"

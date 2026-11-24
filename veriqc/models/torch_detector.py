@@ -4,21 +4,14 @@ from __future__ import annotations
 
 import shutil
 import time
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
 from PIL import Image
 
-__all__ = ["Detector", "Detection"]
+from veriqc.models.types import Detection
 
-
-@dataclass(frozen=True)
-class Detection:
-    class_id: int
-    class_name: str
-    confidence: float
-    bbox: tuple[float, float, float, float]
+__all__ = ["Detector"]
 
 
 class Detector:

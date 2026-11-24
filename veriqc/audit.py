@@ -56,12 +56,12 @@ class AuditStore:
 
     def _head(self, connection: sqlite3.Connection) -> tuple[str, int]:
         row = connection.execute(
-            "SELECT curr_hash FROM events ORDER BY id DESC LIMIT 1"
+            "SELECT id, curr_hash FROM events ORDER BY id DESC LIMIT 1"
         ).fetchone()
         if row is None:
             return GENESIS, 0
-        count = connection.execute("SELECT COUNT(*) FROM events").fetchone()[0]
-        return str(row["curr_hash"]), int(count)
+        # The table is append-only, so the last row id is the event count.
+        return str(row["curr_hash"]), int(row["id"])
 
     def append(
         self,
@@ -71,32 +71,37 @@ class AuditStore:
     ) -> str:
         payload = {"result": result.to_dict(include_record_hash=True), "extra": extra or {}}
         payload_json = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
-        with self._lock, closing(self._connect()) as connection:
-            prev_hash, _ = self._head(connection)
-            timestamp = time.time()
-            material = f"{prev_hash}|{event}|{result.inspection_id}|{timestamp:.6f}|{payload_json}"
-            current = hashlib.sha256(material.encode("utf-8")).hexdigest()
-            connection.execute("BEGIN IMMEDIATE")
-            connection.execute(
-                """
-                INSERT INTO events
-                    (inspection_id, part_id, verdict, event, timestamp, payload_json, prev_hash, curr_hash)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    result.inspection_id,
-                    result.part_id,
-                    result.verdict,
-                    event,
-                    timestamp,
-                    payload_json,
-                    prev_hash,
-                    current,
-                ),
-            )
-            connection.execute("COMMIT")
-            head, count = self._head(connection)
-        self._write_anchor({"head": head, "count": count})
+        with self._lock:
+            with closing(self._connect()) as connection:
+                prev_hash, _ = self._head(connection)
+                timestamp = time.time()
+                material = (
+                    f"{prev_hash}|{event}|{result.inspection_id}|{timestamp:.6f}|{payload_json}"
+                )
+                current = hashlib.sha256(material.encode("utf-8")).hexdigest()
+                connection.execute("BEGIN IMMEDIATE")
+                cursor = connection.execute(
+                    """
+                    INSERT INTO events
+                        (inspection_id, part_id, verdict, event, timestamp, payload_json, prev_hash, curr_hash)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        result.inspection_id,
+                        result.part_id,
+                        result.verdict,
+                        event,
+                        timestamp,
+                        payload_json,
+                        prev_hash,
+                        current,
+                    ),
+                )
+                row_id = int(cursor.lastrowid)
+                connection.execute("COMMIT")
+            # Keep the lock through the anchor write so two appends cannot
+            # publish an older head after a newer one.
+            self._write_anchor({"head": current, "count": row_id})
         return current
 
     def _write_anchor(self, payload: dict[str, Any]) -> None:
@@ -173,6 +178,34 @@ class AuditStore:
             "violations": dict(sorted(violations.items())),
         }
 
+    def recent_context(self, window: int = 50) -> dict[str, Any]:
+        """Aggregate recent verdicts for the advisory, without part identifiers."""
+
+        limit = max(1, min(int(window), 500))
+        with closing(self._connect()) as connection:
+            rows = connection.execute(
+                "SELECT verdict, payload_json FROM events WHERE event = 'verdict' "
+                "ORDER BY id DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+        verdicts = {"PASS": 0, "REVIEW": 0, "FAIL": 0}
+        defects: dict[str, int] = {}
+        for row in rows:
+            verdict = str(row["verdict"])
+            verdicts[verdict] = verdicts.get(verdict, 0) + 1
+            try:
+                payload = json.loads(row["payload_json"])["result"]
+            except Exception:
+                continue
+            for finding in payload.get("findings", []):
+                name = str(finding.get("defect_class") or "unknown")
+                defects[name] = defects.get(name, 0) + 1
+        return {
+            "window": len(rows),
+            "verdicts": verdicts,
+            "defects": dict(sorted(defects.items(), key=lambda item: item[1], reverse=True)),
+        }
+
     def verify(self) -> dict[str, Any]:
         with closing(self._connect()) as connection:
             rows = connection.execute("SELECT * FROM events ORDER BY id ASC").fetchall()
@@ -184,15 +217,33 @@ class AuditStore:
             )
             expected = hashlib.sha256(material.encode("utf-8")).hexdigest()
             if row["prev_hash"] != prev or row["curr_hash"] != expected:
-                return {"ok": False, "rows": len(rows), "first_bad": int(row["id"]), "anchor_ok": False}
+                return {
+                    "ok": False,
+                    "chain_ok": False,
+                    "anchor_ok": False,
+                    "rows": len(rows),
+                    "first_bad": int(row["id"]),
+                }
             try:
                 payload = json.loads(row["payload_json"])
                 record = InspectionResult.from_dict(payload["result"])
                 stored_record_hash = str(payload["result"]["record_hash"])
             except Exception:
-                return {"ok": False, "rows": len(rows), "first_bad": int(row["id"]), "anchor_ok": False}
+                return {
+                    "ok": False,
+                    "chain_ok": False,
+                    "anchor_ok": False,
+                    "rows": len(rows),
+                    "first_bad": int(row["id"]),
+                }
             if record.inspection_id != row["inspection_id"] or record.record_hash() != stored_record_hash:
-                return {"ok": False, "rows": len(rows), "first_bad": int(row["id"]), "anchor_ok": False}
+                return {
+                    "ok": False,
+                    "chain_ok": False,
+                    "anchor_ok": False,
+                    "rows": len(rows),
+                    "first_bad": int(row["id"]),
+                }
             prev = row["curr_hash"]
 
         anchor_ok = True
@@ -208,7 +259,13 @@ class AuditStore:
                     )
                 except Exception:
                     anchor_ok = False
-        return {"ok": anchor_ok, "rows": len(rows), "first_bad": None, "anchor_ok": anchor_ok}
+        return {
+            "ok": anchor_ok,
+            "chain_ok": True,
+            "anchor_ok": anchor_ok,
+            "rows": len(rows),
+            "first_bad": None,
+        }
 
     def export_csv(self, path: str | Path) -> Path:
         target = Path(path)

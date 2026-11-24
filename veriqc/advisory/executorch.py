@@ -21,6 +21,8 @@ import weakref
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from veriqc.advisory.constants import ADVISORY_MAX_NEW_TOKENS
+
 __all__ = ["AdvisorResult", "ExecuTorchAdvisor", "ADVISORY_TOKENIZER_DIR"]
 
 #: Where the advisory's tokenizer lives.  The station ships the tokenizer
@@ -96,7 +98,7 @@ class ExecuTorchAdvisor:
         self,
         pte_path: str | Path,
         tokenizer_path: str | Path | None = None,
-        max_new_tokens: int = 48,
+        max_new_tokens: int = ADVISORY_MAX_NEW_TOKENS,
         temperature: float = 0.0,
         use_chat_template: bool = True,
     ):

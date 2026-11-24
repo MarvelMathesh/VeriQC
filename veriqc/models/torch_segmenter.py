@@ -84,8 +84,6 @@ class UNet(nn.Module):
 class SegmenterConfig:
     input_width: int = 384
     input_height: int = 1024
-    threshold: float = 0.5
-    min_area_px: int = 8
 
 
 class Segmenter:
@@ -101,7 +99,11 @@ class Segmenter:
     @classmethod
     def from_checkpoint(cls, path: str | Path, device: str = "cpu") -> "Segmenter":
         blob = torch.load(path, map_location="cpu", weights_only=True)
-        config = SegmenterConfig(**blob.get("config", {}))
+        raw = blob.get("config", {})
+        config = SegmenterConfig(
+            input_width=int(raw.get("input_width", 384)),
+            input_height=int(raw.get("input_height", 1024)),
+        )
         model = UNet(pretrained=False)
         model.load_state_dict(blob["state_dict"])
         return cls(model, config, device=device)
@@ -137,8 +139,6 @@ class Segmenter:
                 "config": {
                     "input_width": self.config.input_width,
                     "input_height": self.config.input_height,
-                    "threshold": self.config.threshold,
-                    "min_area_px": self.config.min_area_px,
                 },
             },
             target,

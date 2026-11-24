@@ -6,13 +6,14 @@ description: Thin-crack inspection of electrical commutators (KolektorSDD).
 known:
   type: segmenter
   weights: models/profiles/commutator/fold0_unet.pt
-  input_size: [384, 1024]
-  classes: [crack]
-  score_threshold: 0.50
+  input_size:
+  - 384
+  - 1024
+  classes:
+  - crack
+  score_threshold: 0.5
   min_area_px: 8
   report_threshold: 0.5
-anomaly:
-  enabled: false
 calibration: configs/calibration/commutator.json
 severity: configs/severity/commutator.yaml
 cards: configs/cards/commutator.yaml
@@ -20,4 +21,4 @@ quality:
   min_width: 500
   min_height: 1000
   blur_ratio_min: 0.004
-  clipped_max: 0.30
+  clipped_max: 0.3
