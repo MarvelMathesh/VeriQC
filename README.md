@@ -12,6 +12,8 @@ deterministic grounding verifier before its wording reaches the operator.
 The supported deployment target is a CPU-only Raspberry Pi 5. The production
 station does not require a GPU, a network connection or a cloud service.
 
+**Demo and `.pte` file:** [Google Drive](https://drive.google.com/file/d/19QSM35MPh9UwVe5Ok8qsLWZhmyGXHJTl/view?usp=sharing)
+
 ---
 
 ## Problem and scope
